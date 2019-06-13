@@ -1,0 +1,33 @@
+# Global parameters :
+TOOLS=/Users/pouchonc/Desktop/Scripts/OrthoSkim/tools.sh                             ## path to file with tools aliases
+PATH_FIND_CHLORO=/Users/pouchonc/PhyloAlps/CDS/                                      ## path to find annotated chloroplast assemblies resulting from ORGasm
+RES=/Users/pouchonc/PhyloAlps/run_orthoskim                                          ## path to directory to write output
+PATHNAME_ASSEMBLY=Assembly                                                           ## name of assembly directory where contigs from SPAdes were put (before nucleus and mitochondrion modes)
+EVALUE=0.0001                                                                        ## evalue threshold for diamond steps
+MAXCONT=2                                                                            ## maximal number of contigs allowed mapping a reference (paralogs filtering)
+MINLENGTH=200                                                                        ## minimal length of alignment allowed mapping to reference
+ANNOFMT=embl                                                                         ## format of annotated chloroplast/rdnanuc files
+VERBOSE=1                                                                            ## Set verbose to TRUE (1) or FASE (0)
+
+# Preprocessing the data [indexing] mode
+LIST_FILES=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/listSamples.tab      ## Parameters table for assembly path analysis according to annotated chloroplasts previously assembled. Specific format required: (1) chloroplast file name; (2) Genus of species sample\n-3: sample name\n-4: forward reads\n-5: reverse reads\n-6: Output path for assemblies samples subdirectories. This file could be obtained with the prep_assembly mode of OrthoSkim function
+
+# Extraction steps from annotation files
+# [chloroplast] mode :
+CHLORO_GENES=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/listGenes.chloro   ## list of chloroplastic genes for extraction. Specific format of table: (1) type of gene [CDS,...]; (2) name of gene. This file could be modified by adding/removing specific lines.
+# [nucrdna] mode :
+NRDNA_GENES=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/listGenes.rdna      ## list of rdna nuclear genes for extraction. Specific format of table: (1) type of gene [CDS,...]; (2) name of gene. This file could be modified by adding/removing specific lines.
+
+# Extraction steps from mapping assemblies into a reference
+# [SPAdes_assembly] mode:
+THREADS=15                                                                           ## Number of threads which will be used
+MEMORY=30                                                                            ## Number of threads which will be used
+# [nuclear] mode :
+NUC_REF=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/refGenes.nu             ## list of nuclear genes of reference.  Amino acid sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. LFY_3702,LFY_3811 for LFY gene).
+# [mitochondrion] mode :
+MITO_REF=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/refCDS.mito            ## list of mitochondrial genes of reference.  Amino acid sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. cox1_3702,cox1_3811 for cox1 gene).
+
+# Get mitochondrial sequences of reference [get_mitoRef] mode :
+LENGTH_RATIO=0.75                                                                    ## length ratio of reference mitochondrial gene aligning the gene seed to consider this gene in final gene banks of reference.
+SEEDS_MITO=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/seeds.mito           ## mitochondrial seeds of reference (from Arabidopsis_thaliana_3702_genbank) in amino acid sequence.
+MITO_GENBANK_LOC=
