@@ -11,7 +11,7 @@ import fnmatch
 parser = argparse.ArgumentParser(description='Creation of parameters table for assembly path analysis according to annotated chloroplasts previously assembled.\
  Output format: (1) chloroplast file name; (2) Genus of species sample; (3) sample name; (4) forward reads, (5) reverse reads, (6) Output path for assemblies samples subdirectories\
  Script was writen by C. Pouchon (2019).')
-parser.add_argument("-i","--infile", help="input file liste of assembled annotated chloroplasts",
+parser.add_argument("-i","--infile", help="input file list of assembled annotated chloroplasts",
                     type=str)
 parser.add_argument("-p","--path", help="searching path of annotated chloroplasts",
                     type=str)
@@ -51,10 +51,16 @@ for file in in_files:
     cindex_of_dot = cfile_name.index('.')
     cfile_name_without_extension = cfile_name[:cindex_of_dot]
     ctaxaname = cfile_name_without_extension.split(":")[0]
+    taxid = cfile_name_without_extension.split(":")[1]
     ingenus=ctaxaname.split("_")[0]
-    samplename=str(cfile_name.split(".")[0])+"_"+str(cfile_name.split(".")[1])+"_"+str(cfile_name.split(".")[2])
+    sequencing = cfile_name.split(".")[2].split(":")
+    samplename=str(ctaxaname+"_"+taxid+"_"+str(cfile_name.split(".")[1])+"_"+str(sequencing[0])+"_"+str(sequencing[1]))
 
-    r1path=os.path.dirname(cf)+"/"+fnmatch.filter(os.listdir(os.path.dirname(cf)), '*_[0-9]_1_*_clean.fastq.gz')[0]
-    r2path=os.path.dirname(cf)+"/"+fnmatch.filter(os.listdir(os.path.dirname(cf)), '*_[0-9]_2_*_clean.fastq.gz')[0]
+    if "GWM" in cf:
+        r1path=os.path.dirname(cf)+"/"+fnmatch.filter(os.listdir(os.path.dirname(cf)), '*_R1.fastq.gz')[0]
+        r2path=os.path.dirname(cf)+"/"+fnmatch.filter(os.listdir(os.path.dirname(cf)), '*_R2.fastq.gz')[0]
+    else:
+        r1path=os.path.dirname(cf)+"/"+fnmatch.filter(os.listdir(os.path.dirname(cf)), '*_[0-9]_1_*_clean.fastq.gz')[0]
+        r2path=os.path.dirname(cf)+"/"+fnmatch.filter(os.listdir(os.path.dirname(cf)), '*_[0-9]_2_*_clean.fastq.gz')[0]
 
     print "%s\t%s\t%s\t%s\t%s\t%s" % (str(cfile_path),str(ingenus),str(samplename),str(r1path),str(r2path),str(outdir_assembly_path))

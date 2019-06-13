@@ -56,10 +56,8 @@ if (( $VERBOSE==1 )); then
       set -x
 fi
 
-echo ""
-echo ""
+
 echo "Processing OrthoSkim program"
-echo ""
 
 mkdir -p ${RES}/${PATHNAME_ASSEMBLY}/Samples
 
