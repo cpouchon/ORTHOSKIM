@@ -5,7 +5,7 @@
   </a>
 </p>
 
-OrthoSKim is a pipeline providing different tools to skim orthologous regions from whole genome low coverage sequencing data for nuclear, chloroplastic and mitochondrial compartments. This pipeline allow for region extracting from de novo assemblies using annotation when provided (in *chloroplast* and *rdnanuc* mode) or mapping into references (in *nucleus* and *mitochondrion* mode).
+OrthoSKim is a pipeline providing different tools to skim orthologous regions from whole genome low coverage sequencing data for nuclear, chloroplastic, ribosomal and mitochondrial compartments. This pipeline allow for region extracting from de novo assemblies using annotation when provided (in *chloroplast* and *rdnanuc* mode) or mapping into references (in *nucleus* and *mitochondrion* mode).
 
 
 ### 1 . Installation
