@@ -165,7 +165,7 @@ mkdir -p ${RES}/${PATHNAME_ASSEMBLY}/Samples
 			${DIAMOND} blastx --outfmt 6 qseqid sseqid pident length mismatch gapopen qframe qstart qend sstart send evalue bitscore slen -d ${refdb} -q ${f} -o ${RES}/mito_mapping/matches_${lib} --evalue ${EVALUE}
 			awk '{print $1}' ${RES}/mito_mapping/matches_${lib} | sort | uniq > ${RES}/mito_mapping/hits_${lib}
 			awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $f | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/mito_mapping/hits_${lib} - > ${RES}/mito_mapping/contigs_hits_${lib}.fasta
-			${EXONERATE} --showcigar no --showtargetgff no --showvulgar no -q ${NUC_REF} -t ${RES}/mito_mapping/contigs_hits_${lib}.fasta --ryo ">%qi gene=%qi ref=%ti length=%tl qalnlen=%qal qbal=%qab qeal=%qae qlen=%ql alnlen=%tal baln=%tab ealn=%tae score=%s\n%tas" --showalignment no | gawk '!/^Hostname:|^Command line:|^-- completed exonerate analysis/ {print $0}' > ${RES}/mito_mapping/out_${lib}.fasta
+			${EXONERATE} --showcigar no --showtargetgff no --showvulgar no -q ${MITO_REF} -t ${RES}/mito_mapping/contigs_hits_${lib}.fasta --ryo ">%qi gene=%qi ref=%ti length=%tl qalnlen=%qal qbal=%qab qeal=%qae qlen=%ql alnlen=%tal baln=%tab ealn=%tae score=%s\n%tas" --showalignment no | gawk '!/^Hostname:|^Command line:|^-- completed exonerate analysis/ {print $0}' > ${RES}/mito_mapping/out_${lib}.fasta
 			`dirname $0`/src/ExoSamp.py -i ${RES}/mito_mapping/out_${lib}.fasta -m $mode -o ${RES}/$mode -c ${MAXCONT} -n ${lib} -l ${MINLENGTH}
 			rm ${RES}/mito_mapping/contigs_hits_${lib}.fasta ${RES}/mito_mapping/matches_${lib} ${RES}/mito_mapping/hits_${lib} ${RES}/mito_mapping/out_${lib}.fasta
 			echo ${f} >> ${RES}/mitochondrion_mode.log
