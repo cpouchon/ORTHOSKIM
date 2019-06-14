@@ -14,7 +14,7 @@ OrthoSKim is a pipeline providing different tools to skim orthologous regions fr
 OrthoSKim is tested on Unix environment and requires:
 + [Exonerate](https://www.ebi.ac.uk/about/vertebrate-genomics/software/exonerate)
 + [SPAdes](http://cab.spbu.ru/software/spades/)
-+ [Quast](https://github.com/ablab/quast)
++ [QUAST](https://github.com/ablab/quast)
 + [Diamond](https://github.com/bbuchfink/diamond)
 + Needs Awk, Python, Biopython
 
@@ -251,7 +251,7 @@ OrthoSkim used different mode to index files, align and/or extract regions or ch
 
 This step allowed to guide the pipeline according to an indexing tab based on existing chloroplast assemblies. This tab is produced by *indexing* mode or is given in **<LIST_FILES>**. This allowed to screen each sample that will be used for extraction from the **<PATH_FIND_CHLORO>** directory. Unwanted samples must be removed from the list before processing other modes.
 
-**Note**: If *nucleus* and/or *mitochondrion* mode will be used, *de novo* assembly has to be made on each sample using SPAdes (ref). To facilitate this, the output tab could be directly used to specify forward and reverse reads and outname of sample.
+**Note**: If *nucleus* and/or *mitochondrion* mode will be used, *de novo* assembly has to be made on each sample using [SPAdes](http://cab.spbu.ru/software/spades/). To facilitate this, the output tab could be directly used to specify forward and reverse reads and outname of sample.
 
 
 #### 3.2 - Extraction from annotation
@@ -324,7 +324,7 @@ All the output files will be in the **${RES}/mitochondrion/** and **${RES}/nucle
 
 #### 3.4 - Summary statistics of assemblies
 
-OrthoSkim allowed also to output summary statistic on contigs assemblies for both *OrgAsm* (chloroplast+rdna) and [SPAdes](http://cab.spbu.ru/software/spades/) runs thanks to [Quast](https://github.com/ablab/quast).
+OrthoSkim allowed also to output summary statistic on contigs assemblies for both *OrgAsm* (chloroplast+rdna) and [SPAdes](http://cab.spbu.ru/software/spades/) runs thanks to [QUAST](https://github.com/ablab/quast).
 
 The output *transposed_report.txt* tab file will be in **${RES}/report_[chloro,rdnanuc,SPAdes]_assemblies/** directories given indication on the assembly. For example, for the chloroplast, we except the assembly of a single contig sizing 150,000 Nt in average as in the following example.  
 
@@ -339,7 +339,7 @@ Androsace_helvetica_199610.CLA000520.BGN_ETA.chloro   1                    1    
 Doronicum_columnae_118758.PHA003018.BGN_EEH.chloro    1                    1                       1                       1                        1                        1                        152623                  152623                     152623                     152623                      152623                      152623                      1          152623          152623        37.60   152623  152623  1    1    0.00             
 ```
 
-OrthoSkim will also output the *report.pdf* file generated with [Quast](https://github.com/ablab/quast) containing:
+OrthoSkim will also output the *report.pdf* file generated with [QUAST](https://github.com/ablab/quast) containing:
 
 <figure align="center">
   <img height="240" src="img/Nx.jpeg" title="Nx values varying from 0 to 100%" />
@@ -381,7 +381,9 @@ OrthoSkim will also output the *report.pdf* file generated with [Quast](https://
   <figcaption>*coverage distribution for sample3*</figcaption>
 </figure>
 <br>
-**Note**: see Quast [manual](http://quast.bioinf.spbau.ru/manual.html) for more details. Outputs for [icarus](http://bioinf.spbau.ru/icarus) genome visualizer were also kept in the directory to visualize assemblies.
+
+
+**Note**: see QUAST [manual](http://quast.bioinf.spbau.ru/manual.html) for more details. Outputs for [icarus](http://bioinf.spbau.ru/icarus) genome visualizer were also kept in the directory to visualize assemblies.
 
 ### 4. Running OrthoSkim
 ------------------
@@ -425,8 +427,8 @@ For summary statistic, please use `-m [stat_chloro,stat_rdna,stat_SPAdes]`
 --------------------
 + Bankevich, A., Nurk, S., Antipov, D., Gurevich, A.A., Dvorkin, M., Kulikov, A.S., et al. (2012). SPAdes: a new genome assembly algorithm and its applications to single-cell sequencing. J. Comput. Biol., 19, 455–477.
 + Buchfink, B., Xie, C. & Huson, D.H. (2015). Fast and sensitive protein alignment using DIAMOND. Nature Methods, 12, 59–60.
++ Gurevich, A., Saveliev, V., Vyahhi, N. & Tesler, G. (2013). QUAST: quality assessment tool for genome assemblies. Bioinformatics, 29, 1072–1075.
 + Johnson, M.G., Pokorny, L., Dodsworth, S., Botigué, L.R., Cowan, R.S., Devault, A., et al. (n.d.). A Universal Probe Set for Targeted Sequencing of 353 Nuclear Genes from Any Flowering Plant Designed Using k-Medoids Clustering. Syst Biol.
 + Simão, F.A., Waterhouse, R.M., Ioannidis, P., Kriventseva, E.V. & Zdobnov, E.M. (2015). BUSCO: assessing genome assembly and annotation completeness with single-copy orthologs. Bioinformatics, 31, 3210–3212.
 + Slater, G.S.C. & Birney, E. (2005). Automated generation of heuristics for biological sequence comparison. BMC Bioinformatics, 6, 31.
 + Waterhouse, R.M., Seppey, M., Simão, F.A., Manni, M., Ioannidis, P., Klioutchnikov, G., et al. (2018). BUSCO Applications from Quality Assessments to Gene Prediction and Phylogenomics. Molecular Biology and Evolution, 35, 543–548.
-+ Quast?
