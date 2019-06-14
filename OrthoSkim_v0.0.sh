@@ -178,8 +178,8 @@ mkdir -p ${RES}/${PATHNAME_ASSEMBLY}/Samples
 		echo "OrthoSkim: Summary statistics of chloroplast assemblies"
 		${QUAST} `awk '{print $1}' ${LIST_FILES} | perl -pe 's/.embl/.fasta/'  | perl -pe 's/\n/ /'` -o ${RES}/report_chloro_assemblies
 		rm -rf ${RES}/report_chloro_assemblies/basic_stats/
-		rm -rf ${RES}/report_chloro_assemblies/icarus_viewers/
-		rm ${RES}/report_chloro_assemblies/icarus.html ${RES}/report_chloro_assemblies/report.html ${RES}/report_chloro_assemblies/report.tex ${RES}/report_chloro_assemblies/report.tsv ${RES}/report_chloro_assemblies/report.txt ${RES}/report_chloro_assemblies/transposed_report.tex ${RES}/report_chloro_assemblies/transposed_report.tsv
+		#rm -rf ${RES}/report_chloro_assemblies/icarus_viewers/
+		rm ${RES}/report_chloro_assemblies/report.tex ${RES}/report_chloro_assemblies/report.tsv ${RES}/report_chloro_assemblies/report.txt ${RES}/report_chloro_assemblies/transposed_report.tex ${RES}/report_chloro_assemblies/transposed_report.tsv
 		echo "done"
 		exit 0
 
@@ -187,8 +187,8 @@ mkdir -p ${RES}/${PATHNAME_ASSEMBLY}/Samples
 		echo "OrthoSkim: Summary statistics of rdna assemblies"
 		${QUAST} `awk '{print $1}' ${LIST_FILES} | perl -pe 's/.chloro.embl/.rdnanuc.fasta/'  | perl -pe 's/\n/ /'` -o ${RES}/report_rdnanuc_assemblies
 		rm -rf ${RES}/report_rdnanuc_assemblies/basic_stats/
-		rm -rf ${RES}/report_rdnanuc_assemblies/icarus_viewers/
-		rm ${RES}/report_rdnanuc_assemblies/icarus.html ${RES}/report_rdnanuc_assemblies/report.html ${RES}/report_rdnanuc_assemblies/report.tex ${RES}/report_rdnanuc_assemblies/report.tsv ${RES}/report_rdnanuc_assemblies/report.txt ${RES}/report_rdnanuc_assemblies/transposed_report.tex ${RES}/report_rdnanuc_assemblies/transposed_report.tsv
+		#rm -rf ${RES}/report_rdnanuc_assemblies/icarus_viewers/
+		rm ${RES}/report_rdnanuc_assemblies/report.tex ${RES}/report_rdnanuc_assemblies/report.tsv ${RES}/report_rdnanuc_assemblies/report.txt ${RES}/report_rdnanuc_assemblies/transposed_report.tex ${RES}/report_rdnanuc_assemblies/transposed_report.tsv
 		echo "done"
 		exit 0
 
@@ -196,8 +196,8 @@ mkdir -p ${RES}/${PATHNAME_ASSEMBLY}/Samples
 		echo "OrthoSkim: Summary statistics of nuclear assemblies"
 		${QUAST} ${RES}/${PATHNAME_ASSEMBLY}/Samples/*.fa -o ${RES}/report_SPAdes_assemblies
 		rm -rf ${RES}/report_SPAdes_assemblies/basic_stats/
-		rm -rf ${RES}/report_SPAdes_assemblies/icarus_viewers/
-		rm ${RES}/report_SPAdes_assemblies/icarus.html ${RES}/report_SPAdes_assemblies/report.html ${RES}/report_SPAdes_assemblies/report.tex ${RES}/report_SPAdes_assemblies/report.tsv ${RES}/report_SPAdes_assemblies/report.txt ${RES}/report_SPAdes_assemblies/transposed_report.tex ${RES}/report_SPAdes_assemblies/transposed_report.tsv
+		#rm -rf ${RES}/report_SPAdes_assemblies/icarus_viewers/
+		rm ${RES}/report_SPAdes_assemblies/report.tex ${RES}/report_SPAdes_assemblies/report.tsv ${RES}/report_SPAdes_assemblies/report.txt ${RES}/report_SPAdes_assemblies/transposed_report.tex ${RES}/report_SPAdes_assemblies/transposed_report.tsv
 		echo "done"
 		exit 0
 

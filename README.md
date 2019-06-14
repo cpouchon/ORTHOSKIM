@@ -1,7 +1,7 @@
 
 <p align="center">
   <a>
-    <img height="300" src="logo/orthoskim_log.jpeg">
+    <img height="300" src="img/orthoskim_log.jpeg">
   </a>
 </p>
 
@@ -245,6 +245,7 @@ $ python /Users/pouchonc/PhyloAlps/CDS/ExoRef.py -in tmp.exonerate -m inter -p .
 
 OrthoSkim used different mode to index files, align and/or extract regions or check assemblies. Regardless of genomic compartment chosen mode, indexing has to be made in first. As chloroplast and nucrdna were specially assembled, extraction can be directly processed from annotation files. For nucleus and mitochondrion extraction, a non-directional assembly has to be made with SPAdes on sample before running the pipeline.
 
+**Note**: for the *nucleus*, *mitochondrion*, *nucrdna* and *chloroplast* modes, a *mode.log* file is created containing samples that were processed. This file could be used to remove these samples from the initial **<LIST_FILES>** if the script has to be run.
 
 #### 3.1 - Indexing files
 
@@ -255,7 +256,7 @@ This step allowed to guide the pipeline according to an indexing tab based on ex
 
 #### 3.2 - Extraction from annotation
 
-For each sample specified in **<LIST_FILES>**, OrthoSkim will perform genes extraction directly from annotation according to a list of genes.
+For each sample specified in **<LIST_FILES>**, OrthoSkim will perform genes extraction directly from annotation according to a list of genes in *chloroplast* and *nucrdna* modes.
 
 Results are output in **RES/** directory by creating subdirectories for each compartment and gene type, with a multifasta file per gene. For example, for chloroplastic CDS provided in **<CHLORO_GENES>**, OrthoSkim will output **RES/chloroplast_CDS/** subdirectory with CDS gene files.
 
@@ -281,6 +282,7 @@ Results are output in **RES/** directory by creating subdirectories for each com
 #### 3.3 - Extraction from mapping to reference
 
 The study of nuclear and mitochondrial compartments has to be driven on new genomic assemblies performed with [SPAdes](http://cab.spbu.ru/software/spades/) because of available assemblies for sample was conducted only on chloroplast or rDNA cluster with OrgAsm. This allowed to assembly all the genomic compartment and after extract interested regions instead of assembly specific chloroplast/rDNA.
+
 
 ##### 3.3.1 - SPAdes assembly run
 
@@ -337,8 +339,51 @@ Androsace_helvetica_199610.CLA000520.BGN_ETA.chloro   1                    1    
 Doronicum_columnae_118758.PHA003018.BGN_EEH.chloro    1                    1                       1                       1                        1                        1                        152623                  152623                     152623                     152623                      152623                      152623                      1          152623          152623        37.60   152623  152623  1    1    0.00             
 ```
 
+OrthoSkim will also output the *report.pdf* file generated with [Quast](https://github.com/ablab/quast) containing:
 
-### 4. Running PmR
+<figure align="center">
+  <img height="240" src="img/Nx.jpeg" title="Nx values varying from 0 to 100%" />
+  <figcaption>Nx values varying from 0 to 100%</figcaption>
+</figure>
+<br>
+<figure align="center">
+  <img height="240" src="img/GCall.jpeg"/>
+  <figcaption>*GC content in the contigs for all samples*</figcaption>
+</figure>
+<figure align="center">
+  <img height="240" src="img/GCsamp1.jpeg"/>
+  <figcaption>*GC content in the contigs for sample1*</figcaption>
+</figure>
+<figure align="center">
+  <img height="240" src="img/GCsamp2.jpeg"/>
+  <figcaption>*GC content in the contigs for sample2*</figcaption>
+</figure>
+<figure align="center">
+  <img height="240" src="img/GCsamp3.jpeg"/>
+  <figcaption>*GC content in the contigs for sample3*</figcaption>
+</figure>
+<br>
+<figure align="center">
+  <img height="240" src="img/Covall.jpeg"/>
+  <figcaption>*distribution of total contig lengths at different*</figcaption>
+  <figcaption>*read coverage (only for SPAdes mode)*<figcaption>         
+</figure>
+<figure align="center">
+  <img height="240" src="img/Covsamp1.jpeg"/>
+  <figcaption>*coverage distribution for sample1*</figcaption>
+</figure>
+<figure align="center">
+  <img height="240" src="img/Covsamp2.jpeg"/>
+  <figcaption>*coverage distribution for sample2*</figcaption>
+</figure>
+<figure align="center">
+  <img height="240" src="img/Covsamp3.jpeg"/>
+  <figcaption>*coverage distribution for sample3*</figcaption>
+</figure>
+<br>
+**Note**: see Quast [manual](http://quast.bioinf.spbau.ru/manual.html) for more details. Outputs for [icarus](http://bioinf.spbau.ru/icarus) genome visualizer were also kept in the directory to visualize assemblies.
+
+### 4. Running OrthoSkim
 ------------------
 
 OrthoSkim could be called step by step. Recommendations about steps are given in the previous description (section 3). After edition of the *tools.sh* and *config_orthoskim.txt* files, the first step of *indexing* should be called as following:
@@ -384,3 +429,4 @@ For summary statistic, please use `-m [stat_chloro,stat_rdna,stat_SPAdes]`
 + Simão, F.A., Waterhouse, R.M., Ioannidis, P., Kriventseva, E.V. & Zdobnov, E.M. (2015). BUSCO: assessing genome assembly and annotation completeness with single-copy orthologs. Bioinformatics, 31, 3210–3212.
 + Slater, G.S.C. & Birney, E. (2005). Automated generation of heuristics for biological sequence comparison. BMC Bioinformatics, 6, 31.
 + Waterhouse, R.M., Seppey, M., Simão, F.A., Manni, M., Ioannidis, P., Klioutchnikov, G., et al. (2018). BUSCO Applications from Quality Assessments to Gene Prediction and Phylogenomics. Molecular Biology and Evolution, 35, 543–548.
++ Quast?
