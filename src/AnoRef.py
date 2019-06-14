@@ -194,7 +194,7 @@ if model in ("chloroplast","nucrdna","mitochondrion"):
                                     out_seq = flanked.extract(record.seq)
 
                                 header = ">"+str(taxaname)+"_"+str(gene)+"; "+"gene="+str(gene)+"; "+"type="+str(model)+"; "+"length="+str(length)+"; "+"taxa="+str(org[0]+"_"+org[1])+"; "+"taxid="+taxid_num
-                                fname = taxaname+".fna"
+                                fname = taxaname+".fa"
 
                                 if 'translation' in feat.qualifiers:
                                     pseq = feat.qualifiers['translation'][0]
@@ -248,7 +248,7 @@ if model in ("chloroplast","nucrdna","mitochondrion"):
                                     out_seq = flanked.extract(record.seq)
 
                                 header = ">"+str(taxaname)+"_"+str(gene)+"; "+"gene="+str(gene_codon)+"; "+"type="+str(model)+"; "+"length="+str(length)+"; "+"taxa="+str(org[0]+"_"+org[1])+"; "+"taxid="+taxid_num
-                                fname = taxaname+".fna"
+                                fname = taxaname+".fa"
 
                                 if os.path.isfile(os.path.join(outdirect, fname)):
                                     with open(os.path.join(outdirect, fname), 'a+') as file:
@@ -296,7 +296,7 @@ if model in ("chloroplast","nucrdna","mitochondrion"):
                                     out_seq = flanked.extract(record.seq)
 
                                 header = ">"+str(taxaname)+"_"+str(gene)+"; "+"gene="+str(gene)+"; "+"type="+str(model)+"; "+"length="+str(length)+"; "+"taxa="+str(org[0]+"_"+org[1])+"; "+"taxid="+taxid_num
-                                fname = taxaname+".fna"
+                                fname = taxaname+".fa"
 
                                 'check for nucleotidic sequence if existing or not'
                                 if os.path.isfile(os.path.join(outdirect, fname)):
@@ -344,7 +344,7 @@ if model in ("chloroplast","nucrdna","mitochondrion"):
                                     out_seq = flanked.extract(record.seq)
 
                                 header = ">"+str(taxaname)+"_"+str(gene)+"; "+"gene="+str(gene)+"; "+"type="+str(model)+"; "+"length="+str(length)+"; "+"taxa="+str(org[0]+"_"+org[1])+"; "+"taxid="+taxid_num
-                                fname = taxaname+".fna"
+                                fname = taxaname+".fa"
 
                                 if os.path.isfile(os.path.join(outdirect, fname)):
                                     with open(os.path.join(outdirect, fname), 'a+') as file:

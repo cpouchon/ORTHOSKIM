@@ -189,7 +189,7 @@ if model in ("chloroplast","nucrdna","mitochondrion"):
                                             out_seq = flanked.extract(record.seq)
 
                                         header = ">"+str(name)+"; "+"gene="+str(gene_codon)+"; "+"type="+str(model)+"; "+"length="+str(length)+"; "+"taxa="+taxaname+"; "+"taxid="+taxid_num
-                                        fname = gene_codon+".fna"
+                                        fname = gene_codon+".fa"
                                         typeofgene = g_tab[0]
 
                                         if os.path.isfile(os.path.join(outpath+"/"+model+'_'+typeofgene, fname)):
@@ -242,7 +242,7 @@ if model in ("chloroplast","nucrdna","mitochondrion"):
 
                                         header = ">"+str(name)+"; "+"gene="+g_tab[1]+"; "+"type="+str(model)+"; "+"length="+str(length)+"; "+"taxa="+taxaname+"; "+"taxid="+taxid_num
 
-                                        fname = g_tab[1]+".fna"
+                                        fname = g_tab[1]+".fa"
                                         typeofgene = g_tab[0]
 
                                         if 'translation' in feat.qualifiers:
@@ -327,7 +327,7 @@ if model in ("chloroplast","nucrdna","mitochondrion"):
                                             out_seq = flanked.extract(record.seq)
 
                                         header = ">"+str(name)+"; "+"gene="+g_tab[1]+"; "+"type="+str(model)+"; "+"length="+str(length)+"; "+"taxa="+taxaname+"; "+"taxid="+taxid_num
-                                        fname = g_tab[1]+".fna"
+                                        fname = g_tab[1]+".fa"
                                         typeofgene = g_tab[0]
 
                                         if os.path.isfile(os.path.join(outpath+"/"+model+'_'+typeofgene, fname)):

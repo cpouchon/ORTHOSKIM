@@ -130,7 +130,7 @@ outdir = args.outdir
 name = args.outname
 frq=args.allelefreq
 
-fname = str(name)+".fna"
+fname = str(name)+".fa"
 'we keep the name of alignment (name of UCE) for header'
 
 file_name = os.path.basename(input_file)

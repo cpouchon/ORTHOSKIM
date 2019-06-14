@@ -307,7 +307,7 @@ for geneid in stored.keys():
 
 
     'Output results: we write/append fasta file with sequence taxa for each gene'
-    fname = geneid+str(nuctype)+".fna"
+    fname = geneid+str(nuctype)+".fa"
 
     cond_max=0
     'we check the number of contigs matching each overlapping parts'
