@@ -39,6 +39,7 @@ PATH_FIND_CHLORO=/Users/pouchonc/PhyloAlps/CDS/                                 
 RES=/Users/pouchonc/PhyloAlps/run_orthoskim                                          ## path to directory to write output
 PATHNAME_ASSEMBLY=Assembly                                                           ## name of assembly directory where contigs from SPAdes were put (before nucleus and mitochondrion modes)
 EVALUE=0.0001                                                                        ## evalue threshold for diamond steps
+THREADS=15                                                                           ## Number of threads which will be used
 MAXCONT=2                                                                            ## maximal number of contigs allowed mapping a reference (paralogs filtering)
 MINLENGTH=200                                                                        ## minimal length of alignment allowed mapping to reference
 ANNOFMT=embl                                                                         ## format of annotated chloroplast/rdnanuc files
@@ -55,7 +56,6 @@ NRDNA_GENES=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/listGenes.rdna 
 
 # Extraction steps from mapping assemblies into a reference
 # [SPAdes_assembly] mode:
-THREADS=15                                                                           ## Number of threads which will be used
 MEMORY=30                                                                            ## Number of memory which will be used
 # [nuclear] mode :
 NUC_REF=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/refGenes.nu             ## list of nuclear genes of reference.  Amino acid sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. LFY_3702,LFY_3811 for LFY gene).
@@ -324,7 +324,7 @@ All the output files will be in the **${RES}/mitochondrion/** and **${RES}/nucle
 
 #### 3.4 - Summary statistics of assemblies
 
-OrthoSkim allowed also to output summary statistic on contigs assemblies for both *OrgAsm* (chloroplast+rdna) and [SPAdes](http://cab.spbu.ru/software/spades/) runs thanks to [QUAST](https://github.com/ablab/quast).
+OrthoSkim allowed to output summary statistic on contigs assemblies for both *OrgAsm* (chloroplast+rdna) and [SPAdes](http://cab.spbu.ru/software/spades/) runs thanks to [QUAST](https://github.com/ablab/quast) by specifying the *stat_[chloro,rdna,SPAdes]* modes.
 
 The output *transposed_report.txt* tab file will be in **${RES}/report_[chloro,rdnanuc,SPAdes]_assemblies/** directories given indication on the assembly. For example, for the chloroplast, we except the assembly of a single contig sizing 150,000 Nt in average as in the following example.  
 
@@ -385,6 +385,25 @@ OrthoSkim will also output the *report.pdf* file generated with [QUAST](https://
 
 **Note**: see QUAST [manual](http://quast.bioinf.spbau.ru/manual.html) for more details. Outputs for [icarus](http://bioinf.spbau.ru/icarus) genome visualizer were also kept in the directory to visualize assemblies.
 
+OrthoSkim allowed also to get statistic from gene extraction by using the *get_stat* mode for sequences (\*.fna) found in given **-p PATH**. The pipeline output a *report.tab* into this path containing:
++ gene name (gene_name)
++ samples found for this gene (#taxa)
++ the biggest length of sequence found (maxlen)
++ the number of sample covering this length at 100% (#1.0), 75% (#0.75), 50% (#0.5) and 25% (#0.25).
+
+`head ~/PATH/report.log`
+
+```
+gene_name       #taxa   maxlen  #1.0    #0.75   #0.5    #0.25
+psaB    3       2205    3       3       3       3
+psbN    3       132     3       3       3       3
+rps11   3       417     3       3       3       3
+ndhA    3       1083    3       3       3       3
+rpl14   3       369     3       3       3       3
+rps7    3       468     3       3       3       3
+```
+<br>
+
 ### 4. Running OrthoSkim
 ------------------
 
@@ -420,7 +439,13 @@ For *mitochondrion* and *nucleus* mode, the script should be called as following
 ```
 **Note**: *SPAdes_assembly* and *SPAdes_reformate* have to be run just once for both *mitochondrion* and *nucleus* mode. For mitochondrion mode, the *get_mitoRef* mode was not necessary ran if reference is already provided in the *config_orthoskim.txt* file.
 
-For summary statistic, please use `-m [stat_chloro,stat_rdna,stat_SPAdes]`
+For summary statistic, OrthoSkim could be run using the  `-m [stat_chloro,stat_rdna,stat_SPAdes]`, or using the `-m get_stat` with `-p PATH` option as following:
+
+```
+./OrtoSkim_v0.0.sh -m stat_SPAdes -c config_orthoskim.txt
+./OrtoSkim_v0.0.sh -m get_stat -c config_orthoskim.txt -p path_to_extracted_files
+```
+
 
 
 ### 5. References

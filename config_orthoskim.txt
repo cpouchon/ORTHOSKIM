@@ -4,6 +4,7 @@ PATH_FIND_CHLORO=/Users/pouchonc/PhyloAlps/CDS/                                 
 RES=/Users/pouchonc/PhyloAlps/run_orthoskim                                          ## path to directory to write output
 PATHNAME_ASSEMBLY=Assembly                                                           ## name of assembly directory where contigs from SPAdes were put (before nucleus and mitochondrion modes)
 EVALUE=0.0001                                                                        ## evalue threshold for diamond steps
+THREADS=15                                                                           ## Number of threads which will be used
 MAXCONT=2                                                                            ## maximal number of contigs allowed mapping a reference (paralogs filtering)
 MINLENGTH=200                                                                        ## minimal length of alignment allowed mapping to reference
 ANNOFMT=embl                                                                         ## format of annotated chloroplast/rdnanuc files
@@ -20,7 +21,6 @@ NRDNA_GENES=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/listGenes.rdna 
 
 # Extraction steps from mapping assemblies into a reference
 # [SPAdes_assembly] mode:
-THREADS=15                                                                           ## Number of threads which will be used
 MEMORY=30                                                                            ## Number of memory which will be used
 # [nuclear] mode :
 NUC_REF=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/refGenes.nu             ## list of nuclear genes of reference.  Amino acid sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. LFY_3702,LFY_3811 for LFY gene).

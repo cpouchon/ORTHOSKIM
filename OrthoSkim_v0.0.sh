@@ -1,10 +1,12 @@
 #!/bin/bash
 
-while getopts ":m:c:" opt; do
+while getopts ":m:c:p:" opt; do
   case $opt in
     m) mode="$OPTARG"
     ;;
     c) config="$OPTARG"
+    ;;
+    p) path="$OPTARG"
     ;;
   esac
 done
@@ -13,7 +15,7 @@ done
 ## Help display of function
 if [ "$1" == "-h" ]; then
     ##cat `dirname $0`/README.txt
-  echo "Usage: `basename $0` [-h] [-m mode] [-c configfile.txt]
+  echo "Usage: `basename $0` [-h] [-m mode] [-c configfile.txt] [-p path]
 
 ____________________________________________________
    ___       _   _          ____  _  ___
@@ -26,7 +28,7 @@ ____________________________________________________
 
 OrthoSkim: Skimming of orthologous regions from shotgun sequencing
            where:
-            -m [mode]  perform pipeline according to the choosen mode:
+            -m (mode)  perform pipeline according to the choosen mode:
                   - [indexing] (make paramfile from chloroplastic annotated files)
                   - [SPAdes_assembly]
                   - [SPAdes_reformate] (reformates SPAdes output according to OrthoSkim pipeline)
@@ -40,7 +42,9 @@ OrthoSkim: Skimming of orthologous regions from shotgun sequencing
                   - [stat_chloro] (output summary statistic for chloroplast assemblies)
                   - [stat_rdna] (output summary statistic for rdna assemblies)
                   - [stat_SPAdes] (check assemblies by generating summary statistics)
+                  - [get_stat] (get statistics of gene extraction for files in -p {PATH} directory)
             -c (config)  set the config file
+            -p (path)  set the path to get out statistic of gene extraction for [get_stat] mode
             "
   exit 0
 fi
@@ -97,12 +101,12 @@ mkdir -p ${RES}/${PATHNAME_ASSEMBLY}/Samples
 		mkdir ${RES}/nuc_mapping
 		echo "*** make DIAMOND formatted reference database ***"
 		refdb=${NUC_REF/.fasta/}
-		${DIAMOND} makedb --in ${NUC_REF} -d ${refdb}
+		${DIAMOND} makedb --in ${NUC_REF} -d ${refdb} --threads ${THREADS}
 		echo "*** mapping and extraction of assemblies into reference ***"
 		for f in `find ${RES}/${PATHNAME_ASSEMBLY}/Samples/ -type f -name \*.fa`;
 		do
 			lib=`basename $f | perl -pe 's/.fa//'`
-			${DIAMOND} blastx --outfmt 6 qseqid sseqid pident length mismatch gapopen qframe qstart qend sstart send evalue bitscore slen -d ${refdb} -q ${f} -o ${RES}/nuc_mapping/matches_${lib} --evalue ${EVALUE}
+			${DIAMOND} blastx --outfmt 6 qseqid sseqid pident length mismatch gapopen qframe qstart qend sstart send evalue bitscore slen -d ${refdb} -q ${f} -o ${RES}/nuc_mapping/matches_${lib} --evalue ${EVALUE} --threads ${THREADS}
 			awk '{print $1}' ${RES}/nuc_mapping/matches_${lib} | sort | uniq > ${RES}/nuc_mapping/hits_${lib}
 			awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $f | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/nuc_mapping/hits_${lib} - > ${RES}/nuc_mapping/contigs_hits_${lib}.fasta
 			${EXONERATE} --showcigar no --showtargetgff no --showvulgar no -q ${NUC_REF} -t ${RES}/nuc_mapping/contigs_hits_${lib}.fasta --ryo ">%qi gene=%qi ref=%ti length=%tl qalnlen=%qal qbal=%qab qeal=%qae qlen=%ql alnlen=%tal baln=%tab ealn=%tae score=%s\n%tas" --showalignment no | gawk '!/^Hostname:|^Command line:|^-- completed exonerate analysis/ {print $0}' > ${RES}/nuc_mapping/out_${lib}.fasta
@@ -157,12 +161,12 @@ mkdir -p ${RES}/${PATHNAME_ASSEMBLY}/Samples
 		mkdir ${RES}/mito_mapping
 		refdb=${MITO_REF/.fasta/}
 		echo "*** make DIAMOND formatted reference database ***"
-		${DIAMOND} makedb --in ${MITO_REF} -d ${refdb}
+		${DIAMOND} makedb --in ${MITO_REF} -d ${refdb} --threads ${THREADS}
 		echo "*** mapping and extraction of assemblies into reference ***"
 		for f in `find ${RES}/${PATHNAME_ASSEMBLY}/Samples/ -type f -name \*.fa`;
 		do
 			lib=`basename $f | perl -pe 's/.fa//'`
-			${DIAMOND} blastx --outfmt 6 qseqid sseqid pident length mismatch gapopen qframe qstart qend sstart send evalue bitscore slen -d ${refdb} -q ${f} -o ${RES}/mito_mapping/matches_${lib} --evalue ${EVALUE}
+			${DIAMOND} blastx --outfmt 6 qseqid sseqid pident length mismatch gapopen qframe qstart qend sstart send evalue bitscore slen -d ${refdb} -q ${f} -o ${RES}/mito_mapping/matches_${lib} --evalue ${EVALUE} --threads ${THREADS}
 			awk '{print $1}' ${RES}/mito_mapping/matches_${lib} | sort | uniq > ${RES}/mito_mapping/hits_${lib}
 			awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $f | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/mito_mapping/hits_${lib} - > ${RES}/mito_mapping/contigs_hits_${lib}.fasta
 			${EXONERATE} --showcigar no --showtargetgff no --showvulgar no -q ${MITO_REF} -t ${RES}/mito_mapping/contigs_hits_${lib}.fasta --ryo ">%qi gene=%qi ref=%ti length=%tl qalnlen=%qal qbal=%qab qeal=%qae qlen=%ql alnlen=%tal baln=%tab ealn=%tae score=%s\n%tas" --showalignment no | gawk '!/^Hostname:|^Command line:|^-- completed exonerate analysis/ {print $0}' > ${RES}/mito_mapping/out_${lib}.fasta
@@ -200,6 +204,12 @@ mkdir -p ${RES}/${PATHNAME_ASSEMBLY}/Samples
 		rm ${RES}/report_SPAdes_assemblies/report.tex ${RES}/report_SPAdes_assemblies/report.tsv ${RES}/report_SPAdes_assemblies/report.txt ${RES}/report_SPAdes_assemblies/transposed_report.tex ${RES}/report_SPAdes_assemblies/transposed_report.tsv
 		echo "done"
 		exit 0
+
+  elif [ $mode == 'get_stat' ]; then
+    echo "OrthoSkim: Statistics of genes extraction according to given path"
+    `dirname $0`/src/ExoStat.py -p $path -pfind > $path/report.log
+    echo "done"
+    exit 0
 
 	fi
 
