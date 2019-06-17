@@ -116,6 +116,7 @@ mkdir -p ${RES}/${PATHNAME_ASSEMBLY}/Samples
       ${EXONERATE} --showcigar no --showtargetgff no --showvulgar no -q ${NUC_REF} -t ${RES}/nuc_mapping/contigs_hits_${lib}.fasta --ryo ">%qi gene=%qi ref=%ti length=%tl qalnlen=%qal qbal=%qab qeal=%qae qlen=%ql alnlen=%tal baln=%tab ealn=%tae score=%s\n%tas" --showalignment no | gawk '!/^Hostname:|^Command line:|^-- completed exonerate analysis/ {print $0}' > ${RES}/nuc_mapping/out_${lib}.fasta
       echo "CMD: `dirname $0`/src/ExoSamp.py -i ${RES}/nuc_mapping/out_${lib}.fasta -m ${mode} -o ${RES}/$mode -c ${MAXCONT} -n ${lib} -l ${MINLENGTH}"
       `dirname $0`/src/ExoSamp.py -i ${RES}/nuc_mapping/out_${lib}.fasta -m ${mode} -o ${RES}/$mode -c ${MAXCONT} -n ${lib} -l ${MINLENGTH}
+      rm ${RES}/nuc_mapping/contigs_hits_${lib}.fasta ${RES}/nuc_mapping/hits_${lib} ${RES}/nuc_mapping/out_${lib}.fasta
 			echo ${f} >> ${RES}/nucleus_mode.log
 		done
 		echo "STATUS: done"
@@ -185,7 +186,7 @@ mkdir -p ${RES}/${PATHNAME_ASSEMBLY}/Samples
 			${EXONERATE} --showcigar no --showtargetgff no --showvulgar no -q ${MITO_REF} -t ${RES}/mito_mapping/contigs_hits_${lib}.fasta --ryo ">%qi gene=%qi ref=%ti length=%tl qalnlen=%qal qbal=%qab qeal=%qae qlen=%ql alnlen=%tal baln=%tab ealn=%tae score=%s\n%tas" --showalignment no | gawk '!/^Hostname:|^Command line:|^-- completed exonerate analysis/ {print $0}' > ${RES}/mito_mapping/out_${lib}.fasta
       echo "CMD: `dirname $0`/src/ExoSamp.py -i ${RES}/mito_mapping/out_${lib}.fasta -m $mode -o ${RES}/$mode -c ${MAXCONT} -n ${lib} -l ${MINLENGTH}"
 			`dirname $0`/src/ExoSamp.py -i ${RES}/mito_mapping/out_${lib}.fasta -m $mode -o ${RES}/$mode -c ${MAXCONT} -n ${lib} -l ${MINLENGTH}
-			rm ${RES}/mito_mapping/contigs_hits_${lib}.fasta ${RES}/mito_mapping/matches_${lib} ${RES}/mito_mapping/hits_${lib} ${RES}/mito_mapping/out_${lib}.fasta
+			rm ${RES}/mito_mapping/contigs_hits_${lib}.fasta ${RES}/mito_mapping/hits_${lib} ${RES}/mito_mapping/out_${lib}.fasta
 			echo ${f} >> ${RES}/mitochondrion_mode.log
 		done
 		echo "STATUS: done"
