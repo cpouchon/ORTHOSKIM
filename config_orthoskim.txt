@@ -8,7 +8,7 @@ THREADS=15                                                                      
 MAXCONT=2                                                                            ## maximal number of contigs allowed mapping a reference (paralogs filtering)
 MINLENGTH=200                                                                        ## minimal length of alignment allowed mapping to reference
 ANNOFMT=embl                                                                         ## format of annotated chloroplast/rdnanuc files
-VERBOSE=1                                                                            ## Set verbose to TRUE (1) or FALSE (0)
+VERBOSE=0                                                                            ## Set verbose to TRUE (1) or FALSE (0)
 
 # Preprocessing the data [indexing] mode
 LIST_FILES=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/listSamples.tab      ## Parameters table for assembly path analysis according to annotated chloroplasts previously assembled. Specific format required: (1) chloroplast file name; (2) Genus of species sample\n-3: sample name\n-4: forward reads\n-5: reverse reads\n-6: Output path for assemblies samples subdirectories. This file could be obtained with the prep_assembly mode of OrthoSkim function
