@@ -99,7 +99,7 @@ mkdir -p ${RES}/${PATHNAME_ASSEMBLY}/Samples
 
 	elif [ $mode == 'nucleus' ]; then
 		echo "INFO: mode=$mode - Extraction of nuclear genes from mapping assemblies into reference"
-		mkdir ${RES}/nuc_mapping
+		mkdir -p ${RES}/nuc_mapping
 		echo "*** make DIAMOND formatted reference database ***"
 		refdb=${NUC_REF/.fasta/}
     echo "CMD: ${DIAMOND} makedb --in ${NUC_REF} -d ${refdb} --threads ${THREADS}"
@@ -150,7 +150,7 @@ mkdir -p ${RES}/${PATHNAME_ASSEMBLY}/Samples
 
 	elif [ $mode == 'get_mitoRef' ]; then
 		echo "INFO: mode=$mode - Creation of mitochondria ref database"
-		mkdir ${RES}/mito_ref
+		mkdir -p ${RES}/mito_ref
 		find ${MITO_GENBANK_LOC} -type f -name \*.gb > ${RES}/mito_ref/listTaxa_mito
 		echo '*** extraction of all CDS from annotated genbank files ***'
     echo "CMD: `dirname $0`/src/AnoRef.py -in ${RES}/mito_ref/listTaxa_mito -m mitochondrion -t CDS -fmt genbank -o ${RES}/mito_ref/refCDS -protonly"
@@ -169,7 +169,7 @@ mkdir -p ${RES}/${PATHNAME_ASSEMBLY}/Samples
 
 	elif [ $mode == 'mitochondrion' ]; then
 		echo 'INFO: mode=$mode - Extraction of mitchondrial genes from assemblies'
-		mkdir ${RES}/mito_mapping
+		mkdir -p ${RES}/mito_mapping
 		refdb=${MITO_REF/.fasta/}
 		echo "*** make DIAMOND formatted reference database ***"
     echo "CMD: ${DIAMOND} makedb --in ${MITO_REF} -d ${refdb} --threads ${THREADS}"
