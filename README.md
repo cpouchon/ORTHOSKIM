@@ -308,6 +308,7 @@ After this, in both *mitochondrion* and *nucleus* mode, a [diamond](https://gith
 
 Mapping is made for each sample with [diamond](https://github.com/bbuchfink/diamond) *blastx* to quickly identify contig hits (only hits with a minimal **EVALUE** were retained) and alignments were made by executing [exonerate](https://www.ebi.ac.uk/about/vertebrate-genomics/software/exonerate) with identified mapping contigs and the references (nucleotide *versus* proteins). Alignment were obtained from [exonerate](https://www.ebi.ac.uk/about/vertebrate-genomics/software/exonerate) output through python script. Only genes from the reference list with a minimum length of **MINLENGTH** were output for each sample. In addition, in order to avoid paralogs, genes with more **MAXCONT** contigs mapping the reference will not be kept.
 
+**Note**: If you want to keep all the sequences, users can set **MAXCONT** to 100, and can after decide what sequences have to be kept because of matching contigs numbers is given into headers. 
 
 All the output files will be in the **${RES}/mitochondrion/** and **${RES}/nucleus/** directories as following:
 
