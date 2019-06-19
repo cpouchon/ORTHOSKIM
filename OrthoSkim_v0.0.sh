@@ -112,13 +112,19 @@ mkdir -p ${RES}/Extraction
       echo "CMD: ${DIAMOND} blastx --outfmt 6 qseqid sseqid pident length mismatch gapopen qframe qstart qend sstart send evalue bitscore slen -d ${refdb} -q ${f} -o ${RES}/Mapping/nucleus/matches_${lib} --evalue ${EVALUE} --threads ${THREADS} --sensitive"
 			${DIAMOND} blastx --outfmt 6 qseqid sseqid pident length mismatch gapopen qframe qstart qend sstart send evalue bitscore slen -d ${refdb} -q ${f} -o ${RES}/Mapping/nucleus/matches_${lib} --evalue ${EVALUE} --threads ${THREADS} --sensitive
 			awk '{print $1}' ${RES}/Mapping/nucleus/matches_${lib} | sort | uniq > ${RES}/Mapping/nucleus/hits_${lib}
-			awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $f | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/nucleus/hits_${lib} - > ${RES}/Mapping/nucleus/contigs_hits_${lib}.fasta
-      echo "CMD: ${EXONERATE} --showcigar no --showtargetgff no --showvulgar no -q ${NUC_REF} -t ${RES}/Mapping/nucleus/contigs_hits_${lib}.fasta --ryo \">%qi gene=%qi ref=%ti length=%tl qalnlen=%qal qbal=%qab qeal=%qae qlen=%ql alnlen=%tal baln=%tab ealn=%tae score=%s\n%tas\" --showalignment no | gawk '!/^Hostname:|^Command line:|^-- completed exonerate analysis/ {print $0}' > ${RES}/Mapping/nucleus/out_${lib}.fasta"
-      ${EXONERATE} --showcigar no --showtargetgff no --showvulgar no -q ${NUC_REF} -t ${RES}/Mapping/nucleus/contigs_hits_${lib}.fasta --ryo ">%qi gene=%qi ref=%ti length=%tl qalnlen=%qal qbal=%qab qeal=%qae qlen=%ql alnlen=%tal baln=%tab ealn=%tae score=%s\n%tas" --showalignment no | gawk '!/^Hostname:|^Command line:|^-- completed exonerate analysis/ {print $0}' > ${RES}/Mapping/nucleus/out_${lib}.fasta
-      echo "CMD: `dirname $0`/src/ExoSamp.py -i ${RES}/Mapping/nucleus/out_${lib}.fasta -m ${mode} -o ${RES}/Extraction/$mode -c ${MAXCONT} -n ${lib} -l ${MINLENGTH}"
-      `dirname $0`/src/ExoSamp.py -i ${RES}/Mapping/nucleus/out_${lib}.fasta -m ${mode} -o ${RES}/Extraction/$mode -c ${MAXCONT} -n ${lib} -l ${MINLENGTH}
-      rm ${RES}/Mapping/nucleus/contigs_hits_${lib}.fasta ${RES}/Mapping/nucleus/hits_${lib} ${RES}/Mapping/nucleus/out_${lib}.fasta
-			echo ${f} >> ${RES}/nucleus_mode.log
+      if [ -s ${RES}/Mapping/nucleus/hits_${lib} ]; then
+        awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $f | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/nucleus/hits_${lib} - > ${RES}/Mapping/nucleus/contigs_hits_${lib}.fasta
+        echo "CMD: ${EXONERATE} --showcigar no --showtargetgff no --showvulgar no -q ${NUC_REF} -t ${RES}/Mapping/nucleus/contigs_hits_${lib}.fasta --ryo \">%qi gene=%qi ref=%ti length=%tl qalnlen=%qal qbal=%qab qeal=%qae qlen=%ql alnlen=%tal baln=%tab ealn=%tae score=%s\n%tas\" --showalignment no | gawk '!/^Hostname:|^Command line:|^-- completed exonerate analysis/ {print $0}' > ${RES}/Mapping/nucleus/out_${lib}.fasta"
+        ${EXONERATE} --showcigar no --showtargetgff no --showvulgar no -q ${NUC_REF} -t ${RES}/Mapping/nucleus/contigs_hits_${lib}.fasta --ryo ">%qi gene=%qi ref=%ti length=%tl qalnlen=%qal qbal=%qab qeal=%qae qlen=%ql alnlen=%tal baln=%tab ealn=%tae score=%s\n%tas" --showalignment no | gawk '!/^Hostname:|^Command line:|^-- completed exonerate analysis/ {print $0}' > ${RES}/Mapping/nucleus/out_${lib}.fasta
+        echo "CMD: `dirname $0`/src/ExoSamp.py -i ${RES}/Mapping/nucleus/out_${lib}.fasta -m ${mode} -o ${RES}/Extraction/$mode -c ${MAXCONT} -n ${lib} -l ${MINLENGTH}"
+        `dirname $0`/src/ExoSamp.py -i ${RES}/Mapping/nucleus/out_${lib}.fasta -m ${mode} -o ${RES}/Extraction/$mode -c ${MAXCONT} -n ${lib} -l ${MINLENGTH}
+        rm ${RES}/Mapping/nucleus/contigs_hits_${lib}.fasta ${RES}/Mapping/nucleus/hits_${lib} ${RES}/Mapping/nucleus/out_${lib}.fasta
+  			echo ${f} >> ${RES}/nucleus_mode.log
+      else
+        echo "WARN: No hits were detected when mapping ${f} into ${NUC_REF} database"
+        echo "${f} no hits" >> ${RES}/nucleus_error.log
+        continue
+      fi
 		done
 		echo "STATUS: done"
 		exit 0
@@ -182,17 +188,22 @@ mkdir -p ${RES}/Extraction
       echo "CMD: ${DIAMOND} blastx --outfmt 6 qseqid sseqid pident length mismatch gapopen qframe qstart qend sstart send evalue bitscore slen -d ${refdb} -q ${f} -o ${RES}/Mapping/mitochondrion/matches_${lib} --evalue ${EVALUE} --threads ${THREADS} --sensitive"
 			${DIAMOND} blastx --outfmt 6 qseqid sseqid pident length mismatch gapopen qframe qstart qend sstart send evalue bitscore slen -d ${refdb} -q ${f} -o ${RES}/Mapping/mitochondrion/matches_${lib} --evalue ${EVALUE} --threads ${THREADS} --sensitive
 			awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/hits_${lib}
-			awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $f | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/mitochondrion/hits_${lib} - > ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta
-      echo "CMD: ${EXONERATE} --showcigar no --showtargetgff no --showvulgar no -q ${MITO_REF} -t ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta --ryo \">%qi gene=%qi ref=%ti length=%tl qalnlen=%qal qbal=%qab qeal=%qae qlen=%ql alnlen=%tal baln=%tab ealn=%tae score=%s\n%tas\" --showalignment no | gawk '!/^Hostname:|^Command line:|^-- completed exonerate analysis/ {print $0}' > ${RES}/Mapping/mitochondrion/out_${lib}.fasta"
-			${EXONERATE} --showcigar no --showtargetgff no --showvulgar no -q ${MITO_REF} -t ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta --ryo ">%qi gene=%qi ref=%ti length=%tl qalnlen=%qal qbal=%qab qeal=%qae qlen=%ql alnlen=%tal baln=%tab ealn=%tae score=%s\n%tas" --showalignment no | gawk '!/^Hostname:|^Command line:|^-- completed exonerate analysis/ {print $0}' > ${RES}/Mapping/mitochondrion/out_${lib}.fasta
-      echo "CMD: `dirname $0`/src/ExoSamp.py -i ${RES}/Mapping/mitochondrion/out_${lib}.fasta -m $mode -o ${RES}/Extraction/$mode -c ${MAXCONT} -n ${lib} -l ${MINLENGTH}"
-			`dirname $0`/src/ExoSamp.py -i ${RES}/Mapping/mitochondrion/out_${lib}.fasta -m $mode -o ${RES}/Extraction/$mode -c ${MAXCONT} -n ${lib} -l ${MINLENGTH}
-			rm ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta ${RES}/Mapping/mitochondrion/hits_${lib} ${RES}/Mapping/mitochondrion/out_${lib}.fasta
-			echo ${f} >> ${RES}/mitochondrion_mode.log
+      if [ -s ${RES}/Mapping/mitochondrion/hits_${lib} ]; then
+        awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $f | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/mitochondrion/hits_${lib} - > ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta
+        echo "CMD: ${EXONERATE} --showcigar no --showtargetgff no --showvulgar no -q ${MITO_REF} -t ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta --ryo \">%qi gene=%qi ref=%ti length=%tl qalnlen=%qal qbal=%qab qeal=%qae qlen=%ql alnlen=%tal baln=%tab ealn=%tae score=%s\n%tas\" --showalignment no | gawk '!/^Hostname:|^Command line:|^-- completed exonerate analysis/ {print $0}' > ${RES}/Mapping/mitochondrion/out_${lib}.fasta"
+  			${EXONERATE} --showcigar no --showtargetgff no --showvulgar no -q ${MITO_REF} -t ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta --ryo ">%qi gene=%qi ref=%ti length=%tl qalnlen=%qal qbal=%qab qeal=%qae qlen=%ql alnlen=%tal baln=%tab ealn=%tae score=%s\n%tas" --showalignment no | gawk '!/^Hostname:|^Command line:|^-- completed exonerate analysis/ {print $0}' > ${RES}/Mapping/mitochondrion/out_${lib}.fasta
+        echo "CMD: `dirname $0`/src/ExoSamp.py -i ${RES}/Mapping/mitochondrion/out_${lib}.fasta -m $mode -o ${RES}/Extraction/$mode -c ${MAXCONT} -n ${lib} -l ${MINLENGTH}"
+  			`dirname $0`/src/ExoSamp.py -i ${RES}/Mapping/mitochondrion/out_${lib}.fasta -m $mode -o ${RES}/Extraction/$mode -c ${MAXCONT} -n ${lib} -l ${MINLENGTH}
+  			rm ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta ${RES}/Mapping/mitochondrion/hits_${lib} ${RES}/Mapping/mitochondrion/out_${lib}.fasta
+  			echo ${f} >> ${RES}/mitochondrion_mode.log
+      else
+        echo "WARN: No hits were detected when mapping ${f} into ${MITO_REF} database"
+        echo "${f} no hits" >> ${RES}/mitochondrion_error.log
+        continue
+      fi
 		done
 		echo "STATUS: done"
 		exit 0
-
 
 	elif [ $mode == 'stat_chloro' ]; then
 		echo "INFO: mode=$mode - Summary statistics of chloroplast assemblies"
