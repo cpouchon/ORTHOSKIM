@@ -315,13 +315,13 @@ for geneid in stored.keys():
         catseq=out_seq.replace("N","")
         newlength = len(catseq)
         if "UCE" in MultipleParts[subgp]["gene"]:
-            header = ">"+str(nameofsample)+"; "+"gene="+str(geneid)+"_UCE"+"; "+"type="+str(model)+"; "+"length="+str(newlength)+"; info:concatenated_parts"+"; "+" match_contigs="+str("-".join(contigs_parts))
+            header = ">"+str(nameofsample)+"; "+"gene="+str(geneid)+"_UCE"+"; "+"type="+str(model)+"; "+"length="+str(newlength)+"; info=concatenated_parts"+"; "+" match_contigs="+str("-".join(contigs_parts))
             nuctype="_UCE"
         elif "BUSCO" in MultipleParts[subgp]["gene"]:
-            header = ">"+str(nameofsample)+"; "+"gene="+str(geneid)+"_BUSCO"+"; "+"type="+str(model)+"; "+"length="+str(newlength)+"; info:concatenated_parts"+"; "+" match_contigs="+str("-".join(contigs_parts))
+            header = ">"+str(nameofsample)+"; "+"gene="+str(geneid)+"_BUSCO"+"; "+"type="+str(model)+"; "+"length="+str(newlength)+"; info=concatenated_parts"+"; "+" match_contigs="+str("-".join(contigs_parts))
             nuctype="_BUSCO"
         else:
-            header = ">"+str(nameofsample)+"; "+"gene="+str(geneid)+"; "+"type="+str(model)+"; "+"length="+str(newlength)+"; info:concatenated_parts"+"; "+" match_contigs="+str("-".join(contigs_parts))
+            header = ">"+str(nameofsample)+"; "+"gene="+str(geneid)+"; "+"type="+str(model)+"; "+"length="+str(newlength)+"; info=concatenated_parts"+"; "+" match_contigs="+str("-".join(contigs_parts))
             nuctype=""
 
         cond_min_length=0
@@ -330,7 +330,7 @@ for geneid in stored.keys():
 
 
     'Output results: we write/append fasta file with sequence taxa for each gene'
-    fname = geneid+str(nuctype)+".fna"
+    fname = geneid+str(nuctype)+".fa"
 
     cond_max=0
     'we check the number of contigs matching each overlapping parts'
