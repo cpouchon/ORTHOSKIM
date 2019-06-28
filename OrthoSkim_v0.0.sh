@@ -114,11 +114,11 @@ mkdir -p ${RES}/Extraction
 			awk '{print $1}' ${RES}/Mapping/nucleus/matches_${lib} | sort | uniq > ${RES}/Mapping/nucleus/hits_${lib}
       if [ -s ${RES}/Mapping/nucleus/hits_${lib} ]; then
         awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $f | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/nucleus/hits_${lib} - > ${RES}/Mapping/nucleus/contigs_hits_${lib}.fasta
-        echo "CMD: ${EXONERATE} --showcigar no --showtargetgff no --showvulgar no -q ${NUC_REF} -t ${RES}/Mapping/nucleus/contigs_hits_${lib}.fasta --ryo \">%qi gene=%qi ref=%ti length=%tl qalnlen=%qal qbal=%qab qeal=%qae qlen=%ql alnlen=%tal baln=%tab ealn=%tae score=%s\n%tas\" --showalignment no | gawk '!/^Hostname:|^Command line:|^-- completed exonerate analysis/ {print $0}' > ${RES}/Mapping/nucleus/out_${lib}.fasta"
-        ${EXONERATE} --showcigar no --showtargetgff no --showvulgar no -q ${NUC_REF} -t ${RES}/Mapping/nucleus/contigs_hits_${lib}.fasta --ryo ">%qi gene=%qi ref=%ti length=%tl qalnlen=%qal qbal=%qab qeal=%qae qlen=%ql alnlen=%tal baln=%tab ealn=%tae score=%s\n%tas" --showalignment no | gawk '!/^Hostname:|^Command line:|^-- completed exonerate analysis/ {print $0}' > ${RES}/Mapping/nucleus/out_${lib}.fasta
-        echo "CMD: `dirname $0`/src/ExoSamp_diamond.py -i ${RES}/Mapping/nucleus/out_${lib}.fasta -m ${mode} -o ${RES}/Extraction/$mode -c ${MAXCONT} -n ${lib} -l ${MINLENGTH} -t ${RES}/Mapping/nucleus/matches_${lib}"
-        `dirname $0`/src/ExoSamp_diamond.py -i ${RES}/Mapping/nucleus/out_${lib}.fasta -m ${mode} -o ${RES}/Extraction/$mode -c ${MAXCONT} -n ${lib} -l ${MINLENGTH} -t ${RES}/Mapping/nucleus/matches_${lib}
-        rm ${RES}/Mapping/nucleus/contigs_hits_${lib}.fasta ${RES}/Mapping/nucleus/hits_${lib} ${RES}/Mapping/nucleus/out_${lib}.fasta
+        echo "CMD: ${EXONERATE} --model protein2genome -q ${NUC_REF} -t ${RES}/Mapping/nucleus/contigs_hits_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/Mapping/nucleus/out_${lib}.gff"
+        ${EXONERATE} --model protein2genome -q ${NUC_REF} -t ${RES}/Mapping/nucleus/contigs_hits_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/Mapping/nucleus/out_${lib}.gff
+        echo "CMD: `dirname $0`/src/ExoGFF.py -i ${RES}/Mapping/nucleus/contigs_hits_${lib}.fasta -g ${RES}/Mapping/nucleus/out_${lib}.gff -m ${mode} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t cds"
+        `dirname $0`/src/ExoGFF.py -i ${RES}/Mapping/nucleus/contigs_hits_${lib}.fasta -g ${RES}/Mapping/nucleus/out_${lib}.gff -m ${mode} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t cds
+        rm ${RES}/Mapping/nucleus/contigs_hits_${lib}.fasta ${RES}/Mapping/nucleus/hits_${lib} ${RES}/Mapping/nucleus/out_${lib}.gff
   			echo ${f} >> ${RES}/nucleus_mode.log
       else
         echo "WARN: No hits were detected when mapping ${f} into ${NUC_REF} database"
@@ -190,12 +190,12 @@ mkdir -p ${RES}/Extraction
 			awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/hits_${lib}
       if [ -s ${RES}/Mapping/mitochondrion/hits_${lib} ]; then
         awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $f | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/mitochondrion/hits_${lib} - > ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta
-        echo "CMD: ${EXONERATE} --showcigar no --showtargetgff no --showvulgar no -q ${MITO_REF} -t ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta --ryo \">%qi gene=%qi ref=%ti length=%tl qalnlen=%qal qbal=%qab qeal=%qae qlen=%ql alnlen=%tal baln=%tab ealn=%tae score=%s\n%tas\" --showalignment no | gawk '!/^Hostname:|^Command line:|^-- completed exonerate analysis/ {print $0}' > ${RES}/Mapping/mitochondrion/out_${lib}.fasta"
-  			${EXONERATE} --showcigar no --showtargetgff no --showvulgar no -q ${MITO_REF} -t ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta --ryo ">%qi gene=%qi ref=%ti length=%tl qalnlen=%qal qbal=%qab qeal=%qae qlen=%ql alnlen=%tal baln=%tab ealn=%tae score=%s\n%tas" --showalignment no | gawk '!/^Hostname:|^Command line:|^-- completed exonerate analysis/ {print $0}' > ${RES}/Mapping/mitochondrion/out_${lib}.fasta
-        echo "CMD: `dirname $0`/src/ExoSamp_diamond.py -i ${RES}/Mapping/mitochondrion/out_${lib}.fasta -m $mode -o ${RES}/Extraction/$mode -c ${MAXCONT} -n ${lib} -l ${MINLENGTH} -t ${RES}/Mapping/mitochondrion/matches_${lib}"
-  			`dirname $0`/src/ExoSamp_diamond.py -i ${RES}/Mapping/mitochondrion/out_${lib}.fasta -m $mode -o ${RES}/Extraction/$mode -c ${MAXCONT} -n ${lib} -l ${MINLENGTH} -t ${RES}/Mapping/mitochondrion/matches_${lib}
-  			rm ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta ${RES}/Mapping/mitochondrion/hits_${lib} ${RES}/Mapping/mitochondrion/out_${lib}.fasta
-  			echo ${f} >> ${RES}/mitochondrion_mode.log
+        echo "CMD: ${EXONERATE} --model protein2genome -q ${MITO_REF} -t ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/Mapping/mitochondrion/out_${lib}.gff"
+        ${EXONERATE} --model protein2genome -q ${MITO_REF} -t ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/Mapping/mitochondrion/out_${lib}.gff
+        echo "CMD: `dirname $0`/src/ExoGFF.py -i ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_${lib}.gff -m ${mode} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t cds"
+        `dirname $0`/src/ExoGFF.py -i ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_${lib}.gff -m ${mode} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t cds
+        rm ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta ${RES}/Mapping/mitochondrion/hits_${lib} ${RES}/Mapping/mitochondrion/out_${lib}.gff
+        echo ${f} >> ${RES}/mitochondrion_mode.log
       else
         echo "WARN: No hits were detected when mapping ${f} into ${MITO_REF} database"
         echo "${f} no hits" >> ${RES}/mitochondrion_error.log
