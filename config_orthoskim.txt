@@ -4,8 +4,7 @@ PATH_FIND_CHLORO=/Users/pouchonc/PhyloAlps/CDS/                                 
 RES=/Users/pouchonc/PhyloAlps/run_orthoskim                                          ## path to directory to write output
 PATHNAME_ASSEMBLY=Assembly                                                           ## name of assembly directory where contigs from SPAdes were put (before nucleus and mitochondrion modes)
 EVALUE=0.001                                                                        ## evalue threshold for diamond steps
-THREADS=15                                                                           ## Number of threads which will be used
-MAXCONT=2                                                                            ## maximal number of contigs allowed mapping a reference (paralogs filtering)
+THREADS=15                                                                           ## Number of threads which will be used for diamond/SPAdes/QUAST softs
 MINLENGTH=200                                                                        ## minimal length of alignment allowed mapping to reference
 ANNOFMT=embl                                                                         ## format of annotated chloroplast/rdnanuc files
 VERBOSE=0                                                                            ## Set verbose to TRUE (1) or FALSE (0)
@@ -20,6 +19,8 @@ CHLORO_GENES=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/listGenes.chlo
 NRDNA_GENES=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/listGenes.rdna      ## list of rdna nuclear genes for extraction. Specific format of table: (1) type of gene [CDS,...]; (2) name of gene. This file could be modified by adding/removing specific lines.
 
 # Extraction steps from mapping assemblies into a reference
+COVERAGE=5                                                                           ## Minimal contigs coverage allowed for genomic scan of mitochondrial and nuclear regions
+MINCONTLENGTH=1000                                                                   ## Minimal contigs length allowed for genomic scan of mitochondrial and nuclear regions
 # [SPAdes_assembly] mode:
 MEMORY=30                                                                            ## Number of memory which will be used
 # [nuclear] mode :

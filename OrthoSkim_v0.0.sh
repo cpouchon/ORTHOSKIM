@@ -117,7 +117,7 @@ mkdir -p ${RES}/Extraction
         echo "CMD: ${EXONERATE} --model protein2genome -q ${NUC_REF} -t ${RES}/Mapping/nucleus/contigs_hits_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/Mapping/nucleus/out_${lib}.gff"
         ${EXONERATE} --model protein2genome -q ${NUC_REF} -t ${RES}/Mapping/nucleus/contigs_hits_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/Mapping/nucleus/out_${lib}.gff
         echo "CMD: `dirname $0`/src/ExoGFF.py -i ${RES}/Mapping/nucleus/contigs_hits_${lib}.fasta -g ${RES}/Mapping/nucleus/out_${lib}.gff -m ${mode} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t cds"
-        `dirname $0`/src/ExoGFF.py -i ${RES}/Mapping/nucleus/contigs_hits_${lib}.fasta -g ${RES}/Mapping/nucleus/out_${lib}.gff -m ${mode} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t cds
+        `dirname $0`/src/ExoGFF.py -i ${RES}/Mapping/nucleus/contigs_hits_${lib}.fasta -g ${RES}/Mapping/nucleus/out_${lib}.gff -m ${mode} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t cds -c ${COVERAGE} -cl ${MINCONTLENGTH}
         rm ${RES}/Mapping/nucleus/contigs_hits_${lib}.fasta ${RES}/Mapping/nucleus/hits_${lib} ${RES}/Mapping/nucleus/out_${lib}.gff
   			echo ${f} >> ${RES}/nucleus_mode.log
       else
@@ -193,7 +193,7 @@ mkdir -p ${RES}/Extraction
         echo "CMD: ${EXONERATE} --model protein2genome -q ${MITO_REF} -t ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/Mapping/mitochondrion/out_${lib}.gff"
         ${EXONERATE} --model protein2genome -q ${MITO_REF} -t ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/Mapping/mitochondrion/out_${lib}.gff
         echo "CMD: `dirname $0`/src/ExoGFF.py -i ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_${lib}.gff -m ${mode} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t cds"
-        `dirname $0`/src/ExoGFF.py -i ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_${lib}.gff -m ${mode} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t cds
+        `dirname $0`/src/ExoGFF.py -i ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_${lib}.gff -m ${mode} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t cds -c ${COVERAGE} -cl ${MINCONTLENGTH}
         rm ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta ${RES}/Mapping/mitochondrion/hits_${lib} ${RES}/Mapping/mitochondrion/out_${lib}.gff
         echo ${f} >> ${RES}/mitochondrion_mode.log
       else

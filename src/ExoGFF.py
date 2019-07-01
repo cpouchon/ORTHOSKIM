@@ -26,6 +26,10 @@ parser.add_argument("-t","--typeofseq", help="type of sequence to extract [e.g. 
                     type=str)
 parser.add_argument("-l","--minlength", help="minimal length of alignment into reference to consider output",
                     type=int)
+parser.add_argument("-c","--mincov", help="minimal coverage of contigs allowed for genomic scan",
+                    type=int)
+parser.add_argument("-cl","--mincontlen", help="minimal length of contifs allowed for genomic scan",
+                    type=int)
 if len(sys.argv)==1:
     parser.print_help(sys.stderr)
     sys.exit(1)
@@ -73,6 +77,9 @@ nameofsample = args.namesample
 min_length = args.minlength
 model = args.model
 outpath=args.outdir
+cov=args.mincov
+clen=args.mincontlen
+
 
 stored={}
 dicscore={}
@@ -116,6 +123,14 @@ for line in tab:
 
         refposmin=rmin
         refposmax=rmax
+
+        contiglength=int(seqid.split("_")[3])
+        contigcov=float(seqid.split("_")[5])
+
+        if contigcov<cov or contiglength<clen:
+            continue
+        else:
+            pass
 
         'we make groups for gene with borne values'
         if genename not in groups.keys():
@@ -202,6 +217,12 @@ for line in tab:
             counthits[genename]=newcont
 
     if l[2]=="gene":
+
+        if contigcov<cov or contiglength<clen:
+            continue
+        else:
+            pass
+
         score = l[5]
         frame = l[6]
         id=(genename,seqid,refid,refposmin,refposmax)
@@ -261,6 +282,12 @@ for line in tab:
         stored.setdefault(id, []).append(dicframe)
 
     elif l[2]==typeseq:
+
+        if contigcov<cov or contiglength<clen:
+            continue
+        else:
+            pass
+
         'we keep all cds position for each combination'
         dicinfo = dict()
         minpos = l[3]
