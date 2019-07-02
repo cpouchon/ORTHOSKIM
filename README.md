@@ -38,12 +38,11 @@ TOOLS=/Users/pouchonc/Desktop/Scripts/OrthoSkim/tools.sh                        
 PATH_FIND_CHLORO=/Users/pouchonc/PhyloAlps/CDS/                                      ## path to find annotated chloroplast assemblies resulting from ORGasm
 RES=/Users/pouchonc/PhyloAlps/run_orthoskim                                          ## path to directory to write output
 PATHNAME_ASSEMBLY=Assembly                                                           ## name of assembly directory where contigs from SPAdes were put (before nucleus and mitochondrion modes)
-EVALUE=0.0001                                                                        ## evalue threshold for diamond steps
-THREADS=15                                                                           ## Number of threads which will be used
-MAXCONT=2                                                                            ## maximal number of contigs allowed mapping a reference (paralogs filtering)
+EVALUE=0.001                                                                         ## evalue threshold for diamond steps
+THREADS=15                                                                           ## Number of threads which will be used for diamond/SPAdes/QUAST softs
 MINLENGTH=200                                                                        ## minimal length of alignment allowed mapping to reference
 ANNOFMT=embl                                                                         ## format of annotated chloroplast/rdnanuc files
-VERBOSE=1                                                                            ## Set verbose to TRUE (1) or FALSE (0)
+VERBOSE=0                                                                            ## Set verbose to TRUE (1) or FALSE (0)
 
 # Preprocessing the data [indexing] mode
 LIST_FILES=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/listSamples.tab      ## Parameters table for assembly path analysis according to annotated chloroplasts previously assembled. Specific format required: (1) chloroplast file name; (2) Genus of species sample\n-3: sample name\n-4: forward reads\n-5: reverse reads\n-6: Output path for assemblies samples subdirectories. This file could be obtained with the prep_assembly mode of OrthoSkim function
@@ -55,12 +54,16 @@ CHLORO_GENES=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/listGenes.chlo
 NRDNA_GENES=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/listGenes.rdna      ## list of rdna nuclear genes for extraction. Specific format of table: (1) type of gene [CDS,...]; (2) name of gene. This file could be modified by adding/removing specific lines.
 
 # Extraction steps from mapping assemblies into a reference
+COVERAGE=5                                                                           ## Minimal contigs coverage allowed for genomic scan of mitochondrial and nuclear regions
+MINCONTLENGTH=1000                                                                   ## Minimal contigs length allowed for genomic scan of mitochondrial and nuclear regions
 # [SPAdes_assembly] mode:
 MEMORY=30                                                                            ## Number of memory which will be used
 # [nuclear] mode :
 NUC_REF=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/refGenes.nu             ## list of nuclear genes of reference.  Amino acid sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. LFY_3702,LFY_3811 for LFY gene).
+NUC_TYPE=cds                                                                         ## Type of structure extracted from the gff among "cds" (exon structure of CDS gene), "intron" (intron structure of CDS gene) and "all" (exon+intron)
 # [mitochondrion] mode :
 MITO_REF=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/refCDS.mito            ## list of mitochondrial genes of reference.  Amino acid sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. cox1_3702,cox1_3811 for cox1 gene).
+MITO_TYPE=cds                                                                        ## Type of structure extracted from the gff among "cds" (exon structure of CDS gene), "intron" (intron structure of CDS gene) and "all" (exon+intron)
 
 # Get mitochondrial sequences of reference [get_mitoRef] mode :
 LENGTH_RATIO=0.75                                                                    ## length ratio of reference mitochondrial gene aligning the gene seed to consider this gene in final gene banks of reference.
@@ -306,13 +309,12 @@ For all these file, OrthoSkim in *get_mitoRef* mode will extract all notified CD
 
 After this, in both *mitochondrion* and *nucleus* mode, a [diamond](https://github.com/bbuchfink/diamond) database is created for each amino acid sequences provided in **<MITO_REF>** and **<NUC_REF>** (with *diamond makedb*).
 
-Mapping is made for each sample with [diamond](https://github.com/bbuchfink/diamond) *blastx* to quickly identify contig hits (only hits with a minimal **EVALUE** were retained) and alignments were made by executing [exonerate](https://www.ebi.ac.uk/about/vertebrate-genomics/software/exonerate) with identified mapping contigs and the references (nucleotide *versus* proteins). Alignment were obtained from [exonerate](https://www.ebi.ac.uk/about/vertebrate-genomics/software/exonerate) output through python script. Only genes from the reference list with a minimum length of **MINLENGTH** were output for each sample. In addition, in order to avoid paralogs, genes with more **MAXCONT** contigs mapping the reference will not be kept.
+Mapping is made for each sample with [diamond](https://github.com/bbuchfink/diamond) *blastx* to quickly identify contig hits (only hits with a minimal **EVALUE** were retained) and alignments were made by executing [exonerate](https://www.ebi.ac.uk/about/vertebrate-genomics/software/exonerate) with identified mapping contigs and the references (nucleotide *versus* proteins). Only contigs with a minimal coverage of **COVERAGE** and length of **MINCONTLENGTH** were considered for alignments into reference.
+Alignment were obtained from [exonerate](https://www.ebi.ac.uk/about/vertebrate-genomics/software/exonerate) output through python script by using the *protein2genome* mode incorporating all the appropriate gaps and frameshifts, and modelling of introns. Only genes from the reference list with a minimum length of **MINLENGTH** were output for each sample. Type of gene structure (exon, intron or exon+intron) extraction from mapping are reported in **NUC_TYPE** or **MITO_TYPE**.
 
-**Note**: If you want to keep all the sequences, users can set **MAXCONT** to infinite value, and can after decide what sequences have to be kept because of matching contigs numbers is given into headers.
+All the output files will be in the **${RES}/mitochondrion/** and **${RES}/nucleus/** directories, according to gene type structure, as following:
 
-All the output files will be in the **${RES}/mitochondrion/** and **${RES}/nucleus/** directories as following:
-
-`ls -l ~/RES/nucleus/`
+`ls -l ~/RES/nucleus_CDS/`
 
 ```
 -rw-r--r--  1 pouchonc  staff  1758  5 jui 11:11 10104_BUSCO.fna

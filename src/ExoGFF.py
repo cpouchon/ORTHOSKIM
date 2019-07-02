@@ -22,8 +22,8 @@ parser.add_argument("-n","--namesample", help="sample name used in sequence head
                     type=str)
 parser.add_argument("-g","--gfftab", help="input gff table from exonerate alignment",
                     type=str)
-parser.add_argument("-t","--typeofseq", help="type of sequence to extract [e.g. cds]",
-                    type=str)
+parser.add_argument("-t","--typeofseq", help="type of sequence to extract",
+                    type=str,choices=["all", "cds","intron"])
 parser.add_argument("-l","--minlength", help="minimal length of alignment into reference to consider output",
                     type=int)
 parser.add_argument("-c","--mincov", help="minimal coverage of contigs allowed for genomic scan",
@@ -89,7 +89,7 @@ seqs={}
 counthits={}
 
 
-mkdir(str(outpath+"/"+model+'_'+typeseq))
+mkdir(str(outpath+"/"+model+'_'+typeseq.upper()))
 
 'we store the gff tab'
 with open(file) as f:
@@ -101,6 +101,7 @@ for record in cur_genome:
     seqID=record.id
     sequence=record.seq
     seqs.setdefault(seqID, []).append(sequence)
+
 
 'find each gene of ref and keep seqID,score,length,ref'
 for line in tab:
@@ -216,85 +217,159 @@ for line in tab:
 
             counthits[genename]=newcont
 
-    if l[2]=="gene":
+    if typeseq=="all":
+        if l[2]=="gene":
 
-        if contigcov<cov or contiglength<clen:
-            continue
-        else:
-            pass
-
-        score = l[5]
-        frame = l[6]
-        id=(genename,seqid,refid,refposmin,refposmax)
-        'dictionary to identify the best score with combination seqID/refID'
-        'we have to keep index in the same order of overlapp and create new dict'
-        if genename not in dicscore.keys():
-            dicscore.setdefault(genename, []).append(int(score))
-            #besthits.setdefault(genename, []).append(dicinfo)
-            besthits.setdefault(genename, []).append(id)
-            #counthits.setdefault(genename, []).append([seqid])
-        else:
-            'mettre condition pour regarder dans loverlapp index'
-
-            'condition si nouveau group'
-
-            newscore=[]
-            newhits=[]
-            overscore=[]
-
-            for i in lnoverlap:
-                'ceux pour qui pas overlapp on les gardes dans le meme ordre (new/modif in first)'
-                newscore.append(dicscore[genename][i])
-                newhits.append(besthits[genename][i])
-
-            if len(loverlap)>0:
-                for i in loverlap:
-                    overscore.append(dicscore[genename][i])
-                'extract best score on new overlapping group'
-                highscore_index = loverlap[overscore.index(max(overscore))]
-                highscore = dicscore[genename][highscore_index]
-                'compare hit score with the bestscore for this overlapping group'
-                if int(score) > highscore:
-                    highscore = int(score)
-                    #highhits = dicinfo
-                    highhits = id
-                else:
-                    highhits = besthits[genename][highscore_index]
-
-                'maintenant faut faire le nouveau gp'
-                newscore.append(highscore)
-                newhits.append(highhits)
+            if contigcov<cov or contiglength<clen:
+                continue
             else:
-                'pas overlapp donc new'
-                newscore.append(int(score))
-                #newhits.append(dicinfo)
-                newhits.append(id)
+                pass
+
+            score = l[5]
+            frame = l[6]
+            id=(genename,seqid,refid,refposmin,refposmax)
+            if genename not in dicscore.keys():
+                dicscore.setdefault(genename, []).append(int(score))
+                #besthits.setdefault(genename, []).append(dicinfo)
+                besthits.setdefault(genename, []).append(id)
+                #counthits.setdefault(genename, []).append([seqid])
+            else:
+                'mettre condition pour regarder dans loverlapp index'
+
+                'condition si nouveau group'
+
+                newscore=[]
+                newhits=[]
+                overscore=[]
+
+                for i in lnoverlap:
+                    'ceux pour qui pas overlapp on les gardes dans le meme ordre (new/modif in first)'
+                    newscore.append(dicscore[genename][i])
+                    newhits.append(besthits[genename][i])
+
+                if len(loverlap)>0:
+                    for i in loverlap:
+                        overscore.append(dicscore[genename][i])
+                    'extract best score on new overlapping group'
+                    highscore_index = loverlap[overscore.index(max(overscore))]
+                    highscore = dicscore[genename][highscore_index]
+                    'compare hit score with the bestscore for this overlapping group'
+                    if int(score) > highscore:
+                        highscore = int(score)
+                        #highhits = dicinfo
+                        highhits = id
+                    else:
+                        highhits = besthits[genename][highscore_index]
+
+                    'maintenant faut faire le nouveau gp'
+                    newscore.append(highscore)
+                    newhits.append(highhits)
+                else:
+                    'pas overlapp donc new'
+                    newscore.append(int(score))
+                    #newhits.append(dicinfo)
+                    newhits.append(id)
 
 
-            dicscore[genename]=newscore
-            besthits[genename]=newhits
+                dicscore[genename]=newscore
+                besthits[genename]=newhits
 
 
-        'we store all combination genename/seqid/refid + frame'
-        #id = (genename,seqid,refid,refposmin,refposmax)
-        dicframe=dict()
-        dicframe['frame']=str(frame)
-        stored.setdefault(id, []).append(dicframe)
+            'we store all combination genename/seqid/refid + frame'
+            #id = (genename,seqid,refid,refposmin,refposmax)
+            dicframe=dict()
+            dicframe['frame']=str(frame)
+            stored.setdefault(id, []).append(dicframe)
 
-    elif l[2]==typeseq:
+            dicinfo = dict()
+            minpos = l[3]
+            maxpos = l[4]
+            dicinfo['min']=str(minpos)
+            dicinfo['max']=str(maxpos)
+            stored.setdefault(id, []).append(dicinfo)
 
-        if contigcov<cov or contiglength<clen:
-            continue
-        else:
-            pass
 
-        'we keep all cds position for each combination'
-        dicinfo = dict()
-        minpos = l[3]
-        maxpos = l[4]
-        dicinfo['min']=str(minpos)
-        dicinfo['max']=str(maxpos)
-        stored.setdefault(id, []).append(dicinfo)
+    else:
+        if l[2]=="gene":
+
+            if contigcov<cov or contiglength<clen:
+                continue
+            else:
+                pass
+
+            score = l[5]
+            frame = l[6]
+            id=(genename,seqid,refid,refposmin,refposmax)
+            'dictionary to identify the best score with combination seqID/refID'
+            'we have to keep index in the same order of overlapp and create new dict'
+            if genename not in dicscore.keys():
+                dicscore.setdefault(genename, []).append(int(score))
+                #besthits.setdefault(genename, []).append(dicinfo)
+                besthits.setdefault(genename, []).append(id)
+                #counthits.setdefault(genename, []).append([seqid])
+            else:
+                'mettre condition pour regarder dans loverlapp index'
+
+                'condition si nouveau group'
+
+                newscore=[]
+                newhits=[]
+                overscore=[]
+
+                for i in lnoverlap:
+                    'ceux pour qui pas overlapp on les gardes dans le meme ordre (new/modif in first)'
+                    newscore.append(dicscore[genename][i])
+                    newhits.append(besthits[genename][i])
+
+                if len(loverlap)>0:
+                    for i in loverlap:
+                        overscore.append(dicscore[genename][i])
+                    'extract best score on new overlapping group'
+                    highscore_index = loverlap[overscore.index(max(overscore))]
+                    highscore = dicscore[genename][highscore_index]
+                    'compare hit score with the bestscore for this overlapping group'
+                    if int(score) > highscore:
+                        highscore = int(score)
+                        #highhits = dicinfo
+                        highhits = id
+                    else:
+                        highhits = besthits[genename][highscore_index]
+
+                    'maintenant faut faire le nouveau gp'
+                    newscore.append(highscore)
+                    newhits.append(highhits)
+                else:
+                    'pas overlapp donc new'
+                    newscore.append(int(score))
+                    #newhits.append(dicinfo)
+                    newhits.append(id)
+
+
+                dicscore[genename]=newscore
+                besthits[genename]=newhits
+
+
+            'we store all combination genename/seqid/refid + frame'
+            #id = (genename,seqid,refid,refposmin,refposmax)
+            dicframe=dict()
+            dicframe['frame']=str(frame)
+            stored.setdefault(id, []).append(dicframe)
+
+        elif l[2]==typeseq:
+
+            if contigcov<cov or contiglength<clen:
+                continue
+            else:
+                pass
+
+            'we keep all cds position for each combination'
+            dicinfo = dict()
+            minpos = l[3]
+            maxpos = l[4]
+            dicinfo['min']=str(minpos)
+            dicinfo['max']=str(maxpos)
+            stored.setdefault(id, []).append(dicinfo)
+
 
 Bar = ProgressBar(len(besthits.keys()), 60, '\t Extraction of genes for %s' % input_file)
 barp=0
@@ -309,18 +384,21 @@ for geneid in besthits:
         dna=str(seqs[seqid][0])
 
         concat=[]
-        for parts in stored[besthits[geneid][0]][1:]:
-            'we exclude the first idx because of frame'
-            start=int(parts['min'])
-            end=int(parts['max'])
-            if fr == "-":
-                extract=str(Seq(dna[start-1:end],generic_dna).reverse_complement())
-            else:
-                extract=str(Seq(dna[start-1:end],generic_dna))
+        if len(stored[besthits[geneid][0]][1:])==0:
+            continue
+        else:
+            for parts in stored[besthits[geneid][0]][1:]:
+                'we exclude the first idx because of frame'
+                start=int(parts['min'])
+                end=int(parts['max'])
+                if fr == "-":
+                    extract=str(Seq(dna[start-1:end],generic_dna).reverse_complement())
+                else:
+                    extract=str(Seq(dna[start-1:end],generic_dna))
 
-            concat.append(extract)
+                concat.append(extract)
 
-        newseq="".join(concat)
+            newseq="".join(concat)
 
     else:
         'condition pour voir quelle position il faut extraire en premier'
@@ -338,22 +416,30 @@ for geneid in besthits:
             fr = stored[besthits[geneid][idx]][0]['frame']
             dna=str(seqs[seqid][0])
 
-            for parts in stored[besthits[geneid][idx]][1:]:
-                'we exclude the first idx because of frame'
-                start=int(parts['min'])
-                end=int(parts['max'])
-                if fr == "-":
-                    extract=str(Seq(dna[start-1:end],generic_dna).reverse_complement())
-                else:
-                    extract=str(Seq(dna[start-1:end],generic_dna))
 
-                concat.append(extract)
+            if len(stored[besthits[geneid][idx]][1:])==0:
+                continue
+            else:
+                for parts in stored[besthits[geneid][idx]][1:]:
+                    'we exclude the first idx because of frame'
+                    start=int(parts['min'])
+                    end=int(parts['max'])
+                    if fr == "-":
+                        extract=str(Seq(dna[start-1:end],generic_dna).reverse_complement())
+                    else:
+                        extract=str(Seq(dna[start-1:end],generic_dna))
+
+                    concat.append(extract)
 
         newseq="".join(concat)
 
+        if len(newseq)==0:
+            continue
+        else:
+            pass
+
     newlength = len(newseq)
     header = ">"+str(nameofsample)+"; "+"gene="+str(geneid)+"; "+"type="+str(model)+"; "+"length="+str(newlength)+"; "+"match_contigs="+str("-".join(contpart))
-
 
     cond_min_length=0
     if newlength>=min_length:
@@ -363,8 +449,8 @@ for geneid in besthits:
     fname = geneid+".fa"
 
     if cond_min_length!=0:
-        if os.path.isfile(os.path.join(outpath+"/"+model+'_'+typeseq, fname)):
-            with open(os.path.join(outpath+"/"+model+'_'+typeseq, fname), 'a+') as file:
+        if os.path.isfile(os.path.join(outpath+"/"+model+'_'+typeseq.upper(), fname)):
+            with open(os.path.join(outpath+"/"+model+'_'+typeseq.upper(), fname), 'a+') as file:
                 old_headers = []
                 end_file=file.tell()
                 file.seek(0)
@@ -380,7 +466,7 @@ for geneid in besthits:
                 else:
                     pass
         else :
-            with open(os.path.join(outpath+"/"+model+'_'+typeseq, fname), 'w') as out:
+            with open(os.path.join(outpath+"/"+model+'_'+typeseq.upper(), fname), 'w') as out:
                 Bar.update(barp)
                 out.write(header+'\n')
                 out.write(str(newseq)+'\n')
