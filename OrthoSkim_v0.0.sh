@@ -111,7 +111,7 @@ mkdir -p ${RES}/Extraction
 			lib=`basename $f | perl -pe 's/.fa//'`
       echo "CMD: ${DIAMOND} blastx --outfmt 6 qseqid sseqid pident length mismatch gapopen qframe qstart qend sstart send evalue bitscore slen -d ${refdb} -q ${f} -o ${RES}/Mapping/nucleus/matches_${lib} --evalue ${EVALUE} --threads ${THREADS} --sensitive"
 			${DIAMOND} blastx --outfmt 6 qseqid sseqid pident length mismatch gapopen qframe qstart qend sstart send evalue bitscore slen -d ${refdb} -q ${f} -o ${RES}/Mapping/nucleus/matches_${lib} --evalue ${EVALUE} --threads ${THREADS} --sensitive
-			awk '{print $1}' ${RES}/Mapping/nucleus/matches_${lib} | awk -v c=${COVERAGE} l=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=c && a[4]>=l) print}' | sort | uniq > ${RES}/Mapping/nucleus/hits_${lib}
+			awk '{split($1,a,"_")}{if(a[6]>='"${COVERAGE}"' && a[4]>='"${MINCONTLENGTH}"') print $1}' ${RES}/Mapping/nucleus/matches_${lib} | sort | uniq > ${RES}/Mapping/nucleus/hits_${lib}
       if [ -s ${RES}/Mapping/nucleus/hits_${lib} ]; then
         awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $f | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/nucleus/hits_${lib} - > ${RES}/Mapping/nucleus/contigs_hits_${lib}.fasta
         echo "CMD: ${EXONERATE} --model protein2genome -q ${NUC_REF} -t ${RES}/Mapping/nucleus/contigs_hits_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/Mapping/nucleus/out_${lib}.gff"
@@ -187,7 +187,7 @@ mkdir -p ${RES}/Extraction
 			lib=`basename $f | perl -pe 's/.fa//'`
       echo "CMD: ${DIAMOND} blastx --outfmt 6 qseqid sseqid pident length mismatch gapopen qframe qstart qend sstart send evalue bitscore slen -d ${refdb} -q ${f} -o ${RES}/Mapping/mitochondrion/matches_${lib} --evalue ${EVALUE} --threads ${THREADS} --sensitive"
 			${DIAMOND} blastx --outfmt 6 qseqid sseqid pident length mismatch gapopen qframe qstart qend sstart send evalue bitscore slen -d ${refdb} -q ${f} -o ${RES}/Mapping/mitochondrion/matches_${lib} --evalue ${EVALUE} --threads ${THREADS} --sensitive
-			awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_${lib} | awk -v c=${COVERAGE} l=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=c && a[4]>=l) print}' | sort | uniq > ${RES}/Mapping/mitochondrion/hits_${lib}
+			awk '{split($1,a,"_")}{if(a[6]>='"${COVERAGE}"' && a[4]>='"${MINCONTLENGTH}"') print $1}' ${RES}/Mapping/mitochondrion/matches_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/hits_${lib}
       if [ -s ${RES}/Mapping/mitochondrion/hits_${lib} ]; then
         awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $f | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/mitochondrion/hits_${lib} - > ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta
         echo "CMD: ${EXONERATE} --model protein2genome -q ${MITO_REF} -t ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/Mapping/mitochondrion/out_${lib}.gff"
