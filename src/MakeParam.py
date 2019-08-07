@@ -48,19 +48,55 @@ for file in in_files:
     cf = file.rstrip()
     cfile_path = cf
     cfile_name = os.path.basename(cfile_path)
-    cindex_of_dot = cfile_name.index('.')
-    cfile_name_without_extension = cfile_name[:cindex_of_dot]
-    ctaxaname = cfile_name_without_extension.split(":")[0]
-    taxid = cfile_name_without_extension.split(":")[1]
-    ingenus=ctaxaname.split("_")[0]
-    sequencing = cfile_name.split(".")[2].split(":")
-    samplename=str(ctaxaname+"_"+taxid+"_"+str(cfile_name.split(".")[1])+"_"+str(sequencing[0])+"_"+str(sequencing[1]))
+
+    if "subsp." in cfile_name:
+        cfile_name_without_extension = cfile_name.split(".chloro.embl")[0]
+        ctaxaname = cfile_name_without_extension.split(":")[0]
+        taxid = cfile_name_without_extension.split(":")[1].split(".")[0]
+        ingenus=ctaxaname.split("_")[0]
+        sequencing = cfile_name.split(".")[3].split(":")
+        samplename=str(ctaxaname+"_"+taxid+"_"+str(cfile_name.split(".")[2])+"_"+str(sequencing[0])+"_"+str(sequencing[1]))
+
+    elif "var." in cfile_name:
+        cfile_name_without_extension = cfile_name.split(".chloro.embl")[0]
+        ctaxaname = cfile_name_without_extension.split(":")[0]
+        taxid = cfile_name_without_extension.split(":")[1].split(".")[0]
+        ingenus=ctaxaname.split("_")[0]
+        sequencing = cfile_name.split(".")[3].split(":")
+        samplename=str(ctaxaname+"_"+taxid+"_"+str(cfile_name.split(".")[2])+"_"+str(sequencing[0])+"_"+str(sequencing[1]))
+
+    elif "sp." in cfile_name:
+        cfile_name_without_extension = cfile_name.split(".chloro.embl")[0]
+        ctaxaname = cfile_name_without_extension.split(":")[0]
+        taxid = cfile_name_without_extension.split(":")[1].split(".")[0]
+        ingenus=ctaxaname.split("_")[0]
+        sequencing = cfile_name.split(".")[3].split(":")
+        samplename=str(ctaxaname+"_"+taxid+"_"+str(cfile_name.split(".")[2])+"_"+str(sequencing[0])+"_"+str(sequencing[1]))
+
+    else:
+        cfile_name_without_extension = cfile_name.split(".chloro.embl")[0]
+        ctaxaname = cfile_name_without_extension.split(":")[0]
+        taxid = cfile_name_without_extension.split(":")[1]
+        ingenus=ctaxaname.split("_")[0]
+        sequencing = cfile_name.split(".")[2].split(":")
+        samplename=str(ctaxaname+"_"+taxid+"_"+str(cfile_name.split(".")[1])+"_"+str(sequencing[0])+"_"+str(sequencing[1]))
 
     if "GWM" in cf:
         r1path=os.path.dirname(cf)+"/"+fnmatch.filter(os.listdir(os.path.dirname(cf)), '*_R1.fastq.gz')[0]
         r2path=os.path.dirname(cf)+"/"+fnmatch.filter(os.listdir(os.path.dirname(cf)), '*_R2.fastq.gz')[0]
+    elif "RSZ" in cf:
+        r1path=os.path.dirname(cf)+"/"+fnmatch.filter(os.listdir(os.path.dirname(cf)), '*_1.fq.gz')[0]
+        r2path=os.path.dirname(cf)+"/"+fnmatch.filter(os.listdir(os.path.dirname(cf)), '*_2.fq.gz')[0]
+    elif "AXZ" in sequencing[0]:
+        if sequencing[1]=='V':
+            r1path=os.path.dirname(cf)+"/"+fnmatch.filter(os.listdir(os.path.dirname(cf)), '*_[0-9]_1_*.fastq.gz')[0]
+            r2path=os.path.dirname(cf)+"/"+fnmatch.filter(os.listdir(os.path.dirname(cf)), '*_[0-9]_2_*.fastq.gz')[0]
+        else:
+            r1path=os.path.dirname(cf)+"/"+fnmatch.filter(os.listdir(os.path.dirname(cf)), '*_[0-9]_1_*.fastq.bz2')[0]
+            r2path=os.path.dirname(cf)+"/"+fnmatch.filter(os.listdir(os.path.dirname(cf)), '*_[0-9]_2_*.fastq.bz2')[0]
     else:
         r1path=os.path.dirname(cf)+"/"+fnmatch.filter(os.listdir(os.path.dirname(cf)), '*_[0-9]_1_*_clean.fastq.gz')[0]
         r2path=os.path.dirname(cf)+"/"+fnmatch.filter(os.listdir(os.path.dirname(cf)), '*_[0-9]_2_*_clean.fastq.gz')[0]
 
-    print "%s\t%s\t%s\t%s\t%s\t%s" % (str(cfile_path),str(ingenus),str(samplename),str(r1path),str(r2path),str(outdir_assembly_path))
+
+    print ('%s\t%s\t%s\t%s\t%s\t%s' % (str(cfile_path),str(ingenus),str(samplename),str(r1path),str(r2path),str(outdir_assembly_path)))
