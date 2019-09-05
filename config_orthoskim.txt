@@ -3,7 +3,7 @@ TOOLS=/Users/pouchonc/Desktop/Scripts/OrthoSkim/tools.sh                        
 PATH_FIND_CHLORO=/Users/pouchonc/PhyloAlps/CDS/                                      ## path to find annotated chloroplast assemblies resulting from ORGasm
 RES=/Users/pouchonc/PhyloAlps/run_orthoskim                                          ## path to directory to write output
 PATHNAME_ASSEMBLY=Assembly                                                           ## name of assembly directory where contigs from SPAdes were put (before nucleus and mitochondrion modes)
-EVALUE=0.001                                                                        ## evalue threshold for diamond steps
+EVALUE=0.001                                                                         ## evalue threshold for diamond steps
 THREADS=15                                                                           ## Number of threads which will be used for diamond/SPAdes/QUAST softs
 MINLENGTH=200                                                                        ## minimal length of alignment allowed mapping to reference
 ANNOFMT=embl                                                                         ## format of annotated chloroplast/rdnanuc files
@@ -23,14 +23,17 @@ COVERAGE=5                                                                      
 MINCONTLENGTH=1000                                                                   ## Minimal contigs length allowed for genomic scan of mitochondrial and nuclear regions
 # [SPAdes_assembly] mode:
 MEMORY=30                                                                            ## Number of memory which will be used
+KMER=55                                                                              ## Kmer fixed (here 55) or range values (as 21,33,55) for SPAdes assembly. Note: less than 128
 # [nuclear] mode :
 NUC_REF=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/refGenes.nu             ## list of nuclear genes of reference.  Amino acid sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. LFY_3702,LFY_3811 for LFY gene).
-NUC_TYPE=cds                                                                         ## Type of structure extracted from the gff among "cds" (exon structure of CDS gene), "intron" (intron structure of CDS gene) and "all" (exon+intron)
+NUC_TYPE=exon                                                                        ## Type of structure extracted from the gff among "cds" (exon structure of CDS gene), "intron" (intron structure of CDS gene) and "all" (exon+intron)
 # [mitochondrion] mode :
-MITO_REF=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/refCDS.mito            ## list of mitochondrial genes of reference.  Amino acid sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. cox1_3702,cox1_3811 for cox1 gene).
-MITO_TYPE=cds                                                                         ## Type of structure extracted from the gff among "cds" (exon structure of CDS gene), "intron" (intron structure of CDS gene) and "all" (exon+intron)
+MITO_REF=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/refCDS.mito            ## list of mitochondrial coding genes of reference.  Amino acid sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. cox1_3702,cox1_3811 for cox1 gene).
+MITO_TYPE=exon                                                                       ## Type of structure extracted from the gff among "cds" (exon structure of CDS gene), "intron" (intron structure of CDS gene) and "all" (exon+intron)
+MITO_REF_RNA=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/refRNA.mito        ## list of mitochondrial non-coding regions of reference.  Nucleotidic sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. rrn18S_3702,rrn18S_3811 for rrn18S gene).
 
 # Get mitochondrial sequences of reference [get_mitoRef] mode :
 LENGTH_RATIO=0.75                                                                    ## length ratio of reference mitochondrial gene aligning the gene seed to consider this gene in final gene banks of reference.
 SEEDS_MITO=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/seeds.mito           ## mitochondrial seeds of reference (from Arabidopsis_thaliana_3702_genbank) in amino acid sequence.
+SEEDS_MITO_RNA=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/seedsRNA.mito           ## mitochondrial seeds of reference (from Arabidopsis_thaliana_3702_genbank) in amino acid sequence.
 MITO_GENBANK_LOC=

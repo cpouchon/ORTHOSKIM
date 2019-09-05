@@ -5,7 +5,7 @@
   </a>
 </p>
 
-OrthoSKim is a pipeline providing different tools to skim orthologous regions from whole genome low coverage sequencing data for nuclear, chloroplastic, ribosomal and mitochondrial compartments. This pipeline allow for region extracting from de novo assemblies using annotation when provided (in *chloroplast* and *rdnanuc* mode) or mapping into references (in *nucleus* and *mitochondrion* mode).
+OrthoSKim is a pipeline providing different tools to skim orthologous regions from whole genome low coverage sequencing data for nuclear, chloroplastic, ribosomal and mitochondrial compartments. This pipeline allow for region extracting from de novo targeted-assemblies using direct annotation when provided (in *chloroplast* and *rdnanuc* mode) or from wide-assemblies using mapping into references (in *nucleus* and *mitochondrion* mode).
 
 
 ### 1 . Installation
@@ -16,8 +16,12 @@ OrthoSKim is tested on Unix environment and requires:
 + [SPAdes](http://cab.spbu.ru/software/spades/)
 + [QUAST](https://github.com/ablab/quast)
 + [Diamond](https://github.com/bbuchfink/diamond)
-+ Needs Awk, Python, Biopython
++ [Blast](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download)
++ Needs Awk, Python
 
+Some python libraries are also required:
++ Bio==0.1.0
++ joblib==0.13.2
 
 ### 2. Input files
 ------------------
@@ -58,16 +62,19 @@ COVERAGE=5                                                                      
 MINCONTLENGTH=1000                                                                   ## Minimal contigs length allowed for genomic scan of mitochondrial and nuclear regions
 # [SPAdes_assembly] mode:
 MEMORY=30                                                                            ## Number of memory which will be used
+KMER=55                                                                              ## Kmer fixed (here 55) or range values (as 21,33,55) for SPAdes assembly. Note: less than 128
 # [nuclear] mode :
 NUC_REF=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/refGenes.nu             ## list of nuclear genes of reference.  Amino acid sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. LFY_3702,LFY_3811 for LFY gene).
-NUC_TYPE=cds                                                                         ## Type of structure extracted from the gff among "cds" (exon structure of CDS gene), "intron" (intron structure of CDS gene) and "all" (exon+intron)
+NUC_TYPE=exon                                                                        ## Type of structure extracted from the gff among "cds" (exon structure of CDS gene), "intron" (intron structure of CDS gene) and "all" (exon+intron)
 # [mitochondrion] mode :
-MITO_REF=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/refCDS.mito            ## list of mitochondrial genes of reference.  Amino acid sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. cox1_3702,cox1_3811 for cox1 gene).
-MITO_TYPE=cds                                                                        ## Type of structure extracted from the gff among "cds" (exon structure of CDS gene), "intron" (intron structure of CDS gene) and "all" (exon+intron)
+MITO_REF=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/refCDS.mito            ## list of mitochondrial coding genes of reference.  Amino acid sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. cox1_3702,cox1_3811 for cox1 gene).
+MITO_TYPE=exon                                                                       ## Type of structure extracted from the gff among "cds" (exon structure of CDS gene), "intron" (intron structure of CDS gene) and "all" (exon+intron)
+MITO_REF_RNA=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/refRNA.mito        ## list of mitochondrial non-coding regions of reference.  Nucleotidic sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. rrn18S_3702,rrn18S_3811 for rrn18S gene).
 
 # Get mitochondrial sequences of reference [get_mitoRef] mode :
 LENGTH_RATIO=0.75                                                                    ## length ratio of reference mitochondrial gene aligning the gene seed to consider this gene in final gene banks of reference.
 SEEDS_MITO=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/seeds.mito           ## mitochondrial seeds of reference (from Arabidopsis_thaliana_3702_genbank) in amino acid sequence.
+SEEDS_MITO_RNA=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/seedsRNA.mito           ## mitochondrial seeds of reference (from Arabidopsis_thaliana_3702_genbank) in amino acid sequence.
 MITO_GENBANK_LOC=
 ```
 
@@ -84,6 +91,8 @@ SPADES=/Users/pouchonc/PhyloAlps/OrthoSkim/TOOLS/SPAdes-3.13.0-Darwin/bin/spades
 DIAMOND=/Users/pouchonc/miniconda2/bin/diamond
 EXONERATE=/usr/local/bin/exonerate
 QUAST=/Users/pouchonc/miniconda2/bin/quast.py
+BLASTDB=/Users/pouchonc/miniconda2/bin/makeblastdb
+BLASTN=/Users/pouchonc/miniconda2/bin/blastn
 ```
 
 #### 2.3 - Annotation files
@@ -133,9 +142,9 @@ By default, OrthoSkim provided tRNA, rRNA and CDS in chloroplastic list (see **<
 
 #### 2.5 - References files
 
-The extraction of orthologous regions for *nucleus* and *mitochondrion* modes is permitted by mapping genomic assemblies into gene banks of references. For each genomic compartment, this bank is given in a multi fasta file, containing amino acid sequences, with header written following name_other-arguments (e.g. cox1_3702,cox1_3811 for cox1 gene). These reference files can be modified to remove or add some genes with the specific format.
+The extraction of orthologous regions for *nucleus* and *mitochondrion* modes is permitted by mapping genomic assemblies into gene banks of references. For each genomic compartment, this bank is given in a multi-fasta file, containing amino acid sequences already align, with header written following name_other-arguments (e.g. cox1_3702,cox1_3811 for cox1 gene). These reference files can be modified to remove or add some genes with the specific format.
 
-For mitochondria, the gene banks includes all CDS of available mitochondria aligned into *Arabidopsis_thaliana* seeds in **<SEEDS_MITO>**.
+For mitochondria, the gene banks includes all CDS, and RNA (rRNA+tRNA) of available mitochondria aligned into *Arabidopsis_thaliana* seeds in **<SEEDS_MITO>** and **<SEEDS_MITO_RNA>**.
 
 `head ~/OrthoSkim/ressources/refCDS.mito`
 
@@ -246,9 +255,9 @@ $ python /Users/pouchonc/PhyloAlps/CDS/ExoRef.py -in tmp.exonerate -m inter -p .
 ### 3. Pipeline description
 ---------------------------
 
-OrthoSkim used different mode to index files, align and/or extract regions or check assemblies. Regardless of genomic compartment chosen mode, indexing has to be made in first. As chloroplast and nucrdna were specially assembled, extraction can be directly processed from annotation files. For nucleus and mitochondrion extraction, a non-directional assembly has to be made with SPAdes on sample before running the pipeline.
+OrthoSkim used different mode to index files, align and/or extract regions or check assemblies. Regardless of genomic compartment chosen mode, indexing has to be made in first. As chloroplast and nucrdna were targeted assembled, extraction can be directly processed from annotation files. For nucleus and mitochondrion extraction, a non-directional assembly has to be made with SPAdes on sample before running the pipeline in order to extract regions of interest (chloroplast regions could also be obtained from this mode by puting aligned regions into a new reference file).
 
-**Note**: for the *nucleus*, *mitochondrion*, *nucrdna* and *chloroplast* modes, a *mode.log* file is created containing samples that were processed. This file could be used to remove these samples from the initial **<LIST_FILES>** if the script has to be run.
+**Note**: for the *nucleus*, *mitochondrion*, *nucrdna* and *chloroplast* modes, a *mode_done.log* file is created containing samples that were correctly processed, whereas unprocessed samples were added into *mode_error.log* file. This file could be used to remove processed samples from the initial **<LIST_FILES>** if the script has to be run. Command lines are also print if users want to rerun specific commands on samples.
 
 #### 3.1 - Indexing files
 
@@ -289,7 +298,7 @@ The study of nuclear and mitochondrial compartments has to be driven on new geno
 
 ##### 3.3.1 - SPAdes assembly run
 
-[SPAdes](http://cab.spbu.ru/software/spades/) assembly could be run using the *SPAdes_assembly* mode from the **<LIST_FILES>** generated with *indexing* mode, by accessing to the forward and reverse reads, and by keeping the sample name providing in the file. [SPAdes](http://cab.spbu.ru/software/spades/) will be run using **THREADS** specified in the *config_orthoskim.txt* file.
+[SPAdes](http://cab.spbu.ru/software/spades/) assembly could be run using the *SPAdes_assembly* mode from the **<LIST_FILES>** generated with *indexing* mode, by accessing to the forward and reverse reads, and by keeping the sample name providing in the file. [SPAdes](http://cab.spbu.ru/software/spades/) will be run using **THREADS** and **KMER** specified in the *config_orthoskim.txt* file.
 
 Othoskim will output then a **samplename/** subdirectory into the **PATHNAME_ASSEMBLY** given per sample included in the **<LIST_FILES>**.  
 
@@ -298,23 +307,31 @@ Othoskim will output then a **samplename/** subdirectory into the **PATHNAME_ASS
 After [SPAdes](http://cab.spbu.ru/software/spades/) runs, OrthoSkim has first to preprocess SPAdes scaffolding contigs by renaming the file according to the same sample name provided in **<LIST_FILES>** and ordering them into **${RES}/${PATHNAME_ASSEMBLY}/Samples/** directory.
 This is made under *SPAdes_reformate* mode.
 
-##### 3.3.3 - CDS mitochondrial gene bank (for *mitochondrion* mode)
+##### 3.3.3 - Mitochondrial gene bank (for *mitochondrion* mode)
 
 In order to extract mitochondrial CDS for our samples, a reference database must be created. To do this, annotation files for mitochondria from genbank has to be download and put into the **MITO_GENBANK_LOC/** directory.
 
 For all these file, OrthoSkim in *get_mitoRef* mode will extract all notified CDS and align them into the CDS of *Arabidopsis_thaliana* as seeds thanks to *exonerate* (proteins *versus* proteins). Output **<MITO_REF>** file is created containing a bank of CDS genes, all well identified.
+A similar approach made for non-coding regions RNAs (rRNA and tRNA with nucleotidic sequences) will come soon (a reference list of RNAs is actually provided in the **ressources/** folder).
 
 
 ##### 3.3.4 - Alignment extraction
 
-After this, in both *mitochondrion* and *nucleus* mode, a [diamond](https://github.com/bbuchfink/diamond) database is created for each amino acid sequences provided in **<MITO_REF>** and **<NUC_REF>** (with *diamond makedb*).
+###### 3.3.4.1 Coding Regions
 
-Mapping is made for each sample with [diamond](https://github.com/bbuchfink/diamond) *blastx* to quickly identify contig hits (only hits with a minimal **EVALUE** were retained) and alignments were made by executing [exonerate](https://www.ebi.ac.uk/about/vertebrate-genomics/software/exonerate) with identified mapping contigs and the references (nucleotide *versus* proteins). Only contigs with a minimal coverage of **COVERAGE** and length of **MINCONTLENGTH** were considered for alignments into reference.
-Alignment were obtained from [exonerate](https://www.ebi.ac.uk/about/vertebrate-genomics/software/exonerate) output through python script by using the *protein2genome* mode incorporating all the appropriate gaps and frameshifts, and modelling of introns. Only genes from the reference list with a minimum length of **MINLENGTH** were output for each sample. Type of gene structure (exon, intron or exon+intron) extraction from mapping are reported in **NUC_TYPE** or **MITO_TYPE**.
+After this, in both *mitochondrion_CDS* and *nucleus* mode, a [diamond](https://github.com/bbuchfink/diamond) database is created for each amino acid sequences provided in **<MITO_REF>** and **<NUC_REF>** (with *diamond makedb*).
 
-All the output files will be in the **${RES}/mitochondrion/** and **${RES}/nucleus/** directories, according to gene type structure, as following:
+Mapping is made for each sample with [diamond](https://github.com/bbuchfink/diamond) *blastx* to quickly identify contigs hits (only hits with a minimal **EVALUE** were retained).
+Alignment was then conducted on these contigs from [exonerate](https://www.ebi.ac.uk/about/vertebrate-genomics/software/exonerate) by using the *protein2genome* mode incorporating all the appropriate gaps and frameshifts, and modelling of introns. Only contigs with a minimal coverage of **COVERAGE** and length of **MINCONTLENGTH** were considered for alignments into reference. Next, extraction was conducted through python script into [exonerate](https://www.ebi.ac.uk/about/vertebrate-genomics/software/exonerate) .gff output table. Type of gene structure (exon, intron or all:exon+intron) required during extraction from mapping are reported in **NUC_TYPE** or **MITO_TYPE**. This step is conducted into multiple processors using the **THREADS** specified in the the *config_orthoskim.txt* file.
 
-`ls -l ~/RES/nucleus_CDS/`
+###### 3.3.4.2 Non-Coding Regions
+
+Non-coding regions (here mitochondrial RNAs) were retrieved in *mitochondrion_RNA* mode using a same approach but involving *nucleotide versus nucleotide* searches through: a [blast](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download) database compilation (*makeblastdb* program) with **<MITO_REF_RNA>** references, hits identification with *blastn* command and Alignment+Extraction from [exonerate](https://www.ebi.ac.uk/about/vertebrate-genomics/software/exonerate) in *genome2genome* mode.
+
+
+All the output files will be in the **${RES}/mitochondrion/** and **${RES}/nucleus/** directories, as following:
+
+`ls -l ~/RES/nucleus/`
 
 ```
 -rw-r--r--  1 pouchonc  staff  1758  5 jui 11:11 10104_BUSCO.fna
@@ -435,7 +452,8 @@ For *mitochondrion* and *nucleus* mode, the script should be called as following
 
 ```
 ./OrtoSkim_v0.0.sh -m get_mitoRef -c config_orthoskim.txt
-./OrtoSkim_v0.0.sh -m mitochondrion -c config_orthoskim.txt
+./OrtoSkim_v0.0.sh -m mitochondrion_CDS -c config_orthoskim.txt
+./OrtoSkim_v0.0.sh -m mitochondrion_RNA -c config_orthoskim.txt
 ```
 ```
 ./OrtoSkim_v0.0.sh -m nucleus -c config_orthoskim.txt

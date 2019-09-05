@@ -44,5 +44,5 @@ poslist=set(range(len_seq))-set(trimpos)
 for seq in range(len(align)):
     newseq="".join([align[seq].seq[x] for x in poslist])
     header=align[seq].description
-    print ">"+header
-    print newseq
+    print (">"+header)
+    print (newseq)

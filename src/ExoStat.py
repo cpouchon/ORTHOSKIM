@@ -38,7 +38,7 @@ else:
     with open(input_list) as f:
         in_files = f.readlines()
 
-print "%s\t%s\t%s\t%s\t%s\t%s\t%s" % ("gene_name","#taxa","maxlen","#1.0","#0.75","#0.5","#0.25")
+print ("%s\t%s\t%s\t%s\t%s\t%s\t%s" % ("gene_name","#taxa","maxlen","#1.0","#0.75","#0.5","#0.25"))
 
 for file in in_files:
     cf = file.rstrip()
@@ -71,4 +71,4 @@ for file in in_files:
     perct50=sum(i >= 0.50 for i in mseqs)
     perct75= sum(i >= 0.75 for i in mseqs)
 
-    print "%s\t%s\t%s\t%s\t%s\t%s\t%s" % (str(gene_name),int(taxa),int(reflen),int(full),int(perct75),int(perct50),int(perct25))
+    print ("%s\t%s\t%s\t%s\t%s\t%s\t%s" % (str(gene_name),int(taxa),int(reflen),int(full),int(perct75),int(perct50),int(perct25)))

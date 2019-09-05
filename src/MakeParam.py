@@ -76,7 +76,7 @@ for file in in_files:
     else:
         cfile_name_without_extension = cfile_name.split(".chloro.embl")[0]
         ctaxaname = cfile_name_without_extension.split(":")[0]
-        taxid = cfile_name_without_extension.split(":")[1]
+        taxid = cfile_name_without_extension.split(":")[1].split(".")[0]
         ingenus=ctaxaname.split("_")[0]
         sequencing = cfile_name.split(".")[2].split(":")
         samplename=str(ctaxaname+"_"+taxid+"_"+str(cfile_name.split(".")[1])+"_"+str(sequencing[0])+"_"+str(sequencing[1]))

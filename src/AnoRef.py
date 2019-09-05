@@ -44,7 +44,7 @@ def mkdir(path, overwrite=False):
     except OSError as exc:
         if exc.errno == errno.EEXIST:
             if not overwrite:
-                print "path '%s' already exists" % path   # overwrite == False and we've hit a directory that exists
+                print ("path '%s' already exists" % path)   # overwrite == False and we've hit a directory that exists
         else: raise
 
 class ProgressBar:
@@ -372,5 +372,5 @@ if model in ("chloroplast","nucrdna","mitochondrion"):
 
 
 else:
-    print "model not recognized - Please, re-run with model=chloroplast,mitochondrion,nucrdna"
+    print ("model not recognized - Please, re-run with model=chloroplast,mitochondrion,nucrdna")
     pass

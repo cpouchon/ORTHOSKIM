@@ -44,7 +44,7 @@ def mkdir(path, overwrite=False):
     except OSError as exc:
         if exc.errno == errno.EEXIST:
             if not overwrite:
-                print "path '%s' already exists" % path   # overwrite == False and we've hit a directory that exists
+                print ("path '%s' already exists" % path)   # overwrite == False and we've hit a directory that exists
         else: raise
 
 class ProgressBar:
@@ -171,7 +171,7 @@ if model in ("chloroplast","nucrdna","mitochondrion"):
                                         barp=barp+1
                                         if feat.location_operator=="join":
                                             joinlocation = str(feat.location).replace("join{","").replace("}","").replace("(-)","").replace("(+)","").replace("[","").replace("]","").replace(" ","").split(",")
-                                            part1, part2 = joinlocation[0], joinlocation[1]
+                                            part1, part2 = joinlocation[0].replace("<","").replace(">",""), joinlocation[1].replace("<","").replace(">","")
                                             spart1, epart1 = int(float(part1.split(":")[0])), int(float(part1.split(":")[1]))
                                             spart2, epart2 = int(float(part2.split(":")[0])), int(float(part2.split(":")[1]))
                                             length = (epart1 - spart1)+(epart2-spart2)
@@ -223,7 +223,7 @@ if model in ("chloroplast","nucrdna","mitochondrion"):
                                         'gene could be in multiple part if it is partial in multiple contigs'
                                         if feat.location_operator=="join":
                                             joinlocation = str(feat.location).replace("join{","").replace("}","").replace("(-)","").replace("(+)","").replace("[","").replace("]","").replace(" ","").split(",")
-                                            part1, part2 = joinlocation[0], joinlocation[1]
+                                            part1, part2 = joinlocation[0].replace("<","").replace(">",""), joinlocation[1].replace("<","").replace(">","")
                                             spart1, epart1 = int(float(part1.split(":")[0])), int(float(part1.split(":")[1]))
                                             spart2, epart2 = int(float(part2.split(":")[0])), int(float(part2.split(":")[1]))
                                             length = (epart1 - spart1)+(epart2-spart2)
@@ -309,7 +309,7 @@ if model in ("chloroplast","nucrdna","mitochondrion"):
                                         'gene could be in multiple part if it is partial in multiple contigs'
                                         if feat.location_operator=="join":
                                             joinlocation = str(feat.location).replace("join{","").replace("}","").replace("(-)","").replace("(+)","").replace("[","").replace("]","").replace(" ","").split(",")
-                                            part1, part2 = joinlocation[0], joinlocation[1]
+                                            part1, part2 = joinlocation[0].replace("<","").replace(">",""), joinlocation[1].replace("<","").replace(">","")
                                             spart1, epart1 = int(float(part1.split(":")[0])), int(float(part1.split(":")[1]))
                                             spart2, epart2 = int(float(part2.split(":")[0])), int(float(part2.split(":")[1]))
                                             length = (epart1 - spart1)+(epart2-spart2)
@@ -358,5 +358,5 @@ if model in ("chloroplast","nucrdna","mitochondrion"):
 
 
 else:
-    print "model not recognized - Please, re-run with model=chloroplast,mitochondrion,nucrdna"
+    print ("model not recognized - Please, re-run with model=chloroplast,mitochondrion,nucrdna")
     pass
