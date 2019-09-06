@@ -17,7 +17,7 @@ parser = argparse.ArgumentParser(description='Export regions of query database f
 parser.add_argument("-i","--infile", help="Fasta input contigs file",
                     type=str)
 parser.add_argument("-m","--model", help="molecular type compartment",
-                    type=str,choices=["chloroplast", "mitochondrion","nucleus"])
+                    type=str,choices=["chloroplast", "mitochondrion_CDS","mitochondrion_RNA","nucleus"])
 parser.add_argument("-o","--outdir", help="Out directory path",
                     type=str)
 parser.add_argument("-n","--namesample", help="sample name used in sequence header for output",
