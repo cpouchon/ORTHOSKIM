@@ -334,8 +334,8 @@ mkdir -p ${RES}/Extraction
 		for f in `find ${RES}/${PATHNAME_ASSEMBLY}/Samples/ -type f -name \*.fa`;
 		do
 			lib=`basename $f | perl -pe 's/.fa//'`
-      if [ -s ${RES}/mitochondrion_done.log ]; then
-        if grep -Fxq "${f}" ${RES}/mitochondrion_done.log; then
+      if [ -s ${RES}/mitochondrion_CDS_done.log ]; then
+        if grep -Fxq "${f}" ${RES}/mitochondrion_CDS_done.log; then
           echo "WARN: $f already processed"
           continue
         else
@@ -346,16 +346,16 @@ mkdir -p ${RES}/Extraction
             awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $f | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/mitochondrion/hits_${lib} - > ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta
             echo "CMD: ${EXONERATE} --model protein2genome -q ${MITO_REF} -t ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/Mapping/mitochondrion/out_${lib}.gff"
             if ${EXONERATE} --model protein2genome -q ${MITO_REF} -t ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/Mapping/mitochondrion/out_${lib}.gff; then
-              echo "CMD: `dirname $0`/src/ExoGFF_threads.py -i ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_${lib}.gff -m ${mode} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t cds --threads ${THREADS}"
-              `dirname $0`/src/ExoGFF_threads.py -i ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_${lib}.gff -m ${mode} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS}
+              echo "CMD: `dirname $0`/src/ExoGFF_threads.py -i ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_${lib}.gff -m ${mode} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} --threads ${THREADS} -s ${MITO_REF}"
+              `dirname $0`/src/ExoGFF_threads.py -i ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_${lib}.gff -m ${mode} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${MITO_REF}
               rm ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta ${RES}/Mapping/mitochondrion/hits_${lib} ${RES}/Mapping/mitochondrion/matches_${lib}
-              echo ${f} >> ${RES}/mitochondrion_done.log
+              echo ${f} >> ${RES}/mitochondrion_CDS_done.log
             else
-              echo ${f} >> ${RES}/mitochondrion_error.log
+              echo ${f} >> ${RES}/mitochondrion_CDS_error.log
             fi
           else
             echo "WARN: No hits were detected when mapping ${f} into ${MITO_REF} database"
-            echo ${f} >> ${RES}/mitochondrion_error.log
+            echo ${f} >> ${RES}/mitochondrion_CDS_error.log
             continue
           fi
         fi
@@ -367,16 +367,16 @@ mkdir -p ${RES}/Extraction
           awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $f | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/mitochondrion/hits_${lib} - > ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta
           echo "CMD: ${EXONERATE} --model protein2genome -q ${MITO_REF} -t ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/Mapping/mitochondrion/out_${lib}.gff"
           if ${EXONERATE} --model protein2genome -q ${MITO_REF} -t ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/Mapping/mitochondrion/out_${lib}.gff; then
-            echo "CMD: `dirname $0`/src/ExoGFF_threads.py -i ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_${lib}.gff -m ${mode} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t cds --threads ${THREADS}"
-            `dirname $0`/src/ExoGFF_threads.py -i ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_${lib}.gff -m ${mode} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS}
+            echo "CMD: `dirname $0`/src/ExoGFF_threads.py -i ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_${lib}.gff -m ${mode} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} --threads ${THREADS} -s ${MITO_REF}"
+            `dirname $0`/src/ExoGFF_threads.py -i ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_${lib}.gff -m ${mode} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${MITO_REF}
             rm ${RES}/Mapping/mitochondrion/contigs_hits_${lib}.fasta ${RES}/Mapping/mitochondrion/hits_${lib} ${RES}/Mapping/mitochondrion/matches_${lib}
-            echo ${f} >> ${RES}/mitochondrion_done.log
+            echo ${f} >> ${RES}/mitochondrion_CDS_done.log
           else
-            echo ${f} >> ${RES}/mitochondrion_error.log
+            echo ${f} >> ${RES}/mitochondrion_CDS_error.log
           fi
         else
           echo "WARN: No hits were detected when mapping ${f} into ${MITO_REF} database"
-          echo ${f} >> ${RES}/mitochondrion_error.log
+          echo ${f} >> ${RES}/mitochondrion_CDS_error.log
           continue
         fi
       fi
