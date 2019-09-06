@@ -78,8 +78,13 @@ mkdir -p ${RES}/Extraction
 		while read f;
 		do
 			samplename=`echo ${f} | awk '{print $3}'`
-			cp ${RES}/${PATHNAME_ASSEMBLY}/${samplename}/scaffolds.fasta ${RES}/${PATHNAME_ASSEMBLY}/Samples/${samplename}.fa
-		done <${LIST_FILES}
+      if [ -s ${RES}/${PATHNAME_ASSEMBLY}/${samplename}/scaffolds.fasta ]; then
+        cp ${RES}/${PATHNAME_ASSEMBLY}/${samplename}/scaffolds.fasta ${RES}/${PATHNAME_ASSEMBLY}/Samples/${samplename}.fa
+      else
+        echo "WARN: $samplename unprocessed"
+        continue
+      fi
+    done <${LIST_FILES}
 		echo "STATUS: done"
 		exit 0
 
