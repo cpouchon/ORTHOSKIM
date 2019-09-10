@@ -267,8 +267,8 @@ mkdir -p ${RES}/Extraction
 		echo 'INFO: mode=$mode - Extraction of mitchondrial RNAs (tRNA+rRNA) from assemblies'
 		mkdir -p ${RES}/Mapping/mitochondrion
 		echo "*** make BLAST formatted reference database ***"
-    echo "CMD: ${BLASTDB} --in ${MITO_REF_RNA} -dbtype nucl"
-		${BLASTDB} --in ${MITO_REF_RNA} -dbtype nucl
+    echo "CMD: ${BLASTDB} -in ${MITO_REF_RNA} -dbtype nucl"
+		${BLASTDB} -in ${MITO_REF_RNA} -dbtype nucl
 		echo "*** mapping and extraction of assemblies into reference ***"
 		for f in `find ${RES}/${PATHNAME_ASSEMBLY}/Samples/ -type f -name \*.fa`;
 		do
