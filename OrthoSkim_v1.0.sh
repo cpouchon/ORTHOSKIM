@@ -43,8 +43,9 @@ OrthoSkim: Skimming of orthologous regions from shotgun sequencing
                   - [stat_rdna] (output summary statistic for rdna assemblies)
                   - [stat_SPAdes] (check assemblies by generating summary statistics)
                   - [get_stat] (get statistics of gene extraction for files in -p {PATH} directory)
+                  - [selection] (extract only interested taxa from gene extraction files)
             -c (config)  set the config file
-            -p (path)  set the path to get out statistic of gene extraction for [get_stat] mode
+            -p (path)  set the path to get out statistic of gene extraction for [get_stat] mode / or for selection mode
             "
   exit 0
 fi
@@ -284,7 +285,7 @@ mkdir -p ${RES}/Extraction
           if [ -s ${RES}/Mapping/mitochondrion/hits_RNA_${lib} ]; then
             awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $f | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/mitochondrion/hits_RNA_${lib} - > ${RES}/Mapping/mitochondrion/contigs_hits_RNA_${lib}.fasta
             echo "CMD: ${EXONERATE} --model genome2genome -q ${MITO_REF_RNA} -t ${RES}/Mapping/mitochondrion/contigs_hits_RNA_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/Mapping/mitochondrion/out_RNA_${lib}.gff"
-            if ${EXONERATE} --model genome2genome -q ${MITO_REF} -t ${RES}/Mapping/mitochondrion/contigs_hits_RNA_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/Mapping/mitochondrion/out_RNA_${lib}.gff; then
+            if ${EXONERATE} --model genome2genome -q ${MITO_REF_RNA} -t ${RES}/Mapping/mitochondrion/contigs_hits_RNA_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/Mapping/mitochondrion/out_RNA_${lib}.gff; then
               echo "CMD: `dirname $0`/src/ExoGFF_threads.py -i ${RES}/Mapping/mitochondrion/contigs_hits_RNA_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_RNA_${lib}.gff -m ${mode} -o ${RES}/Extraction/${mode} -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} --threads ${THREADS} -s ${MITO_REF_RNA}"
               `dirname $0`/src/ExoGFF_threads.py -i ${RES}/Mapping/mitochondrion/contigs_hits_RNA_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_RNA_${lib}.gff -m ${mode} -o ${RES}/Extraction/${mode} -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${MITO_REF_RNA}
               rm ${RES}/Mapping/mitochondrion/contigs_hits_RNA_${lib}.fasta ${RES}/Mapping/mitochondrion/hits_RNA_${lib} ${RES}/Mapping/mitochondrion/matches_RNA_${lib}
@@ -418,6 +419,14 @@ mkdir -p ${RES}/Extraction
     `dirname $0`/src/ExoStat.py -p $path -pfind > $path/report.log
     echo "STATUS: done"
     exit 0
+
+  elif [ $mode == 'selection' ]; then
+    echo "INFO: mode=$mode - Selection of taxa from genes extraction"
+    echo "CMD: `dirname $0`/src/SelecTaxa.py --inpath $path --pathfind --outpath ${RES}/Selection -t ${TAXALIST} -e ${EXTENSION} --threads ${THREADS}"
+    `dirname $0`/src/SelecTaxa.py --inpath $path --pathfind --outpath ${RES}/Selection -t ${TAXALIST} -e ${EXTENSION} --threads ${THREADS}
+    echo "STATUS: done"
+    exit 0
+
 
 	fi
 

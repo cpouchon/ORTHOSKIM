@@ -35,7 +35,7 @@ parser.add_argument("--threads", help="number of threads to use",
 parser.add_argument("-o","--outname", help="Outname file",
                     type=str)
 parser.add_argument("--pergene", help="extraction sequences per gene (default is per taxa)",
-                    action="store_true")
+                    type=str)
 if len(sys.argv)==1:
     parser.print_help(sys.stderr)
     sys.exit(1)
@@ -79,7 +79,7 @@ class ProgressBar:
 
 def GeneExtraction(genenumber):
     contpart=[]
-    geneid=besthits.keys()[genenumber]
+    geneid=list(besthits.keys()[genenumber])
 
     if len(besthits[geneid])==1:
         contpart.append(str(len(set(counthits[geneid][0]))))
