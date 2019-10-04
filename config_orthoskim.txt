@@ -35,5 +35,9 @@ MITO_REF_RNA=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/refRNA.mito   
 # Get mitochondrial sequences of reference [get_mitoRef] mode :
 LENGTH_RATIO=0.75                                                                    ## length ratio of reference mitochondrial gene aligning the gene seed to consider this gene in final gene banks of reference.
 SEEDS_MITO=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/seeds.mito           ## mitochondrial seeds of reference (from Arabidopsis_thaliana_3702_genbank) in amino acid sequence.
-SEEDS_MITO_RNA=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/seedsRNA.mito           ## mitochondrial seeds of reference (from Arabidopsis_thaliana_3702_genbank) in amino acid sequence.
+SEEDS_MITO_RNA=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/seedsRNA.mito    ## mitochondrial seeds of reference (from Arabidopsis_thaliana_3702_genbank) in amino acid sequence.
 MITO_GENBANK_LOC=
+
+# Selection of taxa from extractions
+TAXALIST=selTaxa_Primulaceae.tab                                                     ## list of taxa to select from extractions
+EXTENSION=fa

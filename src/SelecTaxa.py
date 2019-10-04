@@ -60,7 +60,7 @@ else:
     with open(input_list) as f:
         in_files = f.readlines()
 
-model=os.path.basename(path)
+model=os.path.basename(os.path.normpath(path))
 outpath=args.outpath
 mkdir(outpath+"/"+model)
 
