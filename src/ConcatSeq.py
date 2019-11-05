@@ -9,7 +9,9 @@ from Bio import SeqIO
 from Bio.SeqFeature import FeatureLocation
 
 
-parser = argparse.ArgumentParser(description='Concatenation of sequenes alignments')
+
+
+parser = argparse.ArgumentParser(description='Concatenation of sequences alignments')
 parser.add_argument("-p","--path", help="searching path of sequences files",
                     type=str)
 parser.add_argument("-i","--infile", help="input file list of sequence files, sequences have to be aligned before",
@@ -20,6 +22,8 @@ parser.add_argument("-o","--outfile", help="output file list of concatenated seq
                     type=str)
 parser.add_argument("-t","--taxa", help="list of taxa to include in the final concatenated file",
                     type=str)
+parser.add_argument("--missingfract", help="maximal missing data threshold allowed to consider final sequence (e.g. 0.5 meaning that final sequence has fewer than 0.5 of missing data)",
+                     type=float,default=None)
 parser.add_argument("-e","--extension", help="extension of files to search (i.e fa,fna,fasta or custom)",
                     type=str)
 if len(sys.argv)==1:
@@ -67,6 +71,7 @@ else:
 #cat *.fa | grep '>' | sort | uniq | perl -pe 's/>//' > list_taxa
 
 fname=args.outfile
+Nthreshold=args.missingfract
 
 giventaxa = args.taxa
 with open(giventaxa) as f:
@@ -128,10 +133,34 @@ for file in in_files:
 for taxa in taxa_dict:
     header= ">"+str(taxa)
     concatenate_seq="".join(taxa_dict[taxa])
+    Ncount=int(concatenate_seq.count("N"))
+    SeqLength=len(concatenate_seq)
+    Nratio=float(float(Ncount)/float(SeqLength))
     'we add condition to check if a taxa is completly missing'
     seqtestN='N'*len(concatenate_seq)
     if seqtestN == concatenate_seq:
-        print ("%s is missing" % (taxa))
+        print ("WARN: %s is missing" % (taxa))
+    elif Nratio > Nthreshold:
+        print ("WARN: %s has too missing data, not passed filter fraction of %s" % (taxa,Nthreshold))
+        if os.path.isfile("missing_seqs.fasta"):
+            'we stored only the missing sequences in a file'
+            with open("missing_seqs.fasta", 'a+') as file:
+                old_headers = []
+                end_file=file.tell()
+                file.seek(0)
+                for line in file:
+                    if line.startswith(">"):
+                        old_headers.append(line.replace(">","").split(";")[0])
+                if not taxa in old_headers:
+                    file.seek(end_file)
+                    file.write(header+'\n')
+                    file.write(str(concatenate_seq)+'\n')
+                else:
+                    pass
+        else :
+            with open("missing_seqs.fasta", 'w') as out:
+                out.write(header+'\n')
+                out.write(str(concatenate_seq)+'\n')
     else:
         if os.path.isfile(fname):
             with open(fname, 'a+') as file:
