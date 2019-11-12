@@ -24,6 +24,8 @@ parser.add_argument("--multiple", help="[mode] extraction from multiple sequence
                     action="store_true")
 parser.add_argument("--single", help="[mode] extraction from a single given fasta file (-i)",
                     action="store_true")
+parser.add_argument("--protein", help="[mode] extract the aminoacid sequence",
+                    action="store_true")
 parser.add_argument("-o","--outfile", help="output file list of concatenated sequences",
                     type=str)
 parser.add_argument("-c","--count", help="number of sequences targeted",
@@ -102,7 +104,10 @@ for file in in_files:
         random_keys=random.sample(list(seqs),k=len(seqs))
 
     for taxa in random_keys:
-        taxa_sequence=str(seqs[taxa][0]).replace("-","n")
+        if args.protein:
+            taxa_sequence=str(seqs[taxa][0].translate()).replace("-","n").replace("*","").upper()
+        else:
+            taxa_sequence=str(seqs[taxa][0]).replace("-","n").upper()
         infos = dicinfo[taxa][0].split(" ")[1:len(dicinfo[taxa][0].split(" "))]
         taxinfo = dict(item.split("=") for item in infos)
         header=">"+str(taxinfo['gene'])+"_"+str(taxinfo['taxid'])

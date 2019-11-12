@@ -29,8 +29,13 @@ NUC_REF=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/refGenes.nu        
 NUC_TYPE=exon                                                                        ## Type of structure extracted from the gff among "cds" (exon structure of CDS gene), "intron" (intron structure of CDS gene) and "all" (exon+intron)
 # [mitochondrion] mode :
 MITO_REF=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/refCDS.mito            ## list of mitochondrial coding genes of reference.  Amino acid sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. cox1_3702,cox1_3811 for cox1 gene).
-MITO_TYPE=exon                                                                       ## Type of structure extracted from the gff among "cds" (exon structure of CDS gene), "intron" (intron structure of CDS gene) and "all" (exon+intron)
 MITO_REF_RNA=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/refRNA.mito        ## list of mitochondrial non-coding regions of reference.  Nucleotidic sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. rrn18S_3702,rrn18S_3811 for rrn18S gene).
+MITO_TYPE=exon                                                                       ## Type of structure extracted from the gff among "cds" (exon structure of CDS gene), "intron" (intron structure of CDS gene) and "all" (exon+intron)
+# [chloroplast] mode:
+CHLORO_REF_CDS=
+CHLORO_REF_RNA=
+CHLORO_TYPE=exon
+
 
 # Get mitochondrial sequences of reference [get_mitoRef] mode :
 LENGTH_RATIO=0.75                                                                    ## length ratio of reference mitochondrial gene aligning the gene seed to consider this gene in final gene banks of reference.

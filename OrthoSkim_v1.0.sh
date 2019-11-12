@@ -35,6 +35,8 @@ OrthoSkim: Skimming of orthologous regions from shotgun sequencing
                   - [nucleus] (perform alignment and extraction of nuclear regions from a reference list
                               and assemblies)
                   - [chloroplast] (extract regions of interest from annotation of chloroplast assemblies)
+                  - [chloroplast_CDS,chloroplast_RNA] (perform alignment and extraction of chloroplastic regions from a
+                                    reference list and assemblies of chloroplast CDS and/or RNA)
                   - [nucrdna] (extract regions of interest from annotation of rdna assemblies)
                   - [get_mitoRef] (make a bank of mitochondrial CDS as a reference)
                   - [mitochondrion_CDS,mitochondrion_RNA] (perform alignment and extraction of mitochondrial regions from a
@@ -96,7 +98,7 @@ mkdir -p ${RES}/Extraction
 			samplename=`echo ${f} | awk '{print $3}'`
 			r1=`echo ${f} | awk '{print $4}'`
 			r2=`echo ${f} | awk '{print $5}'`
-			outp=`echo ${f} | awk '{print $6}'`
+			#outp=`echo ${f} | awk '{print $6}'`
       # if assembly_done existed
       if [ -s ${RES}/assembly_done.log ]; then
         # we checked if sample already in done.log to continue to another sample
@@ -104,17 +106,17 @@ mkdir -p ${RES}/Extraction
           echo "WARN: $samplename already processed"
           continue
         else
-          echo "${SPADES} -1 ${r1} -2 ${r2} --cov-cutoff auto -o ${outp}/${samplename} -t ${THREADS} -m ${MEMORY} -k ${KMER} --only-assembler --careful"
+          echo "${SPADES} -1 ${r1} -2 ${r2} --cov-cutoff auto -o ${RES}/${PATHNAME_ASSEMBLY}/${samplename} -t ${THREADS} -m ${MEMORY} -k ${KMER} --only-assembler --careful"
           # we check if no error on function run
-          if ${SPADES} -1 ${r1} -2 ${r2} --cov-cutoff auto -o ${outp}/${samplename} -t ${THREADS} -m ${MEMORY} -k ${KMER} --only-assembler --careful; then
+          if ${SPADES} -1 ${r1} -2 ${r2} --cov-cutoff auto -o ${RES}/${PATHNAME_ASSEMBLY}/${samplename} -t ${THREADS} -m ${MEMORY} -k ${KMER} --only-assembler --careful; then
             echo $samplename >> ${RES}/assembly_done.log
           else
             echo $samplename >> ${RES}/assembly_error.log
           fi
         fi
       else
-        echo "${SPADES} -1 ${r1} -2 ${r2} --cov-cutoff auto -o ${outp}/${samplename} -t ${THREADS} -m ${MEMORY} -k ${KMER} --only-assembler --careful"
-        if ${SPADES} -1 ${r1} -2 ${r2} --cov-cutoff auto -o ${outp}/${samplename} -t ${THREADS} -m ${MEMORY} -k ${KMER} --only-assembler --careful; then
+        echo "${SPADES} -1 ${r1} -2 ${r2} --cov-cutoff auto -o ${RES}/${PATHNAME_ASSEMBLY}/${samplename} -t ${THREADS} -m ${MEMORY} -k ${KMER} --only-assembler --careful"
+        if ${SPADES} -1 ${r1} -2 ${r2} --cov-cutoff auto -o ${RES}/${PATHNAME_ASSEMBLY}/${samplename} -t ${THREADS} -m ${MEMORY} -k ${KMER} --only-assembler --careful; then
           echo ${samplename} >> ${RES}/assembly_done.log
         else
           echo ${samplename} >> ${RES}/assembly_error.log
@@ -426,6 +428,128 @@ mkdir -p ${RES}/Extraction
     `dirname $0`/src/SelecTaxa.py --inpath $path --pathfind --outpath ${RES}/Selection -t ${TAXALIST} -e ${EXTENSION} --threads ${THREADS}
     echo "STATUS: done"
     exit 0
+
+  elif [ $mode == 'chloroplast_RNA' ]; then
+		echo 'INFO: mode=$mode - Extraction of chloroplastic RNA from assemblies'
+		mkdir -p ${RES}/Mapping/chloroplast
+		echo "*** make BLAST formatted reference database ***"
+    echo "CMD: ${BLASTDB} -in ${CHLORO_REF_RNA} -dbtype nucl"
+		${BLASTDB} -in ${CHLORO_REF_RNA} -dbtype nucl
+		echo "*** mapping and extraction of assemblies into reference ***"
+		for f in `find ${RES}/${PATHNAME_ASSEMBLY}/Samples/ -type f -name \*.fa`;
+		do
+			lib=`basename $f | perl -pe 's/.fa//'`
+      if [ -s ${RES}/chloroplast_RNA_done.log ]; then
+        if grep -Fxq "${f}" ${RES}/chloroplast_RNA_done.log; then
+          echo "WARN: $f already processed"
+          continue
+        else
+          echo "CMD: ${BLASTN} -db ${CHLORO_REF_RNA} -query ${f} -out ${RES}/Mapping/chloroplast/matches_RNA_${lib} -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7"
+    			${BLASTN} -db ${CHLORO_REF_RNA} -query ${f} -out ${RES}/Mapping/chloroplast/matches_RNA_${lib} -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7
+    			awk '{split($1,a,"_")}{if(a[6]>='"${COVERAGE}"' && a[4]>='"${MINCONTLENGTH}"') print $1}' ${RES}/Mapping/chloroplast/matches_RNA_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/hits_RNA_${lib}
+          if [ -s ${RES}/Mapping/chloroplast/hits_RNA_${lib} ]; then
+            awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $f | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/chloroplast/hits_RNA_${lib} - > ${RES}/Mapping/chloroplast/contigs_hits_RNA_${lib}.fasta
+            echo "CMD: ${EXONERATE} --model genome2genome -q ${CHLORO_REF_RNA} -t ${RES}/Mapping/chloroplast/contigs_hits_RNA_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/Mapping/chloroplast/out_RNA_${lib}.gff"
+            if ${EXONERATE} --model genome2genome -q ${CHLORO_REF_RNA} -t ${RES}/Mapping/chloroplast/contigs_hits_RNA_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/Mapping/chloroplast/out_RNA_${lib}.gff; then
+              echo "CMD: `dirname $0`/src/ExoGFF_threads.py -i ${RES}/Mapping/chloroplast/contigs_hits_RNA_${lib}.fasta -g ${RES}/Mapping/chloroplast/out_RNA_${lib}.gff -m ${mode} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${CHLORO_TYPE} --threads ${THREADS} -s ${CHLORO_REF_RNA}"
+              `dirname $0`/src/ExoGFF_threads.py -i ${RES}/Mapping/chloroplast/contigs_hits_RNA_${lib}.fasta -g ${RES}/Mapping/chloroplast/out_RNA_${lib}.gff -m ${mode} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${CHLORO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CHLORO_REF_RNA}
+              rm ${RES}/Mapping/chloroplast/contigs_hits_RNA_${lib}.fasta ${RES}/Mapping/chloroplast/hits_RNA_${lib} ${RES}/Mapping/chloroplast/matches_RNA_${lib}
+              echo ${f} >> ${RES}/chloroplast_RNA_done.log
+            else
+              echo ${f} >> ${RES}/chloroplast_RNA_error.log
+            fi
+          else
+            echo "WARN: No hits were detected when mapping ${f} into ${CHLORO_REF_RNA} database"
+            echo ${f} >> ${RES}/chloroplast_RNA_error.log
+            continue
+          fi
+        fi
+      else
+        echo "CMD: ${BLASTN} -db ${CHLORO_REF_RNA} -query ${f} -out ${RES}/Mapping/chloroplast/matches_RNA_${lib} -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7"
+        ${BLASTN} -db ${CHLORO_REF_RNA} -query ${f} -out ${RES}/Mapping/chloroplast/matches_RNA_${lib} -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7
+        awk '{split($1,a,"_")}{if(a[6]>='"${COVERAGE}"' && a[4]>='"${MINCONTLENGTH}"') print $1}' ${RES}/Mapping/chloroplast/matches_RNA_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/hits_RNA_${lib}
+        if [ -s ${RES}/Mapping/chloroplast/hits_RNA_${lib} ]; then
+          awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $f | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/chloroplast/hits_RNA_${lib} - > ${RES}/Mapping/chloroplast/contigs_hits_RNA_${lib}.fasta
+          echo "CMD: ${EXONERATE} --model genome2genome -q ${CHLORO_REF_RNA} -t ${RES}/Mapping/chloroplast/contigs_hits_RNA_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/Mapping/chloroplast/out_RNA_${lib}.gff"
+          if ${EXONERATE} --model genome2genome -q ${CHLORO_REF_RNA} -t ${RES}/Mapping/chloroplast/contigs_hits_RNA_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/Mapping/chloroplast/out_RNA_${lib}.gff; then
+            echo "CMD: `dirname $0`/src/ExoGFF_threads.py -i ${RES}/Mapping/chloroplast/contigs_hits_RNA_${lib}.fasta -g ${RES}/Mapping/chloroplast/out_RNA_${lib}.gff -m ${mode} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${CHLORO_TYPE} --threads ${THREADS} -s ${CHLORO_REF_RNA}"
+            `dirname $0`/src/ExoGFF_threads.py -i ${RES}/Mapping/chloroplast/contigs_hits_RNA_${lib}.fasta -g ${RES}/Mapping/chloroplast/out_RNA_${lib}.gff -m ${mode} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${CHLORO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CHLORO_REF_RNA}
+            rm ${RES}/Mapping/chloroplast/contigs_hits_RNA_${lib}.fasta ${RES}/Mapping/chloroplast/hits_RNA_${lib} ${RES}/Mapping/chloroplast/matches_RNA_${lib}
+            echo ${f} >> ${RES}/chloroplast_RNA_done.log
+          else
+            echo ${f} >> ${RES}/chloroplast_RNA_error.log
+          fi
+        else
+          echo "WARN: No hits were detected when mapping ${f} into ${CHLORO_REF_RNA} database"
+          echo ${f} >> ${RES}/chloroplast_RNA_error.log
+          continue
+        fi
+      fi
+		done
+		echo "STATUS: done"
+		exit 0
+
+
+  elif [ $mode == 'chloroplast_CDS' ]; then
+		echo 'INFO: mode=$mode - Extraction of chloroplastic genes from assemblies'
+		mkdir -p ${RES}/Mapping/chloroplast
+		refdb=${CHLORO_REF_CDS/.fasta/}
+		echo "*** make DIAMOND formatted reference database ***"
+    echo "CMD: ${DIAMOND} makedb --in ${CHLORO_REF_CDS} -d ${refdb}"
+		${DIAMOND} makedb --in ${CHLORO_REF_CDS} -d ${refdb} --threads ${THREADS}
+		echo "*** mapping and extraction of assemblies into reference ***"
+		for f in `find ${RES}/${PATHNAME_ASSEMBLY}/Samples/ -type f -name \*.fa`;
+		do
+			lib=`basename $f | perl -pe 's/.fa//'`
+      if [ -s ${RES}/chloroplast_CDS_done.log ]; then
+        if grep -Fxq "${f}" ${RES}/chloroplast_CDS_done.log; then
+          echo "WARN: $f already processed"
+          continue
+        else
+          echo "CMD: ${DIAMOND} blastx --outfmt 6 qseqid sseqid pident length mismatch gapopen qframe qstart qend sstart send evalue bitscore slen -d ${refdb} -q ${f} -o ${RES}/Mapping/chloroplast/matches_CDS_${lib} --evalue ${EVALUE} --threads ${THREADS} --sensitive"
+    			${DIAMOND} blastx --outfmt 6 qseqid sseqid pident length mismatch gapopen qframe qstart qend sstart send evalue bitscore slen -d ${refdb} -q ${f} -o ${RES}/Mapping/chloroplast/matches_CDS_${lib} --evalue ${EVALUE} --threads ${THREADS} --sensitive
+    			awk '{split($1,a,"_")}{if(a[6]>='"${COVERAGE}"' && a[4]>='"${MINCONTLENGTH}"') print $1}' ${RES}/Mapping/chloroplast/matches_CDS_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/hits_CDS_${lib}
+          if [ -s ${RES}/Mapping/chloroplast/hits_CDS_${lib} ]; then
+            awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $f | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/chloroplast/hits_CDS_${lib} - > ${RES}/Mapping/chloroplast/contigs_hits_CDS_${lib}.fasta
+            echo "CMD: ${EXONERATE} --model protein2genome -q ${CHLORO_REF_CDS} -t ${RES}/Mapping/chloroplast/contigs_hits_CDS_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/Mapping/chloroplast/out_CDS_${lib}.gff"
+            if ${EXONERATE} --model protein2genome -q ${CHLORO_REF_CDS} -t ${RES}/Mapping/chloroplast/contigs_hits_CDS_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/Mapping/chloroplast/out_CDS_${lib}.gff; then
+              echo "CMD: `dirname $0`/src/ExoGFF_threads.py -i ${RES}/Mapping/chloroplast/contigs_hits_CDS_${lib}.fasta -g ${RES}/Mapping/chloroplast/out_CDS_${lib}.gff -m ${mode} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} --threads ${THREADS} -s ${CHLORO_REF_CDS}"
+              `dirname $0`/src/ExoGFF_threads.py -i ${RES}/Mapping/chloroplast/contigs_hits_CDS_${lib}.fasta -g ${RES}/Mapping/chloroplast/out_CDS_${lib}.gff -m ${mode} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CHLORO_REF_CDS}
+              rm ${RES}/Mapping/chloroplast/contigs_hits_CDS_${lib}.fasta ${RES}/Mapping/chloroplast/hits_CDS_${lib} ${RES}/Mapping/chloroplast/matches_CDS_${lib}
+              echo ${f} >> ${RES}/chloroplast_CDS_done.log
+            else
+              echo ${f} >> ${RES}/chloroplast_CDS_error.log
+            fi
+          else
+            echo "WARN: No hits were detected when mapping ${f} into ${CHLORO_REF_CDS} database"
+            echo ${f} >> ${RES}/chloroplast_CDS_error.log
+            continue
+          fi
+        fi
+      else
+        echo "CMD: ${DIAMOND} blastx --outfmt 6 qseqid sseqid pident length mismatch gapopen qframe qstart qend sstart send evalue bitscore slen -d ${refdb} -q ${f} -o ${RES}/Mapping/chloroplast/matches_CDS_${lib} --evalue ${EVALUE} --threads ${THREADS} --sensitive"
+        ${DIAMOND} blastx --outfmt 6 qseqid sseqid pident length mismatch gapopen qframe qstart qend sstart send evalue bitscore slen -d ${refdb} -q ${f} -o ${RES}/Mapping/chloroplast/matches_CDS_${lib} --evalue ${EVALUE} --threads ${THREADS} --sensitive
+        awk '{split($1,a,"_")}{if(a[6]>='"${COVERAGE}"' && a[4]>='"${MINCONTLENGTH}"') print $1}' ${RES}/Mapping/chloroplast/matches_CDS_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/hits_CDS_${lib}
+        if [ -s ${RES}/Mapping/chloroplast/hits_CDS_${lib} ]; then
+          awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $f | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/chloroplast/hits_CDS_${lib} - > ${RES}/Mapping/chloroplast/contigs_hits_CDS_${lib}.fasta
+          echo "CMD: ${EXONERATE} --model protein2genome -q ${CHLORO_REF_CDS} -t ${RES}/Mapping/chloroplast/contigs_hits_CDS_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/Mapping/chloroplast/out_CDS_${lib}.gff"
+          if ${EXONERATE} --model protein2genome -q ${CHLORO_REF_CDS} -t ${RES}/Mapping/chloroplast/contigs_hits_CDS_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/Mapping/chloroplast/out_CDS_${lib}.gff; then
+            echo "CMD: `dirname $0`/src/ExoGFF_threads.py -i ${RES}/Mapping/chloroplast/contigs_hits_CDS_${lib}.fasta -g ${RES}/Mapping/chloroplast/out_CDS_${lib}.gff -m ${mode} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} --threads ${THREADS} -s ${CHLORO_REF_CDS}"
+            `dirname $0`/src/ExoGFF_threads.py -i ${RES}/Mapping/chloroplast/contigs_hits_CDS_${lib}.fasta -g ${RES}/Mapping/chloroplast/out_CDS_${lib}.gff -m ${mode} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CHLORO_REF_CDS}
+            rm ${RES}/Mapping/chloroplast/contigs_hits_CDS_${lib}.fasta ${RES}/Mapping/chloroplast/hits_CDS_${lib} ${RES}/Mapping/chloroplast/matches_CDS_${lib}
+            echo ${f} >> ${RES}/chloroplast_CDS_done.log
+          else
+            echo ${f} >> ${RES}/chloroplast_CDS_error.log
+          fi
+        else
+          echo "WARN: No hits were detected when mapping ${f} into ${CHLORO_REF_CDS} database"
+          echo ${f} >> ${RES}/chloroplast_CDS_error.log
+          continue
+        fi
+      fi
+		done
+		echo "STATUS: done"
+		exit 0
 
 
 	fi
