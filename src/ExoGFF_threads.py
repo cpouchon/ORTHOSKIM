@@ -17,7 +17,7 @@ parser = argparse.ArgumentParser(description='Export regions of query database f
 parser.add_argument("-i","--infile", help="Fasta input contigs file",
                     type=str)
 parser.add_argument("-m","--model", help="molecular type compartment",
-                    type=str,choices=["chloroplast", "mitochondrion_CDS","mitochondrion_RNA","nucleus"])
+                    type=str,choices=["chloroplast", "mitochondrion_CDS","mitochondrion_RNA","nucleus","chloroplast_CDS","chloroplast_RNA"])
 parser.add_argument("-o","--outdir", help="Out directory path",
                     type=str)
 parser.add_argument("-n","--namesample", help="sample name used in sequence header for output",
@@ -79,7 +79,7 @@ class ProgressBar:
 
 def GeneExtraction(genenumber):
     contpart=[]
-    geneid=besthits.keys()[genenumber]
+    geneid=list(besthits.keys())[genenumber]
     if len(besthits[geneid])==1:
         contpart.append(str(len(set(counthits[geneid][0]))))
         contigcount=len(set(counthits[geneid][0]))
@@ -485,5 +485,5 @@ for line in tab:
 
 
 print ("Extraction of sequences for %s" % nameofsample)
-inputs=range(len(besthits.keys()))
+inputs=range(len(list(besthits.keys())))
 Parallel(n_jobs=num_cores)(delayed(GeneExtraction)(i) for i in inputs)
