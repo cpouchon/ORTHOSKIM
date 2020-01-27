@@ -80,32 +80,62 @@ class ProgressBar:
 def GeneExtraction(genenumber):
     contpart=[]
     geneid=list(besthits.keys())[genenumber]
+    match=[]
+    for i in counthits[geneid]:
+        for j in i:
+            match.append(j)
+
     if len(besthits[geneid])==1:
+        concat=[]
         contpart.append(str(len(set(counthits[geneid][0]))))
         contigcount=len(set(counthits[geneid][0]))
         seqid = besthits[geneid][0][1]
-        fr = stored[besthits[geneid][0]][0]['frame']
+
+        ds = stored[besthits[geneid][0]]
         dna=str(seqs[seqid][0])
-        concat=[]
-        list_combo=list()
-        if len(stored[besthits[geneid][0]])==0:
+
+        if len(ds)==0:
             pass
         else:
-            for parts in stored[besthits[geneid][0]]:
+            res = list(map(dict, set(tuple(sorted(d.items())) for d in ds)))
+            for parts in res:
                 if 'frame' in parts.keys():
+                    fr = parts['frame']
+                else:
+                    pass
+
+            parts_min=list()
+            usedparts=list()
+
+            'we check the order of different parts (when there is an intron we have two exon parts) / we store only the part that are not frame'
+            for i in range(len(res)):
+                if 'frame' in res[i].keys():
                     pass
                 else:
-                    start=int(parts['min'])
-                    end=int(parts['max'])
-                    combo=str(start)+"-"+str(end)
-                    if combo not in list_combo:
-                        list_combo.append(combo)
-                        if fr == "-":
-                            extract=str(Seq(dna[start-1:end],generic_dna).reverse_complement())
-                        else:
-                            extract=str(Seq(dna[start-1:end],generic_dna))
-                        concat.append(extract)
+                    usedparts.append(i)
+                    parts_min.append(res[i]['min'])
+
+            ressort=sorted(range(len(parts_min)), key=lambda k: parts_min[k])
+            'we inverse the order of the parts for the concatenation when it is the reverse brand'
+            if fr=="-":
+                orderusedparts=ressort[::-1]
+            else:
+                orderusedparts=ressort
+
+            list_combo=list()
+            for j in orderusedparts:
+                start=int(res[usedparts[j]]['min'])
+                end=int(res[usedparts[j]]['max'])
+                combo=str(start)+"-"+str(end)
+                if combo not in list_combo:
+                    list_combo.append(combo)
+                    if fr == "-":
+                        extract=str(Seq(dna[start-1:end],generic_dna).reverse_complement())
+                    else:
+                        extract=str(Seq(dna[start-1:end],generic_dna))
+                concat.append(extract)
             newseq="".join(concat)
+
     else:
         'condition pour voir quelle position il faut extraire en premier'
         lmin=list()
@@ -113,33 +143,55 @@ def GeneExtraction(genenumber):
             lmin.append(hits[3])
         orderindx=sorted(range(len(lmin)), key=lambda k: lmin[k])
         concat=[]
+
         for idx in orderindx:
             contpart.append(str(len(set(counthits[geneid][idx]))))
             seqid = besthits[geneid][idx][1]
-            fr = stored[besthits[geneid][idx]][0]['frame']
-            dna=str(seqs[seqid][0])
-            list_combo=list()
-            if len(stored[besthits[geneid][idx]])==0:
+            ds = stored[besthits[geneid][idx]]
+
+            if len(ds)==0:
                 pass
             else:
-                for parts in stored[besthits[geneid][idx]]:
+                res = list(map(dict, set(tuple(sorted(d.items())) for d in ds)))
+                for parts in res:
                     if 'frame' in parts.keys():
+                        fr = parts['frame']
+                    else:
+                        pass
+                dna=str(seqs[seqid][0])
+                parts_min=list()
+                usedparts=list()
+                'we check the order of different parts (when there is an intron we have two exon parts) / we store only the part that are not frame'
+                for i in range(len(res)):
+                    if 'frame' in res[i].keys():
                         pass
                     else:
-                        start=int(parts['min'])
-                        end=int(parts['max'])
-                        combo=str(start)+"-"+str(end)
-                        if combo not in list_combo:
-                            list_combo.append(combo)
-                            if fr == "-":
-                                extract=str(Seq(dna[start-1:end],generic_dna).reverse_complement())
-                            else:
-                                extract=str(Seq(dna[start-1:end],generic_dna))
-                        concat.append(extract)
+                        usedparts.append(i)
+                        parts_min.append(res[i]['min'])
+
+                ressort=sorted(range(len(parts_min)), key=lambda k: parts_min[k])
+                'we inverse the order of the parts for the concatenation when it is the reverse brand'
+                if fr=="-":
+                    orderusedparts=ressort[::-1]
+                else:
+                    orderusedparts=ressort
+
+                list_combo=list()
+                for j in orderusedparts:
+                    start=int(res[usedparts[j]]['min'])
+                    end=int(res[usedparts[j]]['max'])
+                    combo=str(start)+"-"+str(end)
+                    if combo not in list_combo:
+                        list_combo.append(combo)
+                        if fr == "-":
+                            extract=str(Seq(dna[start-1:end],generic_dna).reverse_complement())
+                        else:
+                            extract=str(Seq(dna[start-1:end],generic_dna))
+                    concat.append(extract)
         newseq="".join(concat)
 
     newlength = len(newseq)
-    header = ">"+str(nameofsample)+"; "+"gene="+str(geneid)+"; "+"type="+str(model)+"; "+"length="+str(newlength)+"; "+"match_contigs="+str("-".join(contpart))
+    header = ">"+str(nameofsample)+"; "+"gene="+str(geneid)+"; "+"type="+str(model)+"; "+"length="+str(newlength)+"; "+"match_contigs="+str("-".join(contpart))+"; "+"Ncont="+str(len(set(match)))+"; "+"Npart="+str(len(besthits[geneid]))
     cond_min_length=0
     if newlength>=min_length:
         cond_min_length=cond_min_length+1

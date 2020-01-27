@@ -106,17 +106,17 @@ mkdir -p ${RES}/Extraction
           echo "WARN: $samplename already processed"
           continue
         else
-          echo "${SPADES} -1 ${r1} -2 ${r2} --cov-cutoff auto -o ${RES}/${PATHNAME_ASSEMBLY}/${samplename} -t ${THREADS} -m ${MEMORY} -k ${KMER} --only-assembler --careful"
+          echo "${SPADES} -1 ${r1} -2 ${r2} --cov-cutoff auto -o ${RES}/${PATHNAME_ASSEMBLY}/${samplename} -t ${THREADS} -m ${MEMORY} -k ${KMER}"
           # we check if no error on function run
-          if ${SPADES} -1 ${r1} -2 ${r2} --cov-cutoff auto -o ${RES}/${PATHNAME_ASSEMBLY}/${samplename} -t ${THREADS} -m ${MEMORY} -k ${KMER} --only-assembler --careful; then
+          if ${SPADES} -1 ${r1} -2 ${r2} --cov-cutoff auto -o ${RES}/${PATHNAME_ASSEMBLY}/${samplename} -t ${THREADS} -m ${MEMORY} -k ${KMER}; then
             echo $samplename >> ${RES}/assembly_done.log
           else
             echo $samplename >> ${RES}/assembly_error.log
           fi
         fi
       else
-        echo "${SPADES} -1 ${r1} -2 ${r2} --cov-cutoff auto -o ${RES}/${PATHNAME_ASSEMBLY}/${samplename} -t ${THREADS} -m ${MEMORY} -k ${KMER} --only-assembler --careful"
-        if ${SPADES} -1 ${r1} -2 ${r2} --cov-cutoff auto -o ${RES}/${PATHNAME_ASSEMBLY}/${samplename} -t ${THREADS} -m ${MEMORY} -k ${KMER} --only-assembler --careful; then
+        echo "${SPADES} -1 ${r1} -2 ${r2} --cov-cutoff auto -o ${RES}/${PATHNAME_ASSEMBLY}/${samplename} -t ${THREADS} -m ${MEMORY} -k ${KMER}"
+        if ${SPADES} -1 ${r1} -2 ${r2} --cov-cutoff auto -o ${RES}/${PATHNAME_ASSEMBLY}/${samplename} -t ${THREADS} -m ${MEMORY} -k ${KMER}; then
           echo ${samplename} >> ${RES}/assembly_done.log
         else
           echo ${samplename} >> ${RES}/assembly_error.log

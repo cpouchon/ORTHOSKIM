@@ -17,21 +17,11 @@ parser = argparse.ArgumentParser(description='Export regions of query database f
 parser.add_argument("-i","--infile", help="Fasta input contigs file",
                     type=str)
 parser.add_argument("-m","--model", help="molecular type compartment",
-                    type=str,choices=["chloroplast", "mitochondrion_CDS","mitochondrion_RNA","nucleus","chloroplast_CDS","chloroplast_RNA"])
+                    type=str,choices=["mitochondrion_CDS","mitochondrion_rRNA","mitochondrion_tRNA","chloroplast_CDS","chloroplast_RNA"])
 parser.add_argument("-o","--outdir", help="Out directory path",
-                    type=str)
-parser.add_argument("-n","--namesample", help="sample name used in sequence header for output",
                     type=str)
 parser.add_argument("-g","--gfftab", help="input gff table from exonerate alignment",
                     type=str)
-parser.add_argument("-t","--typeofseq", help="type of sequence to extract",
-                    type=str,choices=["all", "exon","intron"])
-parser.add_argument("-l","--minlength", help="minimal length of alignment into reference to consider output",
-                    type=int)
-parser.add_argument("-c","--mincov", help="minimal coverage of contigs allowed for genomic scan",
-                    type=int)
-parser.add_argument("-cl","--mincontlen", help="minimal length of contifs allowed for genomic scan",
-                    type=int)
 parser.add_argument("-s","--seeds", help="input reference seeds",
                     type=str)
 parser.add_argument("--threads", help="number of threads to use",
@@ -76,107 +66,73 @@ class ProgressBar:
         sys.stdout.flush()
 
 
-
 def GeneExtraction(genenumber):
     contpart=[]
     geneid=list(besthits.keys())[genenumber]
     if len(besthits[geneid])==1:
-        contpart.append(str(len(set(counthits[geneid][0]))))
-        contigcount=len(set(counthits[geneid][0]))
         seqid = besthits[geneid][0][1]
-        fr = stored[besthits[geneid][0]][0]['frame']
         dna=str(seqs[seqid][0])
-        concat=[]
-        list_combo=list()
-        if len(stored[besthits[geneid][0]])==0:
-            pass
-        else:
-            for parts in stored[besthits[geneid][0]]:
-                if 'frame' in parts.keys():
-                    pass
-                else:
-                    start=int(parts['min'])
-                    end=int(parts['max'])
-                    combo=str(start)+"-"+str(end)
-                    if combo not in list_combo:
-                        list_combo.append(combo)
-                        if fr == "-":
-                            extract=str(Seq(dna[start-1:end],generic_dna).reverse_complement())
-                        else:
-                            extract=str(Seq(dna[start-1:end],generic_dna))
-                        concat.append(extract)
-            newseq="".join(concat)
+        newid = str(geneid)+"_"+"_".join(seqid.split("_")[1:len(seqid.split("_"))])
     else:
-        'condition pour voir quelle position il faut extraire en premier'
-        lmin=list()
+        hitparts={}
+        hitlen={}
         for hits in besthits[geneid]:
-            lmin.append(hits[3])
-        orderindx=sorted(range(len(lmin)), key=lambda k: lmin[k])
-        concat=[]
-        for idx in orderindx:
-            contpart.append(str(len(set(counthits[geneid][idx]))))
-            seqid = besthits[geneid][idx][1]
-            fr = stored[besthits[geneid][idx]][0]['frame']
-            dna=str(seqs[seqid][0])
-            list_combo=list()
-            if len(stored[besthits[geneid][idx]])==0:
-                pass
+            if hits[1] in hitparts.keys():
+                hitparts[hits[1]]=hitparts[hits[1]]+1
             else:
-                for parts in stored[besthits[geneid][idx]]:
-                    if 'frame' in parts.keys():
-                        pass
-                    else:
-                        start=int(parts['min'])
-                        end=int(parts['max'])
-                        combo=str(start)+"-"+str(end)
-                        if combo not in list_combo:
-                            list_combo.append(combo)
-                            if fr == "-":
-                                extract=str(Seq(dna[start-1:end],generic_dna).reverse_complement())
-                            else:
-                                extract=str(Seq(dna[start-1:end],generic_dna))
-                        concat.append(extract)
-        newseq="".join(concat)
+                hitparts[hits[1]]=1
+            if hits[1] in hitlen.keys():
+                lenhit=int(hits[4])-int(hits[3])
+                hitlen[hits[1]]=hitlen[hits[1]]+lenhit
+            else:
+                lenhit=int(hits[4])-int(hits[3])
+                hitlen[hits[1]]=lenhit
 
-    newlength = len(newseq)
-    header = ">"+str(nameofsample)+"; "+"gene="+str(geneid)+"; "+"type="+str(model)+"; "+"length="+str(newlength)+"; "+"match_contigs="+str("-".join(contpart))
-    cond_min_length=0
-    if newlength>=min_length:
-        cond_min_length=cond_min_length+1
-    fname = geneid+".fa"
-    if cond_min_length!=0:
-        if os.path.isfile(os.path.join(outpath+"/"+model, fname)):
-            with open(os.path.join(outpath+"/"+model, fname), 'a+') as file:
-                old_headers = []
-                end_file=file.tell()
-                file.seek(0)
-                for line in file:
-                    if line.startswith(">"):
-                        old_headers.append(line.replace(">","").split(";")[0])
-                if not nameofsample in old_headers:
-                    file.seek(end_file)
-                    file.write(header+'\n')
-                    file.write(str(newseq)+'\n')
-                else:
-                    pass
-        else :
-            with open(os.path.join(outpath+"/"+model, fname), 'w') as out:
-                out.write(header+'\n')
-                out.write(str(newseq)+'\n')
-    else:
-        pass
+        if len(hitparts.keys()) ==1:
+            'sequence unique donc on recupere le bon id'
+            seqid = besthits[geneid][0][1]
+            dna=str(seqs[seqid][0])
+            newid = str(geneid)+"_"+"_".join(seqid.split("_")[1:len(seqid.split("_"))])
+
+        else:
+            lmax=list()
+            for uniqhit in hitparts.keys():
+                lmax.append(hitlen[uniqhit])
+            orderindx=sorted(range(len(lmax)), key=lambda k: lmax[k])
+            orderindx.reverse()
+            'on garde le plus grand en alignement (reverse du min)'
+            seqid = hitparts.keys()[orderindx[0]]
+            dna=str(seqs[seqid][0])
+            newid = str(geneid)+"_"+"_".join(seqid.split("_")[1:len(seqid.split("_"))])
+
+    header = ">"+str(newid)
+    taxa="_".join(seqid.split("_")[1:len(seqid.split("_"))])
+
+    if os.path.isfile(os.path.join(outpath+"/"+model, taxa+".fa")):
+        with open(os.path.join(outpath+"/"+model, taxa+".fa"), 'a+') as file:
+            old_headers = []
+            end_file=file.tell()
+            file.seek(0)
+            for line in file:
+                if line.startswith(">"):
+                    old_headers.append(line.replace(">",""))
+            if not str(newid) in old_headers:
+                file.seek(end_file)
+                file.write(header+'\n')
+                file.write(str(dna)+'\n')
+            else:
+                pass
+    else :
+        with open(os.path.join(outpath+"/"+model, taxa+".fa"), 'w') as out:
+            out.write(header+'\n')
+            out.write(str(dna)+'\n')
 
 
 
 file=args.gfftab
-typeseq = args.typeofseq
 input_file = args.infile
-nameofsample = args.namesample
-min_length = args.minlength
 model = args.model
 outpath=args.outdir
-cov=args.mincov
-clen=args.mincontlen
 num_cores = args.threads
 tabseeds=args.seeds
 
@@ -221,12 +177,7 @@ for line in tab:
     'intialisation of the scan'
     if l[0] in refnames:
 
-        if "UCE" in l[0]:
-            genename = l[0].split("_")[0]+"_UCE"
-        elif "BUSCO" in l[0]:
-            genename = l[0].split("_")[0]+"_BUSCO"
-        else:
-            genename = l[0].split("_")[0]
+        genename = l[0].split("_")[0]
 
         refid = l[0]
         seqid = l[8].split("; ")[1].split(" ")[1]
@@ -237,13 +188,7 @@ for line in tab:
         refposmin=rmin
         refposmax=rmax
 
-        contiglength=int(seqid.split("_")[3])
-        contigcov=float(seqid.split("_")[5])
 
-        if contigcov<cov or contiglength<clen:
-            continue
-        else:
-            pass
 
         'we make groups for gene with borne values'
         if genename not in groups.keys():
@@ -329,91 +274,12 @@ for line in tab:
 
             counthits[genename]=newcont
 
-    if typeseq=="all":
-        if l[2]=="gene":
-
-            if contigcov<cov or contiglength<clen:
-                continue
-            else:
-                pass
-
-            score = l[5]
-            frame = l[6]
-            id=(genename,seqid,refid,refposmin,refposmax)
-            if genename not in dicscore.keys():
-                dicscore.setdefault(genename, []).append(int(score))
-                #besthits.setdefault(genename, []).append(dicinfo)
-                besthits.setdefault(genename, []).append(id)
-                #counthits.setdefault(genename, []).append([seqid])
-            else:
-                'mettre condition pour regarder dans loverlapp index'
-
-                'condition si nouveau group'
-
-                newscore=[]
-                newhits=[]
-                overscore=[]
-
-                for i in lnoverlap:
-                    'ceux pour qui pas overlapp on les gardes dans le meme ordre (new/modif in first)'
-                    newscore.append(dicscore[genename][i])
-                    newhits.append(besthits[genename][i])
-
-                if len(loverlap)>0:
-                    for i in loverlap:
-                        overscore.append(dicscore[genename][i])
-                    'extract best score on new overlapping group'
-                    highscore_index = loverlap[overscore.index(max(overscore))]
-                    highscore = dicscore[genename][highscore_index]
-                    'compare hit score with the bestscore for this overlapping group'
-                    if int(score) > highscore:
-                        highscore = int(score)
-                        #highhits = dicinfo
-                        highhits = id
-                    else:
-                        highhits = besthits[genename][highscore_index]
-
-                    'maintenant faut faire le nouveau gp'
-                    newscore.append(highscore)
-                    newhits.append(highhits)
-                else:
-                    'pas overlapp donc new'
-                    newscore.append(int(score))
-                    #newhits.append(dicinfo)
-                    newhits.append(id)
-
-
-                dicscore[genename]=newscore
-                besthits[genename]=newhits
-
-
-            'we store all combination genename/seqid/refid + frame'
-            #id = (genename,seqid,refid,refposmin,refposmax)
-            dicframe=dict()
-            dicframe['frame']=str(frame)
-            stored.setdefault(id, []).append(dicframe)
-
-            dicinfo = dict()
-            minpos = l[3]
-            maxpos = l[4]
-            dicinfo['min']=str(minpos)
-            dicinfo['max']=str(maxpos)
-            stored.setdefault(id, []).append(dicinfo)
-
-
     else:
-        if l[2]=="gene":
-
-            if contigcov<cov or contiglength<clen:
-                continue
-            else:
-                pass
+        if l[2]=="similarity":
 
             score = l[5]
             frame = l[6]
             id=(genename,seqid,refid,refposmin,refposmax)
-            'dictionary to identify the best score with combination seqID/refID'
-            'we have to keep index in the same order of overlapp and create new dict'
             if genename not in dicscore.keys():
                 dicscore.setdefault(genename, []).append(int(score))
                 #besthits.setdefault(genename, []).append(dicinfo)
@@ -467,14 +333,6 @@ for line in tab:
             dicframe['frame']=str(frame)
             stored.setdefault(id, []).append(dicframe)
 
-        elif l[2]==typeseq:
-
-            if contigcov<cov or contiglength<clen:
-                continue
-            else:
-                pass
-
-            'we keep all cds position for each combination'
             dicinfo = dict()
             minpos = l[3]
             maxpos = l[4]
@@ -483,7 +341,6 @@ for line in tab:
             stored.setdefault(id, []).append(dicinfo)
 
 
-
-print ("Extraction of sequences for %s" % nameofsample)
+print ("clean sequences for %s" % input_file)
 inputs=range(len(list(besthits.keys())))
 Parallel(n_jobs=num_cores)(delayed(GeneExtraction)(i) for i in inputs)
