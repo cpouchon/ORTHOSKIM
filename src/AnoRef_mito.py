@@ -23,8 +23,6 @@ parser.add_argument("-fmt","--annotationfmt", help="format of annotated file",ch
                     type=str)
 parser.add_argument("-o","--outdir", help="out directory path",
                     type=str)
-parser.add_argument("-protonly","--only_protein", help="[mode] extraction is made only on CDS type by keeping translated sequences",
-                    action="store_true")
 parser.add_argument("--single", help="[mode] parse a single annotated file instead of a list",
                     action="store_true")
 
@@ -71,10 +69,8 @@ class ProgressBar:
 'parse all input files'
 '#########################################################'
 
-
 model=args.model
 
-feattype=args.typeseq
 
 modelextens=''
 if model == "chloroplast":
@@ -114,7 +110,6 @@ if args.single:
         Bar = ProgressBar(len(record.features), 60, '\t Extraction of sequences')
         barp=0
         for feat in record.features:
-            # we seek type "CDS" in the annotation file
 
             if feat.type == 'source':
                 if "/" in feat.qualifiers['organism'][0]:
@@ -128,36 +123,11 @@ if args.single:
                 if 'gene' in feat.qualifiers:
                     gene = feat.qualifiers['gene'][0]
                     barp=barp+1
-                    'gene could be in multiple part if it is partial in multiple contigs'
-                    if feat.location_operator=="join":
-                        length=0
-                        out_seq=""
-                        joinlocation=str(feat.location).replace("join{","").replace("}","").replace("(-)","").replace("(+)","").replace("]","").split(",")
-                        for parts in joinlocation:
-                            clean=parts.split("[")[1]
-                            if ">" in clean or "<" in clean:
-                                pass
-                            else:
-                                spart = int(float(clean.split(":")[0]))
-                                epart = int(float(clean.split(":")[1]))
-                                strand = feat.location.strand
-                                flanked = FeatureLocation(spart, epart, strand)
-                                seq = flanked.extract(record.seq)
-                                length = length+len(str(seq))
-                                out_seq=out_seq+seq
-                    else:
-                        s, e, strand = feat.location.start, feat.location.end, feat.location.strand
-                        length = e-s
-                        flanked = FeatureLocation(s, e, strand)
-                        out_seq = flanked.extract(record.seq)
-
                     header = ">"+str(gene)+"_"+str(taxid)+"_"+"_".join(org)
-
                     if 'translation' in feat.qualifiers:
                         out_seq = feat.qualifiers['translation'][0]
                     else:
                         pass
-
                     fname = taxaname+".fa"
                     subdir=str(model)+"_"+str("CDS")
 
@@ -183,6 +153,8 @@ if args.single:
                             Bar.update(barp)
                             out.write(header+'\n')
                             out.write(str(out_seq)+'\n')
+                else:
+                    pass
 
             elif feat.type == "tRNA":
                 if 'gene' in feat.qualifiers:
@@ -190,7 +162,7 @@ if args.single:
                     barp=barp+1
                     if "anticodon" in feat.qualifiers:
                         code=feat.qualifiers['anticodon'][0]
-                        gene_codon=gene+"_"+code
+                        gene_codon=gene+"-"+code
                     else:
                         gene_codon=gene
                     if feat.location_operator=="join":
@@ -242,6 +214,8 @@ if args.single:
                             out.write(header+'\n')
                             out.write(str(out_seq)+'\n')
 
+                else:
+                    pass
 
             elif feat.type == "rRNA":
                 if 'gene' in feat.qualifiers:
@@ -295,6 +269,8 @@ if args.single:
                             Bar.update(barp)
                             out.write(header+'\n')
                             out.write(str(out_seq)+'\n')
+                else:
+                    pass
 
 else:
     input_list_taxa = args.infile
@@ -323,30 +299,11 @@ else:
                     if 'gene' in feat.qualifiers:
                         gene = feat.qualifiers['gene'][0]
                         barp=barp+1
-                        'gene could be in multiple part if it is partial in multiple contigs'
-                        if feat.location_operator=="join":
-                            joinlocation = str(feat.location).replace("join{","").replace("}","").replace("(-)","").replace("(+)","").replace("[","").replace("]","").replace(" ","").split(",")
-                            part1, part2 = joinlocation[0], joinlocation[1]
-                            spart1, epart1 = int(float(part1.split(":")[0])), int(float(part1.split(":")[1]))
-                            spart2, epart2 = int(float(part2.split(":")[0])), int(float(part2.split(":")[1]))
-                            length = (epart1 - spart1)+(epart2-spart2)
-                            strand = feat.location.strand
-                            flanked1 = FeatureLocation(spart1, epart1, strand)
-                            flanked2 = FeatureLocation(spart2, epart2, strand)
-                            out_seq1 = flanked1.extract(record.seq)
-                            out_seq2 = flanked2.extract(record.seq)
-                            out_seq = out_seq1+out_seq2
-
-                        else:
-                            s, e, strand = feat.location.start, feat.location.end, feat.location.strand
-                            length = e-s
-                            flanked = FeatureLocation(s, e, strand)
-                            out_seq = flanked.extract(record.seq)
-
                         header = ">"+str(gene)+"_"+str(taxid)+"_"+"_".join(org)
                         if 'translation' in feat.qualifiers:
                             out_seq = feat.qualifiers['translation'][0]
-
+                        else:
+                            pass
                         fname = taxaname+".fa"
                         subdir=str(model)+"_"+str("CDS")
 
@@ -372,6 +329,8 @@ else:
                                 Bar.update(barp)
                                 out.write(header+'\n')
                                 out.write(str(out_seq)+'\n')
+                    else:
+                        pass
 
                 elif feat.type == "tRNA":
                     if 'gene' in feat.qualifiers:
@@ -379,22 +338,25 @@ else:
                         barp=barp+1
                         if "anticodon" in feat.qualifiers:
                             code=feat.qualifiers['anticodon'][0]
-                            gene_codon=gene+"_"+code
+                            gene_codon=gene+"-"+code
                         else:
                             gene_codon=gene
                         if feat.location_operator=="join":
-                            joinlocation = str(feat.location).replace("join{","").replace("}","").replace("(-)","").replace("(+)","").replace("[","").replace("]","").replace(" ","").split(",")
-                            part1, part2 = joinlocation[0], joinlocation[1]
-                            spart1, epart1 = int(float(part1.split(":")[0])), int(float(part1.split(":")[1]))
-                            spart2, epart2 = int(float(part2.split(":")[0])), int(float(part2.split(":")[1]))
-                            length = (epart1 - spart1)+(epart2-spart2)
-                            strand = feat.location.strand
-                            flanked1 = FeatureLocation(spart1, epart1, strand)
-                            flanked2 = FeatureLocation(spart2, epart2, strand)
-                            out_seq1 = flanked1.extract(record.seq)
-                            out_seq2 = flanked2.extract(record.seq)
-                            out_seq = out_seq1+out_seq2
-
+                            length=0
+                            out_seq=""
+                            joinlocation=str(feat.location).replace("join{","").replace("}","").replace("(-)","").replace("(+)","").replace("]","").split(",")
+                            for parts in joinlocation:
+                                clean=parts.split("[")[1]
+                                if ">" in clean or "<" in clean:
+                                    pass
+                                else:
+                                    spart = int(float(clean.split(":")[0]))
+                                    epart = int(float(clean.split(":")[1]))
+                                    strand = feat.location.strand
+                                    flanked = FeatureLocation(spart, epart, strand)
+                                    seq = flanked.extract(record.seq)
+                                    length = length+len(str(seq))
+                                    out_seq=out_seq+seq
                         else:
                             s, e, strand = feat.location.start, feat.location.end, feat.location.strand
                             length = e-s
@@ -427,53 +389,61 @@ else:
                                 Bar.update(barp)
                                 out.write(header+'\n')
                                 out.write(str(out_seq)+'\n')
+                    else:
+                        pass
 
 
                 elif feat.type == "rRNA":
-                    gene = feat.qualifiers['gene'][0]
-                    barp=barp+1
-                    if feat.location_operator=="join":
-                        joinlocation = str(feat.location).replace("join{","").replace("}","").replace("(-)","").replace("(+)","").replace("[","").replace("]","").replace(" ","").split(",")
-                        part1, part2 = joinlocation[0], joinlocation[1]
-                        spart1, epart1 = int(float(part1.split(":")[0])), int(float(part1.split(":")[1]))
-                        spart2, epart2 = int(float(part2.split(":")[0])), int(float(part2.split(":")[1]))
-                        length = (epart1 - spart1)+(epart2-spart2)
-                        strand = feat.location.strand
-                        flanked1 = FeatureLocation(spart1, epart1, strand)
-                        flanked2 = FeatureLocation(spart2, epart2, strand)
-                        out_seq1 = flanked1.extract(record.seq)
-                        out_seq2 = flanked2.extract(record.seq)
-                        out_seq = out_seq1+out_seq2
+                    if 'gene' in feat.qualifiers:
+                        gene = feat.qualifiers['gene'][0]
+                        barp=barp+1
+                        if feat.location_operator=="join":
+                            length=0
+                            out_seq=""
+                            joinlocation=str(feat.location).replace("join{","").replace("}","").replace("(-)","").replace("(+)","").replace("]","").split(",")
+                            for parts in joinlocation:
+                                clean=parts.split("[")[1]
+                                if ">" in clean or "<" in clean:
+                                    pass
+                                else:
+                                    spart = int(float(clean.split(":")[0]))
+                                    epart = int(float(clean.split(":")[1]))
+                                    strand = feat.location.strand
+                                    flanked = FeatureLocation(spart, epart, strand)
+                                    seq = flanked.extract(record.seq)
+                                    length = length+len(str(seq))
+                                    out_seq=out_seq+seq
+                        else:
+                            s, e, strand = feat.location.start, feat.location.end, feat.location.strand
+                            length = e-s
+                            flanked = FeatureLocation(s, e, strand)
+                            out_seq = flanked.extract(record.seq)
 
-                    else:
-                        s, e, strand = feat.location.start, feat.location.end, feat.location.strand
-                        length = e-s
-                        flanked = FeatureLocation(s, e, strand)
-                        out_seq = flanked.extract(record.seq)
+                        header = ">"+str(gene)+"_"+str(taxid)+"_"+"_".join(org)
+                        fname = taxaname+".fa"
+                        subdir=str(model)+"_"+str("rRNA")
 
-                    header = ">"+str(gene)+"_"+str(taxid)+"_"+"_".join(org)
-                    fname = taxaname+".fa"
-                    subdir=str(model)+"_"+str("rRNA")
+                        'check for nucleotidic sequence if existing or not'
+                        if os.path.isfile(os.path.join(str(outdirect),str(subdir), fname)):
+                            with open(os.path.join(str(outdirect),str(subdir), fname), 'a+') as file:
+                                old_headers = []
+                                end_file=file.tell()
+                                file.seek(0)
+                                for line in file:
+                                    if line.startswith(">"):
+                                        old_headers.append(line.rstrip())
 
-                    'check for nucleotidic sequence if existing or not'
-                    if os.path.isfile(os.path.join(str(outdirect),str(subdir), fname)):
-                        with open(os.path.join(str(outdirect),str(subdir), fname), 'a+') as file:
-                            old_headers = []
-                            end_file=file.tell()
-                            file.seek(0)
-                            for line in file:
-                                if line.startswith(">"):
-                                    old_headers.append(line.rstrip())
-
-                            if not header in old_headers:
+                                if not header in old_headers:
+                                    Bar.update(barp)
+                                    file.seek(end_file)
+                                    file.write(header+'\n')
+                                    file.write(str(out_seq)+'\n')
+                                else:
+                                    pass
+                        else :
+                            with open(os.path.join(str(outdirect),str(subdir), fname), 'a') as out:
                                 Bar.update(barp)
-                                file.seek(end_file)
-                                file.write(header+'\n')
-                                file.write(str(out_seq)+'\n')
-                            else:
-                                pass
-                    else :
-                        with open(os.path.join(str(outdirect),str(subdir), fname), 'a') as out:
-                            Bar.update(barp)
-                            out.write(header+'\n')
-                            out.write(str(out_seq)+'\n')
+                                out.write(header+'\n')
+                                out.write(str(out_seq)+'\n')
+                    else:
+                        pass

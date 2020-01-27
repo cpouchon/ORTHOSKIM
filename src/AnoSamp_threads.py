@@ -86,19 +86,23 @@ def GeneExtraction(genenumber):
                             'AND we check for the curent record if we have only one copy of this gene'
                             if feat.type == "tRNA" :
                                 code=feat.qualifiers['anticodon'][0]
-                                gene_codon=gene+"_"+code
+                                gene_codon=gene+"-"+code
                                 if feat.location_operator=="join":
-                                    joinlocation = str(feat.location).replace("join{","").replace("}","").replace("(-)","").replace("(+)","").replace("[","").replace("]","").replace(" ","").split(",")
-                                    part1, part2 = joinlocation[0].replace("<","").replace(">",""), joinlocation[1].replace("<","").replace(">","")
-                                    spart1, epart1 = int(float(part1.split(":")[0])), int(float(part1.split(":")[1]))
-                                    spart2, epart2 = int(float(part2.split(":")[0])), int(float(part2.split(":")[1]))
-                                    length = (epart1 - spart1)+(epart2-spart2)
-                                    strand = feat.location.strand
-                                    flanked1 = FeatureLocation(spart1, epart1, strand)
-                                    flanked2 = FeatureLocation(spart2, epart2, strand)
-                                    out_seq1 = flanked1.extract(record.seq)
-                                    out_seq2 = flanked2.extract(record.seq)
-                                    out_seq = out_seq1+out_seq2
+                                    length=0
+                                    out_seq=""
+                                    joinlocation=str(feat.location).replace("join{","").replace("}","").replace("(-)","").replace("(+)","").replace("]","").split(",")
+                                    for parts in joinlocation:
+                                        clean=parts.split("[")[1]
+                                        if ">" in clean or "<" in clean:
+                                            pass
+                                        else:
+                                            spart = int(float(clean.split(":")[0]))
+                                            epart = int(float(clean.split(":")[1]))
+                                            strand = feat.location.strand
+                                            flanked = FeatureLocation(spart, epart, strand)
+                                            seq = flanked.extract(record.seq)
+                                            length = length+len(str(seq))
+                                            out_seq=out_seq+seq
                                 else:
                                     s, e, strand = feat.location.start, feat.location.end, feat.location.strand
                                     length = e-s
@@ -130,17 +134,21 @@ def GeneExtraction(genenumber):
 
                             elif feat.type == "CDS" :
                                 if feat.location_operator=="join":
-                                    joinlocation = str(feat.location).replace("join{","").replace("}","").replace("(-)","").replace("(+)","").replace("[","").replace("]","").replace(" ","").split(",")
-                                    part1, part2 = joinlocation[0].replace("<","").replace(">",""), joinlocation[1].replace("<","").replace(">","")
-                                    spart1, epart1 = int(float(part1.split(":")[0])), int(float(part1.split(":")[1]))
-                                    spart2, epart2 = int(float(part2.split(":")[0])), int(float(part2.split(":")[1]))
-                                    length = (epart1 - spart1)+(epart2-spart2)
-                                    strand = feat.location.strand
-                                    flanked1 = FeatureLocation(spart1, epart1, strand)
-                                    flanked2 = FeatureLocation(spart2, epart2, strand)
-                                    out_seq1 = flanked1.extract(record.seq)
-                                    out_seq2 = flanked2.extract(record.seq)
-                                    out_seq = out_seq1+out_seq2
+                                    length=0
+                                    out_seq=""
+                                    joinlocation=str(feat.location).replace("join{","").replace("}","").replace("(-)","").replace("(+)","").replace("]","").split(",")
+                                    for parts in joinlocation:
+                                        clean=parts.split("[")[1]
+                                        if ">" in clean or "<" in clean:
+                                            pass
+                                        else:
+                                            spart = int(float(clean.split(":")[0]))
+                                            epart = int(float(clean.split(":")[1]))
+                                            strand = feat.location.strand
+                                            flanked = FeatureLocation(spart, epart, strand)
+                                            seq = flanked.extract(record.seq)
+                                            length = length+len(str(seq))
+                                            out_seq=out_seq+seq
                                 else:
                                     s, e, strand = feat.location.start, feat.location.end, feat.location.strand
                                     length = e-s
@@ -175,18 +183,21 @@ def GeneExtraction(genenumber):
 
                             else:
                                 if feat.location_operator=="join":
-                                    joinlocation = str(feat.location).replace("join{","").replace("}","").replace("(-)","").replace("(+)","").replace("[","").replace("]","").replace(" ","").split(",")
-                                    part1, part2 = joinlocation[0].replace("<","").replace(">",""), joinlocation[1].replace("<","").replace(">","")
-                                    spart1, epart1 = int(float(part1.split(":")[0])), int(float(part1.split(":")[1]))
-                                    spart2, epart2 = int(float(part2.split(":")[0])), int(float(part2.split(":")[1]))
-                                    length = (epart1 - spart1)+(epart2-spart2)
-                                    strand = feat.location.strand
-                                    flanked1 = FeatureLocation(spart1, epart1, strand)
-                                    flanked2 = FeatureLocation(spart2, epart2, strand)
-                                    out_seq1 = flanked1.extract(record.seq)
-                                    out_seq2 = flanked2.extract(record.seq)
-                                    out_seq = out_seq1+out_seq2
-
+                                    length=0
+                                    out_seq=""
+                                    joinlocation=str(feat.location).replace("join{","").replace("}","").replace("(-)","").replace("(+)","").replace("]","").split(",")
+                                    for parts in joinlocation:
+                                        clean=parts.split("[")[1]
+                                        if ">" in clean or "<" in clean:
+                                            pass
+                                        else:
+                                            spart = int(float(clean.split(":")[0]))
+                                            epart = int(float(clean.split(":")[1]))
+                                            strand = feat.location.strand
+                                            flanked = FeatureLocation(spart, epart, strand)
+                                            seq = flanked.extract(record.seq)
+                                            length = length+len(str(seq))
+                                            out_seq=out_seq+seq
                                 else:
                                     s, e, strand = feat.location.start, feat.location.end, feat.location.strand
                                     length = e-s
@@ -216,7 +227,10 @@ def GeneExtraction(genenumber):
                                         out.write(header+'\n')
                                         out.write(str(out_seq)+'\n')
 
-
+                    else:
+                        pass
+                else:
+                    pass
 
 '#########################################################'
 'parse all input files'
