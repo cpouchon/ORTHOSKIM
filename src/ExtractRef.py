@@ -19,7 +19,7 @@ import os, errno
 
 
 
-parser = argparse.ArgumentParser(description='Extract genes for annotation files. Script was writen by C. Pouchon (2019).')
+parser = argparse.ArgumentParser(description='Extract closed genes for a query taxa. Script was writen by C. Pouchon (2020).')
 parser.add_argument("-in","--infile", help="input reference DB (fasta format)",
                     type=str)
 parser.add_argument("-g","--geneslist", help="list of genes to extract",
@@ -29,15 +29,15 @@ parser.add_argument("-q","--query", help="taxa name or taxid if --taxid mode",
 parser.add_argument("-o","--outdir", help="out directory path",
                     type=str)
 parser.add_argument("-m","--mode", help="extraction mode",
-                    type=str,choices=["taxonomy", "tree"])
+                    type=str,choices=["taxonomy", "distance"])
 parser.add_argument("--taxid", help="query is given by taxid (else it from it's name)",
                     action="store_true")
 parser.add_argument("--update", help="update NCBI taxonomy",
                     action="store_true")
-parser.add_argument("-t","--tree", help="phylogenetic tree of genus",
+parser.add_argument("-d","--distance", help="phylogenetic distance matrix file of genus",
                     type=str)
-parser.add_argument("-tfmt","--treefmt", help="format of tree",
-                    type=str,choices=["newick", "nexus"])
+parser.add_argument("--gene_type", help="type of genes to extract",
+                    type=str,choices=["CDS", "rRNA","tRNA"])
 
 if len(sys.argv)==1:
     parser.print_help(sys.stderr)
@@ -79,63 +79,43 @@ class ProgressBar:
 
 
 model=args.mode
+typeg = args.gene_type
+outpath=args.outdir
+query_name = args.query
+#query_name = "Androsace_pubescens_229451_PHA000540_AXZ_B"
 
-
-query_name = "Androsace_pubescens_229451_PHA000540_AXZ_B"
 if model=="taxonomy":
     res = [int(i) for i in query_name.split("_") if i.isdigit()]
     query=res[0]
-elif model=="tree":
+elif model=="distance":
     res=query_name.split("_")[0]
     if res[0].isupper():
         query=res
     else:
         query=res.capitalize()
 
-
-input_tree="/Users/pouchonc/PhyloAlps/FlorAlp_Genus_tree.tre"
-treefmt="newick"
-
 if model=="taxonomy":
     ncbi = NCBITaxa()
     if args.update:
         ncbi.update_taxonomy_database()
 else:
-    input_tree = args.tree
-    treefmt = args.treefmt
-
-    tree = Tree(input_tree,format=1)
-    taxa=tree.get_leaf_names()
-
-    if query in taxa:
-        print 'tutu'
-    else:
+    df = pd.read_csv(args.distance,sep=",", index_col=[0])
+    genera = [col for col  in df.columns]
+    if query not in genera:
         model="taxonomy"
         ncbi = NCBITaxa()
         if args.update:
             ncbi.update_taxonomy_database()
+    else:
+        pass
 
-    tree = dendropy.Tree.get(path=input_tree,schema=treefmt)
-    pdm = tree.phylogenetic_distance_matrix()
-    taxa = [i.label for i in tree.taxon_set]
-    colname = taxa
-    rowname = taxa
-    matrix = np.reshape(range(len(taxa)*len(taxa)),(len(taxa),len(taxa)))
-    df = pd.DataFrame(matrix,columns=colname,index=rowname)
 
-    for t1 in taxa:
-        for t2 in taxa:
-            if t1 == t2:
-                df.loc[t1,t2] = 0.0
-            else:
-                df.loc[t1,t2] = tree.get_distance(t1,t2)
-
-# ENFAIT IL FAUT FAIRE LA MATRICE DE DISTANCE AVANT
 
 input_file = args.infile
-input_file = "mit_CDS_unaligned.fa"
+#input_file = "mit_CDS_unaligned.fa"
 
 input_list_genes = args.geneslist
+#input_list_genes = "/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/listGenes.mito"
 with open(input_list_genes) as f:
     genes = f.readlines()
 types=[]
@@ -144,6 +124,7 @@ for g in genes:
     types.append(g_tab[0])
 
 
+#model = "distance"
 
 stored={}
 
@@ -173,7 +154,7 @@ for record in cur_genome:
             else:
                 stored[genename][tax_id].append(sequence)
 
-    elif model=="tree":
+    elif model=="distance":
         if genename not in stored.keys():
             stored[genename]=dict()
             if genus not in stored[genename].keys():
@@ -188,7 +169,8 @@ for record in cur_genome:
             else:
                 stored[genename][genus].append(sequence)
 
-
+#typeg = "CDS"
+fname = "Closed_"+str(typeg)+".fa"
 
 "we search the closed ref for each gene"
 for g in genes:
@@ -196,22 +178,80 @@ for g in genes:
     gene_id=g_tab[1]
     gene_type=g_tab[0]
 
+    if gene_type == typeg:
+        if model=="taxonomy":
+            taxid_list = [int(i) for i in stored[gene_id].keys()]
+            taxid_all=taxid_list
+            if query in taxid_all:
+                # a sequence of the same taxid is already present, we keep the query taxid
+                closed_taxa = [query]
+            else:
+                # we infer the taxonomy tree with the ref and the query taxid
+                taxid_all.append(query)
+                tree = ncbi.get_topology(taxid_all)
+                t2=tree.search_nodes(name=str(query))[0].up
+                closed_taxa = [str(l.__dict__['taxid']) for l in t2.get_leaves()]
+                closed_taxa.remove(str(query))
 
-    if model=="taxonomy":
-        taxid_list = [int(i) for i in stored[gene_id].keys()]
-        taxid_all=taxid_list
-        taxid_all.append(query)
+        else:
+            subdf = df.sort_values(by=query)[query]
+            genera_list = [str(i) for i in stored[gene_id].keys()]
+            part = 0
+            range_list = list()
+            closed_list = list()
+            for taxa in range(len(subdf.index)):
+                if subdf.index[taxa] in genera_list:
+                    # we create list for taxa that are at the same phylogenetic distance from the query
+                    score=subdf[taxa]
+                    if len(range_list)>0:
+                        if score in range_list[part]:
+                            closed_list[part].extend([subdf.index[taxa]])
+                        else:
+                            range_list.append([score])
+                            closed_list.append([subdf.index[taxa]])
+                            part = part+1
+                    else:
+                        range_list.append([score])
+                        closed_list.append([subdf.index[taxa]])
+            closed_taxa=closed_list[0]
 
-        tree = ncbi.get_topology(taxid_all)
+        sub_best=list()
+        sub_name=list()
+        for taxa in closed_taxa:
+            sub_lmax=list()
+            for subtaxa in stored[gene_id][taxa]:
+                sub_lmax.append(len(subtaxa))
+            sub_orderindx=sorted(range(len(sub_lmax)), key=lambda k: sub_lmax[k])
+            sub_orderindx.reverse()
+            sub_best.append(stored[gene_id][taxa][sub_orderindx[0]])
+            sub_name.append(taxa)
 
-        t2=tree.search_nodes(name=str(query))[0].up
-        closed_taxa = [str(l.__dict__['taxid']) for l in t2.get_leaves()]
-        closed_taxa.remove(str(query))
+        lmax=list()
+        for seq in sub_best:
+            lmax.append(len(seq))
+        orderindx=sorted(range(len(lmax)), key=lambda k: lmax[k])
+        orderindx.reverse()
 
-    else:
+        out_header=">"+str(gene_id)+"_"+str(sub_name[orderindx[0]])
+        out_seq=str(sub_best[orderindx[0]])
 
-        subdf = df.sort_values(by=ingenus)[ingenus]
-for taxa in range(len(subdf.index)):
-    if subdf.index[taxa] in stored.keys():
-        closedtaxa_file=stored[subdf.index[taxa]][0]
-        break
+        if os.path.isfile(os.path.join(outpath, fname)):
+            with open(os.path.join(outpath, fname), 'a+') as file:
+                old_headers = []
+                end_file=file.tell()
+                file.seek(0)
+                for line in file:
+                    if line.startswith(">"):
+                        old_headers.append(line.rstrip())
+                if not out_header in old_headers:
+                    file.seek(end_file)
+                    file.write(out_header+'\n')
+                    file.write(str(out_seq)+'\n')
+                else:
+                    pass
+        else :
+            with open(os.path.join(outpath, fname), 'a') as out:
+                out.write(out_header+'\n')
+                out.write(str(out_seq)+'\n')
+
+    # function to now extract the ref from the closed taxa list (either taxid or genus name)
