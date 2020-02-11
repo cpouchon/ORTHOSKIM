@@ -35,9 +35,9 @@ if args.chlorofind:
     in_files = []
     for r, d, f in os.walk(path):
         for file in f:
-            if '.chloro.embl' in file or '.rdnanuc.embl' in file:
-                if os.path.join(r, "".join(file.split(".")[0:-2])) not in in_files:
-                    in_files.append(os.path.join(r, "".join(file.split(".")[0:-2])))
+            if 'indexing.done' in file:
+                if os.path.join(r, file) not in in_files:
+                    in_files.append(os.path.join(r,file))
 else:
     'We parse a list of files'
     input_list = args.infile
@@ -60,39 +60,7 @@ for file in in_files:
         taxid=taxainfos.split(":")[1]
         ingenus=ctaxaname.split("_")[0]
         samplename=str(ctaxaname+"_"+taxid+"_"+code+"_"+sequencing)
-
-        #
-        # if "subsp." in cfile_name:
-        #     cfile_name_without_extension = cfile_name.split(".chloro.embl")[0]
-        #     ctaxaname = cfile_name_without_extension.split(":")[0]
-        #     taxid = cfile_name_without_extension.split(":")[1].split(".")[0]
-        #     ingenus=ctaxaname.split("_")[0]
-        #     sequencing = cfile_name.split(".")[3].split(":")
-        #     samplename=str(ctaxaname+"_"+taxid+"_"+str(cfile_name.split(".")[2])+"_"+str(sequencing[0])+"_"+str(sequencing[1]))
-        #
-        # elif "var." in cfile_name:
-        #     cfile_name_without_extension = cfile_name.split(".chloro.embl")[0]
-        #     ctaxaname = cfile_name_without_extension.split(":")[0]
-        #     taxid = cfile_name_without_extension.split(":")[1].split(".")[0]
-        #     ingenus=ctaxaname.split("_")[0]
-        #     sequencing = cfile_name.split(".")[3].split(":")
-        #     samplename=str(ctaxaname+"_"+taxid+"_"+str(cfile_name.split(".")[2])+"_"+str(sequencing[0])+"_"+str(sequencing[1]))
-        #
-        # elif "sp." in cfile_name:
-        #     cfile_name_without_extension = cfile_name.split(".chloro.embl")[0]
-        #     ctaxaname = cfile_name_without_extension.split(":")[0]
-        #     taxid = cfile_name_without_extension.split(":")[1].split(".")[0]
-        #     ingenus=ctaxaname.split("_")[0]
-        #     sequencing = cfile_name.split(".")[3].split(":")
-        #     samplename=str(ctaxaname+"_"+taxid+"_"+str(cfile_name.split(".")[2])+"_"+str(sequencing[0])+"_"+str(sequencing[1]))
-        #
-        # else:
-        #     cfile_name_without_extension = cfile_name.split(".chloro.embl")[0]
-        #     ctaxaname = cfile_name_without_extension.split(":")[0]
-        #     taxid = cfile_name_without_extension.split(":")[1].split(".")[0]
-        #     ingenus=ctaxaname.split("_")[0]
-        #     sequencing = cfile_name.split(".")[2].split(":")
-        #     samplename=str(ctaxaname+"_"+taxid+"_"+str(cfile_name.split(".")[1])+"_"+str(sequencing[0])+"_"+str(sequencing[1]))
+        embl_chloro=".".join([taxainfos,cf_parts[-3],cf_parts[-2],"chloro","embl"])
 
         if "GWM" in cf:
             r1 = fnmatch.filter(os.listdir(os.path.dirname(cf)), '*_R1.fastq.gz')
@@ -123,8 +91,7 @@ for file in in_files:
             r1path=os.path.dirname(cf)+"/"+r1[0]
             r2path=os.path.dirname(cf)+"/"+r2[0]
 
-
-        print ('%s\t%s\t%s\t%s\t%s\t%s' % (str(str(cfile_path)+str(".chloro.embl")),str(ingenus),str(samplename),str(r1path),str(r2path),str(outdir_assembly_path)))
+        print ('%s\t%s\t%s\t%s\t%s\t%s' % (str(cfile_path.replace("indexing.done",embl_chloro)),str(ingenus),str(samplename),str(r1path),str(r2path),str(outdir_assembly_path)))
 
     except:
         pass

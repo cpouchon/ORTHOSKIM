@@ -302,33 +302,34 @@ else:
                         header = ">"+str(gene)+"_"+str(taxid)+"_"+"_".join(org)
                         if 'translation' in feat.qualifiers:
                             out_seq = feat.qualifiers['translation'][0]
+                            fname = taxaname+".fa"
+                            subdir=str(model)+"_"+str("CDS")
+
+                            'check for nucleotidic sequence if existing or not'
+                            if os.path.isfile(os.path.join(str(outdirect),str(subdir), fname)):
+                                with open(os.path.join(str(outdirect),str(subdir), fname), 'a+') as file:
+                                    old_headers = []
+                                    end_file=file.tell()
+                                    file.seek(0)
+                                    for line in file:
+                                        if line.startswith(">"):
+                                            old_headers.append(line.rstrip())
+
+                                    if not header in old_headers:
+                                        Bar.update(barp)
+                                        file.seek(end_file)
+                                        file.write(header+'\n')
+                                        file.write(str(out_seq)+'\n')
+                                    else:
+                                        pass
+                            else :
+                                with open(os.path.join(str(outdirect),str(subdir), fname), 'a') as out:
+                                    Bar.update(barp)
+                                    out.write(header+'\n')
+                                    out.write(str(out_seq)+'\n')
                         else:
                             pass
-                        fname = taxaname+".fa"
-                        subdir=str(model)+"_"+str("CDS")
 
-                        'check for nucleotidic sequence if existing or not'
-                        if os.path.isfile(os.path.join(str(outdirect),str(subdir), fname)):
-                            with open(os.path.join(str(outdirect),str(subdir), fname), 'a+') as file:
-                                old_headers = []
-                                end_file=file.tell()
-                                file.seek(0)
-                                for line in file:
-                                    if line.startswith(">"):
-                                        old_headers.append(line.rstrip())
-
-                                if not header in old_headers:
-                                    Bar.update(barp)
-                                    file.seek(end_file)
-                                    file.write(header+'\n')
-                                    file.write(str(out_seq)+'\n')
-                                else:
-                                    pass
-                        else :
-                            with open(os.path.join(str(outdirect),str(subdir), fname), 'a') as out:
-                                Bar.update(barp)
-                                out.write(header+'\n')
-                                out.write(str(out_seq)+'\n')
                     else:
                         pass
 

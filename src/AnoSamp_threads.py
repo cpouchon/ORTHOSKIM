@@ -307,7 +307,7 @@ if model in ("chloroplast","nucrdna","mitochondrion"):
                         if (gene == g_tab[1]) or (gene == g_tab[1]+"_1"):
                             if feat.type == "tRNA" :
                                 code=feat.qualifiers['anticodon'][0]
-                                gene_codon=gene+"_"+code
+                                gene_codon=gene+"-"+code
                                 if gene_codon in dict_genes.keys():
                                     dict_genes[gene_codon] = dict_genes[gene_codon]+1
                                 else:

@@ -8,7 +8,7 @@ from Bio.SeqRecord import *
 from Bio.Alphabet.IUPAC import IUPACAmbiguousDNA;
 from Bio.Seq import *
 from Bio.SeqUtils import *
-from ete2 import NCBITaxa
+from ete3 import NCBITaxa
 
 import pandas as pd
 import numpy as np
@@ -38,6 +38,8 @@ parser.add_argument("-d","--distance", help="phylogenetic distance matrix file o
                     type=str)
 parser.add_argument("--gene_type", help="type of genes to extract",
                     type=str,choices=["CDS", "rRNA","tRNA"])
+parser.add_argument("--compartment", help="cellular compartment",
+                    type=str,choices=["chloroplast", "mitochondrion","nucrdna","nucleus"])
 
 if len(sys.argv)==1:
     parser.print_help(sys.stderr)
@@ -82,6 +84,7 @@ model=args.mode
 typeg = args.gene_type
 outpath=args.outdir
 query_name = args.query
+mol=args.compartment
 #query_name = "Androsace_pubescens_229451_PHA000540_AXZ_B"
 
 if model=="taxonomy":
@@ -112,7 +115,7 @@ else:
 
 
 input_file = args.infile
-#input_file = "mit_CDS_unaligned.fa"
+#input_file = "/Users/pouchonc/PhyloAlps/mitoDB/refrences/mit_CDS_unaligned.fa"
 
 input_list_genes = args.geneslist
 #input_list_genes = "/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/listGenes.mito"
@@ -123,7 +126,7 @@ for g in genes:
     g_tab = g.rstrip().split('\t')
     types.append(g_tab[0])
 
-
+mkdir(outpath)
 #model = "distance"
 
 stored={}
@@ -170,7 +173,8 @@ for record in cur_genome:
                 stored[genename][genus].append(sequence)
 
 #typeg = "CDS"
-fname = "Closed_"+str(typeg)+".fa"
+fname = "closed_"+str(mol)+"_"+str(typeg)+".fa"
+open(os.path.join(outpath, fname), 'w').close()
 
 "we search the closed ref for each gene"
 for g in genes:

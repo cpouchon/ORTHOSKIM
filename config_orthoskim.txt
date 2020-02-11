@@ -9,40 +9,50 @@ MINLENGTH=200                                                                   
 ANNOFMT=embl                                                                         ## format of annotated chloroplast/rdnanuc files
 VERBOSE=0                                                                            ## Set verbose to TRUE (1) or FALSE (0)
 
-# Preprocessing the data [indexing] mode
+# [indexing] mode: preprocessing the data
 LIST_FILES=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/listSamples.tab      ## Parameters table for assembly path analysis according to annotated chloroplasts previously assembled. Specific format required: (1) chloroplast file name; (2) Genus of species sample\n-3: sample name\n-4: forward reads\n-5: reverse reads\n-6: Output path for assemblies samples subdirectories. This file could be obtained with the prep_assembly mode of OrthoSkim function
 
-# Extraction steps from annotation files
-# [chloroplast] mode :
+# [extraction_targeted] mode: extraction steps from annotation files
+###### [chloroplast] target:
 CHLORO_GENES=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/listGenes.chloro   ## list of chloroplastic genes for extraction. Specific format of table: (1) type of gene [CDS,...]; (2) name of gene. This file could be modified by adding/removing specific lines.
-# [nucrdna] mode :
+###### [nucrdna] target:
 NRDNA_GENES=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/listGenes.rdna      ## list of rdna nuclear genes for extraction. Specific format of table: (1) type of gene [CDS,...]; (2) name of gene. This file could be modified by adding/removing specific lines.
 
-# Extraction steps from mapping assemblies into a reference
+# [extraction_untargeted]: extraction steps from mapping assemblies into a reference
 COVERAGE=5                                                                           ## Minimal contigs coverage allowed for genomic scan of mitochondrial and nuclear regions
 MINCONTLENGTH=1000                                                                   ## Minimal contigs length allowed for genomic scan of mitochondrial and nuclear regions
-# [SPAdes_assembly] mode:
+MODE_REF=distance                                                                    ## Mode to select the closest reference from the database [taxaonomy,distance]
+DISTANCE_MATRIX=                                                                     ## distance matrix at genus level
+TAXONOMY_UPDATE=no                                                                   ## update of NCBI taxonomy DB [no,yes]
+###### [SPAdes_assembly] mode:
 MEMORY=30                                                                            ## Number of memory which will be used
 KMER=55                                                                              ## Kmer fixed (here 55) or range values (as 21,33,55) for SPAdes assembly. Note: less than 128
-# [nuclear] mode :
-NUC_REF=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/refGenes.nu             ## list of nuclear genes of reference.  Amino acid sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. LFY_3702,LFY_3811 for LFY gene).
+###### [nuclear] target :
+NUC_REF=~/OrthoSkim-master/ressources/refGenes.nu             ## list of nuclear genes of reference.  Amino acid sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. LFY_3702,LFY_3811 for LFY gene).
 NUC_TYPE=exon                                                                        ## Type of structure extracted from the gff among "cds" (exon structure of CDS gene), "intron" (intron structure of CDS gene) and "all" (exon+intron)
-# [mitochondrion] mode :
-MITO_REF=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/refCDS.mito            ## list of mitochondrial coding genes of reference.  Amino acid sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. cox1_3702,cox1_3811 for cox1 gene).
-MITO_REF_RNA=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/refRNA.mito        ## list of mitochondrial non-coding regions of reference.  Nucleotidic sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. rrn18S_3702,rrn18S_3811 for rrn18S gene).
+NUC_DB_TYPE=orthoskim                                                                ## source of nuclear genes [orthoskim,particular]. If particular option is set, please see the documentation to see the required format of the DB.
+###### [mitochondrion] target :
+MITO_GENES=listGenes.mito
+SEEDS_MITO_CDS=~/OrthoSkim-master/ressources/mitoCDS.seeds           ## mitochondrial seeds of reference (from Arabidopsis_thaliana_3702_genbank) in amino acid sequence.
+SEEDS_MITO_rRNA=~/OrthoSkim-master/ressources/mitorRNA.seeds       ## mitochondrial seeds of reference (from Arabidopsis_thaliana_3702_genbank) in amino acid sequence.
+SEEDS_MITO_tRNA=~/OrthoSkim-master/ressources/mitotRNA.seeds                                                        ## list of mitochondrial genes for extraction. Specific format of table: (1) type of gene [CDS,...]; (2) name of gene. This file could be modified by adding/removing specific lines.
+MITO_REF_CDS=~/OrthoSkim-master/ressources/mit_CDS_unaligned.fa       ## list of mitochondrial coding genes of reference.  Amino acid sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. cox1_3702,cox1_3811 for cox1 gene).
+MITO_REF_tRNA=~/OrthoSkim-master/ressources/mit_tRNA_unaligned.fa     ## list of mitochondrial tRNA non-coding regions of reference.  Nucleotidic sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. rrn18S_3702,rrn18S_3811 for rrn18S gene).
+MITO_REF_rRNA=~/OrthoSkim-master/ressources/mit_rRNA_unaligned.fa     ## list of mitochondrial rRNA non-coding regions of reference.  Nucleotidic sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. rrn18S_3702,rrn18S_3811 for rrn18S gene).
 MITO_TYPE=exon                                                                       ## Type of structure extracted from the gff among "cds" (exon structure of CDS gene), "intron" (intron structure of CDS gene) and "all" (exon+intron)
-# [chloroplast] mode:
-CHLORO_REF_CDS=
-CHLORO_REF_RNA=
+###### [chloroplast] target:
+CHLORO_GENES=~/OrthoSkim-master/ressources/listGenes.chloro
+SEEDS_CHLORO_CDS=~/OrthoSkim-master/ressources/chloroCDS.seeds           ## mitochondrial seeds of reference (from Arabidopsis_thaliana_3702_genbank) in amino acid sequence.
+SEEDS_CHLORO_rRNA=~/OrthoSkim-master/ressources/chlororRNA.seeds      ## mitochondrial seeds of reference (from Arabidopsis_thaliana_3702_genbank) in amino acid sequence.
+SEEDS_CHLORO_tRNA=~/OrthoSkim-master/ressources/chlorotRNA.seeds
+CHLORO_REF_CDS=~/OrthoSkim-master/ressources/
+CHLORO_REF_rRNA=~/OrthoSkim-master/ressources/
+CHLORO_REF_tRNA=~/OrthoSkim-master/ressources/
 CHLORO_TYPE=exon
 
-
-# Get mitochondrial sequences of reference [get_mitoRef] mode :
-LENGTH_RATIO=0.75                                                                    ## length ratio of reference mitochondrial gene aligning the gene seed to consider this gene in final gene banks of reference.
-SEEDS_MITO=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/seeds.mito           ## mitochondrial seeds of reference (from Arabidopsis_thaliana_3702_genbank) in amino acid sequence.
-SEEDS_MITO_RNA=/Users/pouchonc/Desktop/Scripts/OrthoSkim/ressources/seedsRNA.mito    ## mitochondrial seeds of reference (from Arabidopsis_thaliana_3702_genbank) in amino acid sequence.
-MITO_GENBANK_LOC=
+# [DB_mitochondrion] mode: mitochondrial sequences of reference
+MITO_GENBANK=~/OrthoSkim-master/ressources/                                                                            ## file with mitochondrial annotation from genbank
 
 # Selection of taxa from extractions
-TAXALIST=selTaxa_Primulaceae.tab                                                     ## list of taxa to select from extractions
+TAXALIST=~/OrthoSkim-master/ressources/selTaxa_Primulaceae.tab                                                     ## list of taxa to select from extractions
 EXTENSION=fa
