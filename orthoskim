@@ -331,9 +331,41 @@ mkdir -p ${RES}/Extraction
 		done <${LIST_FILES}
     cat ${RES}/references/clean/chloroplast_CDS/*.fa > ${CHLORO_REF_CDS}
     cat ${RES}/references/clean/chloroplast_tRNA/*.fa > ${CHLORO_REF_tRNA}
-    cat ${RES}/references/clean/chloroplast_CDS/*.fa > ${CHLORO_REF_rRNA}
+    cat ${RES}/references/clean/chloroplast_rRNA/*.fa > ${CHLORO_REF_rRNA}
 		echo "STATUS: done"
 		exit 0
+
+  elif [ $mode == 'DB_nucrdna' ]; then
+    echo "INFO: mode=$mode - Creation of nucrdna database from phyloskims annotations for CDS, tRNA and rRNA features"
+    mkdir -p ${RES}/references/clean
+    while read f;
+    do
+      file=`echo ${f} | awk '{print $1}' | perl -pe 's/.chloro.embl/.rdnanuc.embl/'
+      if [ -s ${RES}/references/nucrdna_done.log ]; then
+        if grep -Fxq "${file}" ${RES}/references/nucrdna_done.log; then
+          echo "WARN: $file already processed"
+          continue
+        else
+          echo "CMD: `dirname $0`/src/AnoRef_others.py -i ${file} -m nucrdna -g ${NRDNA_GENES} -fmt embl -o ${RES}/references/clean --threads ${THREADS}"
+          if `dirname $0`/src/AnoRef_others.py -i ${file} -m nucrdna -g ${NRDNA_GENES} -fmt embl -o ${RES}/references/clean --threads ${THREADS}; then
+            echo $file >> ${RES}/references/nucrdna_done.log
+          else
+            echo $file >> ${RES}/references/nucrdna_error.log
+          fi
+        fi
+      else
+        echo "CMD: `dirname $0`/src/AnoRef_others.py -i ${file} -m nucrdna -g ${NRDNA_GENES} -fmt embl -o ${RES}/references/clean --threads ${THREADS}"
+        if `dirname $0`/src/AnoRef_others.py -i ${file} -m nucrdna -g ${NRDNA_GENES} -fmt embl -o ${RES}/references/clean --threads ${THREADS}; then
+          echo $file >> ${RES}/references/nucrdna_done.log
+        else
+          echo $file >> ${RES}/references/nucrdna_error.log
+        fi
+      fi
+    done <${LIST_FILES}
+    cat ${RES}/references/clean/nucrdna_misc_RNA/*.fa > ${NRDNA_REF_misc_RNA}
+    cat ${RES}/references/clean/nucrdna_rRNA/*.fa > ${NRDNA_REF_rRNA}
+    echo "STATUS: done"
+    exit 0
 
   elif [ $mode == 'extraction_untargeted' ] && [ $target == 'mitochondrion_rRNA' ]; then
     echo 'INFO: mode=$mode - Extraction of mitchondrial rRNA from non targeted assemblies (SPADes assembly)'
