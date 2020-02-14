@@ -152,7 +152,9 @@ The extraction of orthologous regions for *chloroplast*, *mitochondrion* and *nu
 + the type of gene (e.g. CDS,rRNA,tRNA)
 + the gene name
 
-`head ~/OrthoSkim/ressources/listGenes.chloro`
+```
+head ~/OrthoSkim/ressources/listGenes.chloro
+```
 
 ```
 tRNA    trnV
@@ -290,7 +292,7 @@ This is made under `-m SPAdes_reformate` mode. The extraction of genes will be m
 
 The extraction of genomic regions of interested is made by choosing a target with `-t [nucleus,chloroplast_CDS, chloroplast_tRNA,chloroplast_rRNA,mitochondrion_CDS,mitochondrion_tRNA,mitochondrion_rRNA]` according to three steps:
 
-1. **Reference selection**:
+###### 3.3.3.1 - Reference selection
 
    For all chloroplastic and mitochondrial targets, OrthoSkim will first select the closest reference for each gene of our interested taxa from the given database of references.
 
@@ -300,7 +302,7 @@ The extraction of genomic regions of interested is made by choosing a target wit
 
    After this, if CDS are targeted, a [diamond](https://github.com/bbuchfink/diamond) database is created for each amino acid sequences provided in the retained sequences (with *diamond makedb*). Otherwise, a [blast](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download) database compilation (*makeblastdb* program) is formated.
 
-2. **Alignment**:
+###### 3.3.3.2 - Alignment
    Mapping is made for each sample in two steps:
 
    **a.** Contigs are first aligned into the reference with [diamond](https://github.com/bbuchfink/diamond) *blastx* (for CDS targets) or with  with *blastn* command to quickly identify which of them align to the targeted genes (only hits with a minimal **<EVALUE>** were retained).
@@ -308,7 +310,7 @@ The extraction of genomic regions of interested is made by choosing a target wit
    **b.** Alignments are then conducted on these contigs from [exonerate](https://www.ebi.ac.uk/about/vertebrate-genomics/software/exonerate) incorporating all the appropriate gaps and frameshifts, and modelling of introns, by using the *protein2genome* mode for CDS target or the *genome2genome* mode for other targets. Only contigs with a minimal kmer coverage of **<COVERAGE>** and length of **<MINCONTLENGTH>** were considered for alignments into reference. A *gff* output table is created in **${RES}/Mapping/[nucleus,mitochondrion,chloroplast]/** folder for each sample.
 
 
-3. **Genes extraction**:
+###### 3.3.3.3 - Genes extraction
 
    Extraction is conducted through python script from the gff  table. Type of gene structure (exon, intron or all:exon+intron) required during extraction from mapping are reported in **<NUC_TYPE>**,**<CHLORO_TYPE>** or **<MITO_TYPE>**. This step is conducted into multiple processors using the **<THREADS>** specified in the the *config_orthoskim.txt* file.
 
