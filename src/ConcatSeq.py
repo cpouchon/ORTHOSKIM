@@ -22,10 +22,15 @@ parser.add_argument("-o","--outfile", help="output file list of concatenated seq
                     type=str)
 parser.add_argument("-t","--taxa", help="list of taxa to include in the final concatenated file",
                     type=str)
+parser.add_argument("--target", help="list of targeted gene directory",
+                    type=str)
+parser.add_argument("-g","--genes", help="list of gene to include in the final concatenated file",
+                    type=str)
+parser.add_argument("--trim", help="[mode] if alignments files were trimmed, genes are collected in trim/ folder in rigth target. Otherwise, they are collected in files/",
+                    action="store_true")
 parser.add_argument("--missingfract", help="maximal missing data threshold allowed to consider final sequence (e.g. 0.5 meaning that final sequence has fewer than 0.5 of missing data)",
                      type=float,default=None)
-parser.add_argument("-e","--extension", help="extension of files to search (i.e fa,fna,fasta or custom)",
-                    type=str)
+
 if len(sys.argv)==1:
     parser.print_help(sys.stderr)
     sys.exit(1)
@@ -53,15 +58,25 @@ class ProgressBar:
 		sys.stdout.flush()
 
 
-file_extension=args.extension
+
 if args.pathfind:
+    list_target = [str(item) for item in args.target.split(',')]
     'Search all fasta files files'
     path = args.path
     in_files = []
-    for r, d, f in os.walk(path):
-        for file in f:
-            if str("."+file_extension) in file:
-                in_files.append(os.path.join(r, file))
+    for p in list_target:
+        if args.trim:
+            path_to_seek=os.walk(os.path.join(path,p,"trim"))
+            for r, d, f in path_to_seek:
+                for file in f:
+                    if str("."+"trim") in file:
+                        in_files.append(os.path.join(r, file))
+        else:
+            path_to_seek=os.walk(os.path.join(path,p,"files"))
+            for r, d, f in path_to_seek:
+                for file in f:
+                    if str("."+"fa") in file:
+                        in_files.append(os.path.join(r, file))
 else:
     'We parse a list of files'
     input_list = args.infile
@@ -70,7 +85,7 @@ else:
 
 #cat *.fa | grep '>' | sort | uniq | perl -pe 's/>//' > list_taxa
 
-fname=args.outfile
+fname=args.outfile+".fa"
 Nthreshold=args.missingfract
 
 giventaxa = args.taxa
@@ -81,63 +96,107 @@ taxa_dict={}
 taxa_list = list()
 for line in taxal:
     l = line.rstrip()
-    #taxa_list.append(l)
-    taxa_dict.setdefault(l, [])
+    if len(l)>0:
+        taxa_dict.setdefault(l, {})
+
+givengenes = args.genes
+with open(givengenes) as f:
+    genel = f.readlines()
+
+gene_list = list()
+for gene in genel:
+    l = gene.rstrip()
+    if len(l)>0:
+        gene_list.append(l)
 
 end=0
 partnumber=0
-'read sequences and stock the id/seqs in dictionnary'
+
 for file in in_files:
     seqs={}
-    cur_genome = SeqIO.parse(file, "fasta")
-    for record in cur_genome:
-        seqID=record.id.split(";")[0]
-        sequence=record.seq
-        seqs.setdefault(seqID, []).append(sequence)
+    if args.trim:
+        genename=os.path.basename(file).replace(str("."+"trim"),"")
+    else:
+        genename=os.path.basename(file).replace(str("."+"fa"),"")
 
-    start=end+1
-    end=(start-1)+len(str(seqs[list(seqs.keys())[0]][0]))
-    partnumber=partnumber+1
-    genename=os.path.basename(file).replace(str("."+file_extension),"")
+    if genename in gene_list:
+        cur_genome = SeqIO.parse(file, "fasta")
+        for record in cur_genome:
+            if "_R_" in record.id.split(";")[0]:
+                seqID=record.id.split(";")[0].replace("_R_","")
+            else:
+                seqID=record.id.split(";")[0]
+            sequence=record.seq.upper()
 
-    index_of_dot = fname.index('.')
-    file_name_without_extension = fname[:index_of_dot]
-    partfile=str(file_name_without_extension+".partitions")
-    partinfo=str(file_name_without_extension+".info")
+            if seqID not in seqs.keys():
+                seqs[seqID]=dict()
+                if genename not in seqs[seqID].keys():
+                    seqs[seqID][genename]=sequence
+                else:
+                    pass
+            else:
+                if genename not in seqs[seqID].keys():
+                    seqs[seqID][genename]=sequence
+                else:
+                    pass
 
-    if os.path.isfile(partfile):
-        with open(partfile, 'a+') as file:
-            file.write(str("DNA, part"+str(partnumber)+" = "+str(start)+"-"+str(end)+"\n"))
-    else :
-        with open(partfile, 'w') as out:
-            out.write(str("DNA, part"+str(partnumber)+" = "+str(start)+"-"+str(end)+"\n"))
+        start=end+1
+        end=(start-1)+len(str(seqs[seqs.keys()[0]][genename]))
+        partnumber=partnumber+1
 
-    if os.path.isfile(partinfo):
-        with open(partinfo, 'a+') as file:
-            file.write(str(str(start)+"\t"+str(end)+"\t"+str(genename)+"\t"+"part"+str(partnumber)+"\n"))
-    else :
-        with open(partinfo, 'w') as out:
-            out.write(str(str(start)+"\t"+str(end)+"\t"+str(genename)+"\t"+"part"+str(partnumber)+"\n"))
+        splitfile=os.path.split(os.path.abspath(fname))
+        partfile=str(splitfile[0]+'/'+splitfile[1].split(".")[0]+".partitions")
+        partinfo=str(splitfile[0]+'/'+splitfile[1].split(".")[0]+".info")
 
-    for taxa in list(taxa_dict.keys()):
-        if taxa in list(seqs.keys()):
-            taxa_dict[taxa].append(str(seqs[taxa][0]))
-        else:
-            'we create a null sequence for missing taxa per gene'
-            lenseq = len(str(seqs[list(seqs.keys())[0]][0]))
-            nullseq = "N"*lenseq
-            taxa_dict.setdefault(taxa, []).append(nullseq)
+        if os.path.isfile(partfile):
+            with open(partfile, 'a+') as file:
+                file.write(str("DNA, part"+str(partnumber)+" = "+str(start)+"-"+str(end)+"\n"))
+        else :
+            with open(partfile, 'w') as out:
+                out.write(str("DNA, part"+str(partnumber)+" = "+str(start)+"-"+str(end)+"\n"))
+
+        if os.path.isfile(partinfo):
+            with open(partinfo, 'a+') as file:
+                file.write(str(str(start)+"\t"+str(end)+"\t"+str(genename)+"\t"+"part"+str(partnumber)+"\n"))
+        else :
+            with open(partinfo, 'w') as out:
+                out.write(str(str(start)+"\t"+str(end)+"\t"+str(genename)+"\t"+"part"+str(partnumber)+"\n"))
+
+        for taxa in list(taxa_dict.keys()):
+            if taxa in list(seqs.keys()):
+                taxa_dict[taxa][genename]=seqs[taxa][genename]
+            else:
+                'we create a null sequence for missing taxa per gene'
+                lenseq = len(str(seqs[list(seqs.keys())[0]][genename]))
+                nullseq = "N"*lenseq
+                taxa_dict[taxa][genename]=nullseq
+    else:
+        continue
 
 
 'concatenation of sequences in dictionary and output sequences'
 for taxa in taxa_dict:
     header= ">"+str(taxa)
-    concatenate_seq="".join(taxa_dict[taxa])
+    concatenate_seq=""
+    for file in in_files:
+        if args.trim:
+            genename=os.path.basename(file).replace(str("."+"trim"),"")
+        else:
+            genename=os.path.basename(file).replace(str("."+"fa"),"")
+        if genename in gene_list:
+            concatenate_seq=concatenate_seq+str(taxa_dict[taxa][genename])
     Ncount=int(concatenate_seq.count("N"))
+    gappcount=int(concatenate_seq.count("-"))
     SeqLength=len(concatenate_seq)
     Nratio=float(float(Ncount)/float(SeqLength))
+    AmbCount=Ncount+gappcount
+    Ambratio=float(float(AmbCount)/float(SeqLength))
     'we add condition to check if a taxa is completly missing'
     seqtestN='N'*len(concatenate_seq)
+    splitfile=os.path.split(os.path.abspath(fname))
+    missfile=str(splitfile[0]+'/'+splitfile[1].split(".")[0]+".missingdata")
+    with open(missfile, 'a+') as file:
+        file.write(str(str(taxa)+"\t"+str(Ambratio)+"\n"))
     if seqtestN == concatenate_seq:
         print ("WARN: %s is missing" % (taxa))
     elif Nratio > Nthreshold:

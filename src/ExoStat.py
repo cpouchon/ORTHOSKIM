@@ -5,6 +5,7 @@ import sys
 import os, errno
 import argparse
 import fnmatch
+import numpy
 from Bio import SeqIO
 from Bio.SeqFeature import FeatureLocation
 
@@ -22,8 +23,6 @@ if len(sys.argv)==1:
 
 args = parser.parse_args()
 
-
-
 if args.pathfind:
     'Search all fasta files files'
     path = args.path
@@ -38,7 +37,7 @@ else:
     with open(input_list) as f:
         in_files = f.readlines()
 
-print ("%s\t%s\t%s\t%s\t%s\t%s\t%s" % ("gene_name","#taxa","maxlen","#1.0","#0.75","#0.5","#0.25"))
+print ("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s" % ("gene","taxa","mean","min","max","std","pct25","pct50","pct75"))
 
 for file in in_files:
     cf = file.rstrip()
@@ -57,18 +56,13 @@ for file in in_files:
         #dicinfo = dict(item.split("=") for item in info)
         #dicinfo['seq']=str(record.seq)
         taxa = taxa+1
-        seqs.append(str(record.seq))
+        seqs.append(len(record.seq))
 
-    reflen=len(max(seqs))
-
-    mseqs=[]
-    for elem in seqs:
-        match=elem.replace("N","")
-        mseqs.append(float(len(match))/float(reflen))
-
-    full=sum(i >= 1.0 for i in mseqs)
-    perct25=sum(i >= 0.25 for i in mseqs)
-    perct50=sum(i >= 0.50 for i in mseqs)
-    perct75= sum(i >= 0.75 for i in mseqs)
-
-    print ("%s\t%s\t%s\t%s\t%s\t%s\t%s" % (str(gene_name),int(taxa),int(reflen),int(full),int(perct75),int(perct50),int(perct25)))
+    maxl=max(seqs)
+    minl=min(seqs)
+    mean=round(numpy.mean(seqs),2)
+    std=round(numpy.std(seqs),2)
+    pct25=round(numpy.percentile(seqs,25),2)
+    pct50=round(numpy.percentile(seqs,50),2)
+    pct75=round(numpy.percentile(seqs,75),2)
+    print ("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s" % (str(gene_name),int(taxa),int(mean),int(minl),int(maxl),int(std),int(pct25),int(pct50),int(pct75)))

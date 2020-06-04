@@ -17,7 +17,7 @@ parser = argparse.ArgumentParser(description='Export regions of query database f
 parser.add_argument("-i","--infile", help="Fasta input contigs file",
                     type=str)
 parser.add_argument("-m","--model", help="molecular type compartment",
-                    type=str,choices=["chloroplast", "mitochondrion_CDS","mitochondrion_rRNA","mitochondrion_tRNA","nucleus","chloroplast_CDS","chloroplast_rRNA","chloroplast_tRNA"])
+                    type=str,choices=["chloroplast", "mitochondrion_CDS","mitochondrion_rRNA","mitochondrion_tRNA","nucleus_aa","nucleus_nt","chloroplast_CDS","chloroplast_rRNA","chloroplast_tRNA","busco","uce"])
 parser.add_argument("-o","--outdir", help="Out directory path",
                     type=str)
 parser.add_argument("-n","--namesample", help="sample name used in sequence header for output",
@@ -76,36 +76,90 @@ class ProgressBar:
         sys.stdout.flush()
 
 
-
 def GeneExtraction(genenumber):
     contpart=[]
+    num_exon=[]
+    num_intron=[]
     geneid=list(besthits.keys())[genenumber]
     if len(besthits[geneid])==1:
         contpart.append(str(len(set(counthits[geneid][0]))))
         contigcount=len(set(counthits[geneid][0]))
         seqid = besthits[geneid][0][1]
-        fr = stored[besthits[geneid][0]][0]['frame']
+        #fr = stored[besthits[geneid][0]][0]['frame']
         dna=str(seqs[seqid][0])
         concat=[]
         list_combo=list()
+        pos_to_extract=list()
         if len(stored[besthits[geneid][0]])==0:
             pass
         else:
             for parts in stored[besthits[geneid][0]]:
                 if 'frame' in parts.keys():
-                    pass
+                    fr=parts['frame']
                 else:
                     start=int(parts['min'])
                     end=int(parts['max'])
-                    combo=str(start)+"-"+str(end)
-                    if combo not in list_combo:
+                    combo=str(start)+"_"+str(end)+"_"+fr
+
+                    if len(list_combo)==0:
                         list_combo.append(combo)
-                        if fr == "-":
-                            extract=str(Seq(dna[start-1:end],generic_dna).reverse_complement())
+                        pos_to_extract.append(combo)
+                    else:
+                        num_overlapp=0
+                        for elem in list_combo:
+                            m=int(elem.split("_")[0])
+                            M=int(elem.split("_")[1])
+                            if start <= m:
+                                if end >= m:
+                                    num_overlapp=num_overlapp+1
+                                elif end == M:
+                                    num_overlapp=num_overlapp+1
+                                else:
+                                    pass
+                            else:
+                                if start <= M:
+                                    num_overlapp=num_overlapp+1
+                                else:
+                                    pass
+                        if num_overlapp==0:
+                            pos_to_extract.append(combo)
+                            list_combo=pos_to_extract
                         else:
-                            extract=str(Seq(dna[start-1:end],generic_dna))
-                        concat.append(extract)
+                            pass
+
+            sublmin=list()
+            framelist=list()
+            for i in pos_to_extract:
+                sublmin.append(i.split("_")[0])
+                if i.split("_")[2] in framelist:
+                    pass
+                else:
+                    framelist.append(i.split("_")[2])
+            suborderindx=sorted(range(len(sublmin)), key=lambda k: sublmin[k])
+
+            if len(framelist)==1:
+                if framelist[0]=="-":
+                    suborderindx.reverse()
+                else:
+                    pass
+            else:
+                pass
+
+            for i in suborderindx:
+                posmin=int(pos_to_extract[i].split("_")[0])
+                posmax=int(pos_to_extract[i].split("_")[1])
+                posfr=pos_to_extract[i].split("_")[2]
+                if posfr == "-":
+                    extract=str(Seq(dna[posmin-1:posmax],generic_dna).reverse_complement())
+                else:
+                    extract=str(Seq(dna[posmin-1:posmax],generic_dna))
+                concat.append(extract)
+
             newseq="".join(concat)
+
+        num_exon.append(str(stat_stored[besthits[geneid][0]]["exon"]))
+        num_intron.append(str(stat_stored[besthits[geneid][0]]["intron"]))
+
     else:
         'condition pour voir quelle position il faut extraire en premier'
         lmin=list()
@@ -116,30 +170,100 @@ def GeneExtraction(genenumber):
         for idx in orderindx:
             contpart.append(str(len(set(counthits[geneid][idx]))))
             seqid = besthits[geneid][idx][1]
-            fr = stored[besthits[geneid][idx]][0]['frame']
+            #fr = stored[besthits[geneid][idx]][0]['frame']
             dna=str(seqs[seqid][0])
             list_combo=list()
+            pos_to_extract=list()
             if len(stored[besthits[geneid][idx]])==0:
                 pass
             else:
                 for parts in stored[besthits[geneid][idx]]:
                     if 'frame' in parts.keys():
-                        pass
+                        fr=parts['frame']
                     else:
                         start=int(parts['min'])
                         end=int(parts['max'])
-                        combo=str(start)+"-"+str(end)
-                        if combo not in list_combo:
+                        combo=str(start)+"_"+str(end)+"_"+fr
+
+                        if len(list_combo)==0:
                             list_combo.append(combo)
-                            if fr == "-":
-                                extract=str(Seq(dna[start-1:end],generic_dna).reverse_complement())
+                            pos_to_extract.append(combo)
+                        else:
+                            num_overlapp=0
+                            for elem in list_combo:
+                                m=int(elem.split("_")[0])
+                                M=int(elem.split("_")[1])
+                                if start <= m:
+                                    if end >= m:
+                                        num_overlapp=num_overlapp+1
+                                    elif end == M:
+                                        num_overlapp=num_overlapp+1
+                                    else:
+                                        pass
+                                else:
+                                    if start <= M:
+                                        num_overlapp=num_overlapp+1
+                                    else:
+                                        pass
+                            if num_overlapp==0:
+                                pos_to_extract.append(combo)
+                                list_combo=pos_to_extract
                             else:
-                                extract=str(Seq(dna[start-1:end],generic_dna))
-                        concat.append(extract)
+                                pass
+
+                sublmin=list()
+                framelist=list()
+                for i in pos_to_extract:
+                    sublmin.append(i.split("_")[0])
+                    if i.split("_")[2] in framelist:
+                        pass
+                    else:
+                        framelist.append(i.split("_")[2])
+                suborderindx=sorted(range(len(sublmin)), key=lambda k: sublmin[k])
+
+                if len(framelist)==1:
+                    if framelist[0]=="-":
+                        suborderindx.reverse()
+                    else:
+                        pass
+                else:
+                    pass
+
+                for i in suborderindx:
+                    posmin=int(pos_to_extract[i].split("_")[0])
+                    posmax=int(pos_to_extract[i].split("_")[1])
+                    posfr=pos_to_extract[i].split("_")[2]
+                    if posfr == "-":
+                        extract=str(Seq(dna[posmin-1:posmax],generic_dna).reverse_complement())
+                    else:
+                        extract=str(Seq(dna[posmin-1:posmax],generic_dna))
+                    concat.append(extract)
+
+            num_exon.append(str(stat_stored[besthits[geneid][idx]]["exon"]))
+            num_intron.append(str(stat_stored[besthits[geneid][idx]]["intron"]))
         newseq="".join(concat)
 
     newlength = len(newseq)
-    header = ">"+str(nameofsample)+"; "+"gene="+str(geneid)+"; "+"type="+str(model)+"; "+"length="+str(newlength)+"; "+"match_contigs="+str("-".join(contpart))
+
+    if typeseq=="exon":
+        genepart=typeseq
+    elif typeseq=="intron":
+        genepart=typeseq
+    elif typeseq=="all":
+        genepart="exon+intron"
+
+    if typeseq=="intron":
+        header = ">"+str(nameofsample)+"; "+"gene="+str(geneid)+"; "+"info="+str(genepart)+"; "+"type="+str(model)+"; "+"length="+str(newlength)+"; "+"match_contigs="+str("-".join(contpart))+"; "+"n_exons="+str("-".join(num_exon))+"; "+"n_introns"+str("-".join(num_intron))
+    else:
+        if "CDS" in model or "nucleus_aa" in model or "busco" in model:
+            ref_length=reflength[geneid]*3
+        else:
+            ref_length=reflength[geneid]
+
+        genepercent=round(float(newlength)/float(ref_length),2)
+
+        header = ">"+str(nameofsample)+"; "+"gene="+str(geneid)+"; "+"info="+str(genepart)+"; "+"type="+str(model)+"; "+"length="+str(newlength)+"; "+"match_contigs="+str("-".join(contpart))+"; "+"ref_percent="+str(genepercent)+"; "+"n_exons="+str("-".join(num_exon))+"; "+"n_introns"+str("-".join(num_intron))
+
     cond_min_length=0
     if newlength>=min_length:
         cond_min_length=cond_min_length+1
@@ -152,7 +276,7 @@ def GeneExtraction(genenumber):
                 file.seek(0)
                 for line in file:
                     if line.startswith(">"):
-                        old_headers.append(line.replace(">","").split(";")[0])
+                        old_headers.append(line.rstrip().replace(">","").split(";")[0])
                 if not nameofsample in old_headers:
                     file.seek(end_file)
                     file.write(header+'\n')
@@ -181,11 +305,13 @@ num_cores = args.threads
 tabseeds=args.seeds
 
 stored={}
+stat_stored={}
 dicscore={}
 besthits={}
 groups={}
 seqs={}
 counthits={}
+dict_aln={}
 
 
 mkdir(str(outpath+"/"+model))
@@ -198,6 +324,7 @@ with open(tabseeds) as f:
     reftab = f.readlines()
 
 refnames=list()
+reflength=dict()
 for line in reftab:
     if line.startswith(">"):
         l=line.rstrip()
@@ -206,6 +333,13 @@ for line in reftab:
             refnames.append(genename)
         else:
             pass
+        if "BUSCO" in l:
+            genename = l.replace(">","").split("_")[0]+"_BUSCO"
+        else:
+            genename = l.replace(">","").split("_")[0]
+    else:
+        l=line.rstrip()
+        reflength[genename]=len(l)
 
 'we store all sequences'
 cur_genome = SeqIO.parse(input_file, "fasta")
@@ -234,8 +368,14 @@ for line in tab:
         rmax = int(l[4])
         rscore = int(l[5])
 
+        num_exon=0
+        num_intron=0
+
         refposmin=rmin
         refposmax=rmax
+
+        aln_info=(str(genename),str(seqid),str(refid),str(refposmin),str(refposmax),str(rscore))
+        dict_aln.setdefault(genename, []).append(aln_info)
 
         contiglength=int(seqid.split("_")[3])
         contigcov=float(seqid.split("_")[5])
@@ -330,6 +470,7 @@ for line in tab:
             counthits[genename]=newcont
 
     if typeseq=="all":
+
         if l[2]=="gene":
 
             if contigcov<cov or contiglength<clen:
@@ -339,7 +480,15 @@ for line in tab:
 
             score = l[5]
             frame = l[6]
-            id=(genename,seqid,refid,refposmin,refposmax)
+            id=(genename,seqid,refid,refposmin,refposmax,score)
+
+            if id in stat_stored.keys():
+                pass
+            else:
+                stat_stored[id]={}
+                stat_stored[id]["exon"]=0
+                stat_stored[id]["intron"]=0
+
             if genename not in dicscore.keys():
                 dicscore.setdefault(genename, []).append(int(score))
                 #besthits.setdefault(genename, []).append(dicinfo)
@@ -389,17 +538,26 @@ for line in tab:
 
             'we store all combination genename/seqid/refid + frame'
             #id = (genename,seqid,refid,refposmin,refposmax)
-            dicframe=dict()
-            dicframe['frame']=str(frame)
-            stored.setdefault(id, []).append(dicframe)
+            if dict_aln[genename].count(aln_info)==1:
+                dicframe=dict()
+                dicframe['frame']=str(frame)
+                stored.setdefault(id, []).append(dicframe)
+                dicinfo = dict()
+                minpos = l[3]
+                maxpos = l[4]
+                dicinfo['min']=str(minpos)
+                dicinfo['max']=str(maxpos)
+                stored.setdefault(id, []).append(dicinfo)
+            else:
+                pass
 
-            dicinfo = dict()
-            minpos = l[3]
-            maxpos = l[4]
-            dicinfo['min']=str(minpos)
-            dicinfo['max']=str(maxpos)
-            stored.setdefault(id, []).append(dicinfo)
+        elif l[2]=='exon':
+            old_num=stat_stored[id]["exon"]
+            stat_stored[id]["exon"]=old_num+1
 
+        elif l[2]=="intron":
+            old_num=stat_stored[id]["intron"]
+            stat_stored[id]["intron"]=old_num+1
 
     else:
         if l[2]=="gene":
@@ -411,7 +569,15 @@ for line in tab:
 
             score = l[5]
             frame = l[6]
-            id=(genename,seqid,refid,refposmin,refposmax)
+            id=(genename,seqid,refid,refposmin,refposmax,score)
+
+            if id in stat_stored.keys():
+                pass
+            else:
+                stat_stored[id]={}
+                stat_stored[id]["exon"]=0
+                stat_stored[id]["intron"]=0
+
             'dictionary to identify the best score with combination seqID/refID'
             'we have to keep index in the same order of overlapp and create new dict'
             if genename not in dicscore.keys():
@@ -463,24 +629,63 @@ for line in tab:
 
             'we store all combination genename/seqid/refid + frame'
             #id = (genename,seqid,refid,refposmin,refposmax)
-            dicframe=dict()
-            dicframe['frame']=str(frame)
-            stored.setdefault(id, []).append(dicframe)
-
-        elif l[2]==typeseq:
-
-            if contigcov<cov or contiglength<clen:
-                continue
+            if dict_aln[genename].count(aln_info)==1:
+                dicframe=dict()
+                dicframe['frame']=str(frame)
+                stored.setdefault(id, []).append(dicframe)
             else:
                 pass
 
-            'we keep all cds position for each combination'
-            dicinfo = dict()
-            minpos = l[3]
-            maxpos = l[4]
-            dicinfo['min']=str(minpos)
-            dicinfo['max']=str(maxpos)
-            stored.setdefault(id, []).append(dicinfo)
+        elif typeseq=="exon":
+            if l[2]==typeseq:
+                if contigcov<cov or contiglength<clen:
+                    continue
+                else:
+                    pass
+
+                old_num=stat_stored[id]["exon"]
+                stat_stored[id]["exon"]=old_num+1
+
+                'we keep all cds position for each combination'
+                if dict_aln[genename].count(aln_info)==1:
+                    dicinfo = dict()
+                    minpos = l[3]
+                    maxpos = l[4]
+                    dicinfo['min']=str(minpos)
+                    dicinfo['max']=str(maxpos)
+                    stored.setdefault(id, []).append(dicinfo)
+                else:
+                    pass
+
+            elif l[2]=="intron":
+                old_num=stat_stored[id]["intron"]
+                stat_stored[id]["intron"]=old_num+1
+
+        elif typeseq=="intron":
+            if l[2]==typeseq:
+                if contigcov<cov or contiglength<clen:
+                    continue
+                else:
+                    pass
+
+                old_num=stat_stored[id]["intron"]
+                stat_stored[id]["intron"]=old_num+1
+
+                'we keep all cds position for each combination'
+                if dict_aln[genename].count(aln_info)==1:
+                    dicinfo = dict()
+                    minpos = l[3]
+                    maxpos = l[4]
+                    dicinfo['min']=str(minpos)
+                    dicinfo['max']=str(maxpos)
+                    stored.setdefault(id, []).append(dicinfo)
+                else:
+                    pass
+
+            elif l[2]=="exon":
+                old_num=stat_stored[id]["exon"]
+                stat_stored[id]["exon"]=old_num+1
+
 
 
 

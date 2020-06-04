@@ -80,7 +80,7 @@ def GeneExtraction(genenumber):
                 if feat.type == g_tab[0]:
                     if 'gene' in feat.qualifiers:
                         gene = feat.qualifiers['gene'][0]
-                        if (gene == g_tab[1]) or (gene == g_tab[1]+"_1"):
+                        if (gene == g_tab[1]) or (gene == g_tab[1]+"_1") or (gene in g_tab[1]):
                             'condition: if gene was the same as in list'
                             'we seek if gene is a tRNA type to extract the codon OR a CDS to keep also proteic sequence'
                             'AND we check for the curent record if we have only one copy of this gene'
@@ -204,8 +204,19 @@ def GeneExtraction(genenumber):
                                     flanked = FeatureLocation(s, e, strand)
                                     out_seq = flanked.extract(record.seq)
 
-                                header = ">"+str(name)+"; "+"gene="+g_tab[1]+"; "+"type="+str(model)+"; "+"length="+str(length)+"; "+"taxa="+taxaname+"; "+"taxid="+taxid_num+"; "+"count="+str(dict_genes[gene])
-                                fname = g_tab[1]+".fa"
+                                if g_tab[1]=="5.8S rRNA":
+                                    header = ">"+str(name)+"; "+"gene="+"rrn5.8S"+"; "+"type="+str(model)+"; "+"length="+str(length)+"; "+"taxa="+taxaname+"; "+"taxid="+taxid_num+"; "+"count="+str(dict_genes[gene])
+                                    fname = "rrn5.8S"+".fa"
+                                elif g_tab[1]=="rrnITS1":
+                                    header = ">"+str(name)+"; "+"gene="+"ITS1"+"; "+"type="+str(model)+"; "+"length="+str(length)+"; "+"taxa="+taxaname+"; "+"taxid="+taxid_num+"; "+"count="+str(dict_genes[gene])
+                                    fname = "ITS1"+".fa"
+                                elif g_tab[1]=="rrnITS2":
+                                    header = ">"+str(name)+"; "+"gene="+"ITS2"+"; "+"type="+str(model)+"; "+"length="+str(length)+"; "+"taxa="+taxaname+"; "+"taxid="+taxid_num+"; "+"count="+str(dict_genes[gene])
+                                    fname = "ITS2"+".fa"
+                                else:
+                                    header = ">"+str(name)+"; "+"gene="+g_tab[1]+"; "+"type="+str(model)+"; "+"length="+str(length)+"; "+"taxa="+taxaname+"; "+"taxid="+taxid_num+"; "+"count="+str(dict_genes[gene])
+                                    fname = g_tab[1]+".fa"
+
                                 typeofgene = g_tab[0]
 
                                 if os.path.isfile(os.path.join(outpath+"/"+model+'_'+typeofgene, fname)):
@@ -304,7 +315,7 @@ if model in ("chloroplast","nucrdna","mitochondrion"):
                 if feat.type == g_tab[0]:
                     if 'gene' in feat.qualifiers:
                         gene = feat.qualifiers['gene'][0]
-                        if (gene == g_tab[1]) or (gene == g_tab[1]+"_1"):
+                        if (gene == g_tab[1]) or (gene == g_tab[1]+"_1") or (gene in g_tab[1]):
                             if feat.type == "tRNA" :
                                 code=feat.qualifiers['anticodon'][0]
                                 gene_codon=gene+"-"+code

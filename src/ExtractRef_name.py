@@ -22,8 +22,6 @@ import os, errno
 parser = argparse.ArgumentParser(description='Extract closed genes for a query taxa. Script was writen by C. Pouchon (2020).')
 parser.add_argument("-in","--infile", help="input reference DB (fasta format)",
                     type=str)
-parser.add_argument("-g","--geneslist", help="list of genes to extract",
-                    type=str)
 parser.add_argument("-q","--query", help="taxa name or taxid if --taxid mode",
                     type=str)
 parser.add_argument("-o","--outdir", help="out directory path",
@@ -38,10 +36,8 @@ parser.add_argument("-d","--distance", help="phylogenetic distance matrix file o
                     type=str)
 parser.add_argument("-s","--seeds", help="sequence seeds",
                     type=str)
-parser.add_argument("--gene_type", help="type of genes to extract",
-                    type=str,choices=["CDS", "rRNA","tRNA"])
-parser.add_argument("--compartment", help="cellular compartment",
-                    type=str,choices=["chloroplast", "mitochondrion","nucrdna","nucleus"])
+parser.add_argument("--target", help="gene type targeted",
+                    type=str,choices=["chloroplast_CDS","chloroplast_tRNA","chloroplast_rRNA", "mitochondrion_CDS","mitochondrion_rRNA","nucrdna","nucleus_aa","nucleus_nt"])
 
 if len(sys.argv)==1:
     parser.print_help(sys.stderr)
@@ -83,14 +79,12 @@ class ProgressBar:
 
 ref_seeds=args.seeds
 model=args.mode
-typeg = args.gene_type
 outpath=args.outdir
 query_name = args.query
-mol=args.compartment
-input_list_genes = args.geneslist
+mol=args.target
 input_file = args.infile
 
-# #
+
 # mol="chloroplast"
 # #query_name = "Androsace_pubescens_229451_PHA000540_AXZ_B"
 # outpath="./"
@@ -128,16 +122,18 @@ else:
     else:
         pass
 
-fname = "closed_"+str(mol)+"_"+str(typeg)+".fa"
+mkdir(outpath)
+
+
+fname = "closed_"+str(mol)+".fa"
 open(os.path.join(outpath, fname), 'w').close()
 
-
-with open(input_list_genes) as f:
-    genes = f.readlines()
-types=[]
-for g in genes:
-    g_tab = g.rstrip().split('\t')
-    types.append(g_tab[0])
+# with open(input_list_genes) as f:
+#     genes = f.readlines()
+# types=[]
+# for g in genes:
+#     g_tab = g.rstrip().split('\t')
+#     types.append(g_tab[0])
 
 
 seeds_seq={}
@@ -167,39 +163,47 @@ for record in seeds_genome:
         else:
             seeds_seq[genename][tax_id].append(tokeep)
 
-# we need to check if we used the taxonomy that the query taxid is in the ncbi taxonomy database
+
 if model=="taxonomy":
     if len(ncbi.get_taxid_translator([int(query)]))==0:
-        for g in genes:
-            g_tab = g.rstrip().split('\t')
-            gene_id=g_tab[1]
-            gene_type=g_tab[0]
-            if gene_type == typeg:
-                out_header=">"+str(gene_id)+"_"+str(seeds_seq[gene_id][list(seeds_seq[gene_id].keys())[0]][0]['id'])
-                out_seq=str(seeds_seq[gene_id][list(seeds_seq[gene_id].keys())[0]][0]['seq'])
-                if os.path.isfile(os.path.join(outpath, fname)):
-                    with open(os.path.join(outpath, fname), 'a+') as file:
-                        old_headers = []
-                        end_file=file.tell()
-                        file.seek(0)
-                        for line in file:
-                            if line.startswith(">"):
-                                old_headers.append(line.rstrip())
-                        if not out_header in old_headers:
-                            file.seek(end_file)
-                            file.write(out_header+'\n')
-                            file.write(str(out_seq)+'\n')
-                        else:
-                            pass
-                else :
-                    with open(os.path.join(outpath, fname), 'a') as out:
-                        out.write(out_header+'\n')
-                        out.write(str(out_seq)+'\n')
-        os._exit(0)
+        if len(ncbi.get_name_translator([" ".join(query_name.split("_")[0:2])]))==0:
+            if len(ncbi.get_name_translator([" ".join(query_name.split("_")[0:1])]))==0:
+                print("WARN: Error on query taxid: %s, the seed sequences will be considered as closest sequences for each gene for this taxa." % str(query_name))
+                for g in seeds_seq.keys():
+                    if '5.8S' in g:
+                        gene_id="rrn5.8S"
+                    else:
+                        gene_id=g
+                    out_header=">"+str(gene_id)+"_"+str(seeds_seq[gene_id][list(seeds_seq[gene_id].keys())[0]][0]['id'])
+                    out_seq=str(seeds_seq[gene_id][list(seeds_seq[gene_id].keys())[0]][0]['seq'])
+                    if os.path.isfile(os.path.join(outpath, fname)):
+                        with open(os.path.join(outpath, fname), 'a+') as file:
+                            old_headers = []
+                            end_file=file.tell()
+                            file.seek(0)
+                            for line in file:
+                                if line.startswith(">"):
+                                    old_headers.append(line.rstrip())
+                            if not out_header in old_headers:
+                                file.seek(end_file)
+                                file.write(out_header+'\n')
+                                file.write(str(out_seq)+'\n')
+                            else:
+                                pass
+                    else :
+                        with open(os.path.join(outpath, fname), 'a') as out:
+                            out.write(out_header+'\n')
+                            out.write(str(out_seq)+'\n')
+                os._exit(0)
+            else:
+                genus_name=" ".join(query_name.split("_")[0:1])
+                query=int(ncbi.get_name_translator([genus_name])[genus_name][0])
+        else:
+            species_name=" ".join(query_name.split("_")[0:2])
+            query=int(ncbi.get_name_translator([species_name])[species_name][0])
     else:
         pass
 
-mkdir(outpath)
 
 stored={}
 
@@ -253,12 +257,12 @@ for record in cur_genome:
                     stored[genename][genus].append(tokeep)
 
 "we search the closed ref for each gene"
-for g in genes:
-    g_tab = g.rstrip().split('\t')
-    gene_id=g_tab[1]
-    gene_type=g_tab[0]
-
-    if gene_type == typeg:
+for g in seeds_seq.keys():
+    if '5.8S' in g:
+        gene_id="rrn5.8S"
+    else:
+        gene_id=g
+    if gene_id in stored.keys():
         if model=="taxonomy":
             taxid_list=[]
             if str(query) in stored[gene_id].keys():
@@ -328,6 +332,7 @@ for g in genes:
                         with open(os.path.join(outpath, fname), 'a') as out:
                             out.write(out_header+'\n')
                             out.write(str(out_seq)+'\n')
+                    print("WARN: Error to extract %s locus for the taxa: %s, the seed sequence will be choosed as closed reference." % (str(gene_id),str(query_name)))
                     continue
                 else:
                     taxid_all=taxid_list
@@ -338,17 +343,83 @@ for g in genes:
                         # we infer the taxonomy tree with the ref and the query taxid
                         taxid_all.append(query)
                         tree = ncbi.get_topology(taxid_all)
-                        t2=tree.search_nodes(name=str(query))[0].up
-                        closed_taxa = []
-                        for l in t2.get_leaves():
-                            if l.__dict__['taxid'] in taxid_all:
-                                closed_taxa.append(str(l.__dict__['taxid']))
+                        # we check if the query taxid was translated or not
+                        if len(tree.search_nodes(name=str(query)))==0:
+                            if len(ncbi.get_lineage(query))>0:
+                                search_taxid=ncbi.get_lineage(query)[len(ncbi.get_lineage(query))-1]
+                                if len(tree.search_nodes(name=str(search_taxid)))>0:
+                                    t2=tree.search_nodes(name=str(search_taxid))[0].up
+                                    closed_taxa = []
+                                    for l in t2.get_leaves():
+                                        if l.__dict__['taxid'] in taxid_all:
+                                            closed_taxa.append(str(l.__dict__['taxid']))
+                                        else:
+                                            continue
+                                    if str(query) in closed_taxa:
+                                        closed_taxa.remove(str(query))
+                                    elif str(search_taxid) in closed_taxa:
+                                        closed_taxa.remove(str(search_taxid))
+                                    else:
+                                        pass
+                                else:
+                                    out_header=">"+str(gene_id)+"_"+str(seeds_seq[gene_id][list(seeds_seq[gene_id].keys())[0]][0]['id'])
+                                    out_seq=str(seeds_seq[gene_id][list(seeds_seq[gene_id].keys())[0]][0]['seq'])
+                                    if os.path.isfile(os.path.join(outpath, fname)):
+                                        with open(os.path.join(outpath, fname), 'a+') as file:
+                                            old_headers = []
+                                            end_file=file.tell()
+                                            file.seek(0)
+                                            for line in file:
+                                                if line.startswith(">"):
+                                                    old_headers.append(line.rstrip())
+                                            if not out_header in old_headers:
+                                                file.seek(end_file)
+                                                file.write(out_header+'\n')
+                                                file.write(str(out_seq)+'\n')
+                                            else:
+                                                pass
+                                    else :
+                                        with open(os.path.join(outpath, fname), 'a') as out:
+                                            out.write(out_header+'\n')
+                                            out.write(str(out_seq)+'\n')
+                                    print("WARN: Error to extract %s locus for the taxa: %s, the seed sequence will be choosed as closed reference." % (str(gene_id),str(query_name)))
+                                    continue
                             else:
+                                out_header=">"+str(gene_id)+"_"+str(seeds_seq[gene_id][list(seeds_seq[gene_id].keys())[0]][0]['id'])
+                                out_seq=str(seeds_seq[gene_id][list(seeds_seq[gene_id].keys())[0]][0]['seq'])
+                                if os.path.isfile(os.path.join(outpath, fname)):
+                                    with open(os.path.join(outpath, fname), 'a+') as file:
+                                        old_headers = []
+                                        end_file=file.tell()
+                                        file.seek(0)
+                                        for line in file:
+                                            if line.startswith(">"):
+                                                old_headers.append(line.rstrip())
+                                        if not out_header in old_headers:
+                                            file.seek(end_file)
+                                            file.write(out_header+'\n')
+                                            file.write(str(out_seq)+'\n')
+                                        else:
+                                            pass
+                                else :
+                                    with open(os.path.join(outpath, fname), 'a') as out:
+                                        out.write(out_header+'\n')
+                                        out.write(str(out_seq)+'\n')
+                                print("WARN: Error to extract %s locus for the taxa: %s, the seed sequence will be choosed as closed reference." % (str(gene_id),str(query_name)))
                                 continue
-                        if str(query) in closed_taxa:
-                            closed_taxa.remove(str(query))
                         else:
-                            pass
+                            t2=tree.search_nodes(name=str(query))[0].up
+                            closed_taxa = []
+                            for l in t2.get_leaves():
+                                if l.__dict__['taxid'] in taxid_all:
+                                    closed_taxa.append(str(l.__dict__['taxid']))
+                                else:
+                                    continue
+                            if str(query) in closed_taxa:
+                                closed_taxa.remove(str(query))
+                            else:
+                                pass
+
         else:
             subdf = df.sort_values(by=query)[query]
             genera_list = [str(i) for i in stored[gene_id].keys()]
@@ -374,24 +445,69 @@ for g in genes:
         sub_best=list()
         sub_name=list()
 
-        for taxa in closed_taxa:
-            sub_lmax=list()
-            for subtaxa in stored[gene_id][taxa]:
-                sub_lmax.append(len(subtaxa['seq']))
-            sub_orderindx=sorted(range(len(sub_lmax)), key=lambda k: sub_lmax[k])
-            sub_orderindx.reverse()
-            sub_best.append(stored[gene_id][taxa][sub_orderindx[0]])
-            #sub_name.append(taxa)
+        if len(closed_taxa)==0:
+            out_header=">"+str(gene_id)+"_"+str(seeds_seq[gene_id][list(seeds_seq[gene_id].keys())[0]][0]['id'])
+            out_seq=str(seeds_seq[gene_id][list(seeds_seq[gene_id].keys())[0]][0]['seq'])
+            if os.path.isfile(os.path.join(outpath, fname)):
+                with open(os.path.join(outpath, fname), 'a+') as file:
+                    old_headers = []
+                    end_file=file.tell()
+                    file.seek(0)
+                    for line in file:
+                        if line.startswith(">"):
+                            old_headers.append(line.rstrip())
+                    if not out_header in old_headers:
+                        file.seek(end_file)
+                        file.write(out_header+'\n')
+                        file.write(str(out_seq)+'\n')
+                    else:
+                        pass
+            else :
+                with open(os.path.join(outpath, fname), 'a') as out:
+                    out.write(out_header+'\n')
+                    out.write(str(out_seq)+'\n')
+            print("WARN: Error to extract %s locus for the taxa: %s, the seed sequence will be choosed as closed reference." % (str(gene_id),str(query_name)))
+            continue
+        else:
+            for taxa in closed_taxa:
+                sub_lmax=list()
+                for subtaxa in stored[gene_id][taxa]:
+                    sub_lmax.append(len(subtaxa['seq']))
+                sub_orderindx=sorted(range(len(sub_lmax)), key=lambda k: sub_lmax[k])
+                sub_orderindx.reverse()
+                sub_best.append(stored[gene_id][taxa][sub_orderindx[0]])
+                #sub_name.append(taxa)
 
-        lmax=list()
-        for seq in sub_best:
-            lmax.append(len(seq['seq']))
-        orderindx=sorted(range(len(lmax)), key=lambda k: lmax[k])
-        orderindx.reverse()
+            lmax=list()
+            for seq in sub_best:
+                lmax.append(len(seq['seq']))
+            orderindx=sorted(range(len(lmax)), key=lambda k: lmax[k])
+            orderindx.reverse()
 
-        out_header=">"+str(gene_id)+"_"+str(sub_best[orderindx[0]]['id'])
-        out_seq=str(sub_best[orderindx[0]]['seq'])
+            out_header=">"+str(gene_id)+"_"+str(sub_best[orderindx[0]]['id'])
+            out_seq=str(sub_best[orderindx[0]]['seq'])
 
+            if os.path.isfile(os.path.join(outpath, fname)):
+                with open(os.path.join(outpath, fname), 'a+') as file:
+                    old_headers = []
+                    end_file=file.tell()
+                    file.seek(0)
+                    for line in file:
+                        if line.startswith(">"):
+                            old_headers.append(line.rstrip())
+                    if not out_header in old_headers:
+                        file.seek(end_file)
+                        file.write(out_header+'\n')
+                        file.write(str(out_seq)+'\n')
+                    else:
+                        pass
+            else :
+                with open(os.path.join(outpath, fname), 'a') as out:
+                    out.write(out_header+'\n')
+                    out.write(str(out_seq)+'\n')
+    else:
+        out_header=">"+str(gene_id)+"_"+str(seeds_seq[gene_id][list(seeds_seq[gene_id].keys())[0]][0]['id'])
+        out_seq=str(seeds_seq[gene_id][list(seeds_seq[gene_id].keys())[0]][0]['seq'])
         if os.path.isfile(os.path.join(outpath, fname)):
             with open(os.path.join(outpath, fname), 'a+') as file:
                 old_headers = []
@@ -410,3 +526,5 @@ for g in genes:
             with open(os.path.join(outpath, fname), 'a') as out:
                 out.write(out_header+'\n')
                 out.write(str(out_seq)+'\n')
+        print("WARN: Error %s locus not found in %s dataset, the seed sequence will be choosed as closed reference." % (str(gene_id),str(input_file)))
+        continue

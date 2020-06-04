@@ -17,7 +17,7 @@ parser = argparse.ArgumentParser(description='Export regions of query database f
 parser.add_argument("-i","--infile", help="Fasta input contigs file",
                     type=str)
 parser.add_argument("-m","--model", help="molecular type compartment",
-                    type=str,choices=["mitochondrion_CDS","mitochondrion_rRNA","mitochondrion_tRNA","chloroplast_CDS","chloroplast_RNA"])
+                    type=str,choices=["mitochondrion_CDS","mitochondrion_rRNA","mitochondrion_tRNA","chloroplast_CDS","chloroplast_RNA","nucrdna_rRNA"])
 parser.add_argument("-o","--outdir", help="Out directory path",
                     type=str)
 parser.add_argument("-g","--gfftab", help="input gff table from exonerate alignment",
@@ -69,63 +69,68 @@ class ProgressBar:
 def GeneExtraction(genenumber):
     contpart=[]
     geneid=list(besthits.keys())[genenumber]
-    if len(besthits[geneid])==1:
-        seqid = besthits[geneid][0][1]
-        dna=str(seqs[seqid][0])
-        newid = str(geneid)+"_"+"_".join(seqid.split("_")[1:len(seqid.split("_"))])
-    else:
-        hitparts={}
-        hitlen={}
-        for hits in besthits[geneid]:
-            if hits[1] in hitparts.keys():
-                hitparts[hits[1]]=hitparts[hits[1]]+1
-            else:
-                hitparts[hits[1]]=1
-            if hits[1] in hitlen.keys():
-                lenhit=int(hits[4])-int(hits[3])
-                hitlen[hits[1]]=hitlen[hits[1]]+lenhit
-            else:
-                lenhit=int(hits[4])-int(hits[3])
-                hitlen[hits[1]]=lenhit
 
-        if len(hitparts.keys()) ==1:
-            'sequence unique donc on recupere le bon id'
+    if 'rrnITS' not in geneid:
+        if len(besthits[geneid])==1:
             seqid = besthits[geneid][0][1]
             dna=str(seqs[seqid][0])
             newid = str(geneid)+"_"+"_".join(seqid.split("_")[1:len(seqid.split("_"))])
-
         else:
-            lmax=list()
-            for uniqhit in hitparts.keys():
-                lmax.append(hitlen[uniqhit])
-            orderindx=sorted(range(len(lmax)), key=lambda k: lmax[k])
-            orderindx.reverse()
-            'on garde le plus grand en alignement (reverse du min)'
-            seqid = hitparts.keys()[orderindx[0]]
-            dna=str(seqs[seqid][0])
-            newid = str(geneid)+"_"+"_".join(seqid.split("_")[1:len(seqid.split("_"))])
+            hitparts={}
+            hitlen={}
+            for hits in besthits[geneid]:
+                if hits[1] in hitparts.keys():
+                    hitparts[hits[1]]=hitparts[hits[1]]+1
+                else:
+                    hitparts[hits[1]]=1
+                if hits[1] in hitlen.keys():
+                    lenhit=int(hits[4])-int(hits[3])
+                    hitlen[hits[1]]=hitlen[hits[1]]+lenhit
+                else:
+                    lenhit=int(hits[4])-int(hits[3])
+                    hitlen[hits[1]]=lenhit
 
-    header = ">"+str(newid)
-    taxa="_".join(seqid.split("_")[1:len(seqid.split("_"))])
+            if len(hitparts.keys()) ==1:
+                'sequence unique donc on recupere le bon id'
+                seqid = besthits[geneid][0][1]
+                dna=str(seqs[seqid][0])
+                newid = str(geneid)+"_"+"_".join(seqid.split("_")[1:len(seqid.split("_"))])
 
-    if os.path.isfile(os.path.join(outpath+"/"+model, taxa+".fa")):
-        with open(os.path.join(outpath+"/"+model, taxa+".fa"), 'a+') as file:
-            old_headers = []
-            end_file=file.tell()
-            file.seek(0)
-            for line in file:
-                if line.startswith(">"):
-                    old_headers.append(line.replace(">",""))
-            if not str(newid) in old_headers:
-                file.seek(end_file)
-                file.write(header+'\n')
-                file.write(str(dna)+'\n')
             else:
-                pass
-    else :
-        with open(os.path.join(outpath+"/"+model, taxa+".fa"), 'w') as out:
-            out.write(header+'\n')
-            out.write(str(dna)+'\n')
+                lmax=list()
+                for uniqhit in hitparts.keys():
+                    lmax.append(hitlen[uniqhit])
+                orderindx=sorted(range(len(lmax)), key=lambda k: lmax[k])
+                orderindx.reverse()
+                'on garde le plus grand en alignement (reverse du min)'
+                seqid = hitparts.keys()[orderindx[0]]
+                dna=str(seqs[seqid][0])
+                newid = str(geneid)+"_"+"_".join(seqid.split("_")[1:len(seqid.split("_"))])
+
+        header = ">"+str(newid)
+        taxa="_".join(seqid.split("_")[1:len(seqid.split("_"))])
+
+        if os.path.isfile(os.path.join(outpath+"/"+model, taxa+".fa")):
+            with open(os.path.join(outpath+"/"+model, taxa+".fa"), 'a+') as file:
+                old_headers = []
+                end_file=file.tell()
+                file.seek(0)
+                for line in file:
+                    if line.startswith(">"):
+                        old_headers.append(line.rstrip().replace(">",""))
+                if not str(newid) in old_headers:
+                    file.seek(end_file)
+                    file.write(header+'\n')
+                    file.write(str(dna)+'\n')
+                else:
+                    pass
+        else :
+            with open(os.path.join(outpath+"/"+model, taxa+".fa"), 'w') as out:
+                out.write(header+'\n')
+                out.write(str(dna)+'\n')
+    else:
+        pass
+
 
 
 
@@ -143,8 +148,11 @@ groups={}
 seqs={}
 counthits={}
 
-
-mkdir(str(outpath+"/"+model))
+if model =="nucrdna_rRNA":
+    mkdir(str(outpath+"/"+model))
+    mkdir(str(outpath+"/"+model.replace("_rRNA","_misc_RNA")))
+else:
+    mkdir(str(outpath+"/"+model))
 
 'we store the gff tab'
 with open(file) as f:

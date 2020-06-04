@@ -14,10 +14,6 @@ import multiprocessing
 parser = argparse.ArgumentParser(description='Selection of taxa from fasta files')
 parser.add_argument("--inpath", help="searching path of sequences files",
                     type=str)
-parser.add_argument("-i","--infile", help="input file list of sequence files, sequences have to be aligned before",
-                    type=str)
-parser.add_argument("-pfind","--pathfind", help="[mode] search all sequences files in given path (-p) otherwise parse a given list (-i)",
-                    action="store_true")
 parser.add_argument("--outpath", help="output path to write sequences",
                     type=str)
 parser.add_argument("-t","--taxa", help="list of taxa to include in the final concatenated file",
@@ -46,19 +42,14 @@ def mkdir(path, overwrite=False):
 
 
 file_extension=args.extension
-if args.pathfind:
-    'Search all fasta files files'
-    path = args.inpath
-    in_files = []
-    for r, d, f in os.walk(path):
-        for file in f:
-            if str("."+file_extension) in file:
-                in_files.append(os.path.join(r, file))
-else:
-    'We parse a list of files'
-    input_list = args.infile
-    with open(input_list) as f:
-        in_files = f.readlines()
+'Search all fasta files files'
+path = args.inpath
+in_files = []
+for r, d, f in os.walk(path):
+    for file in f:
+        if str("."+file_extension) in file:
+            in_files.append(os.path.join(r, file))
+
 
 model=os.path.basename(os.path.normpath(path))
 outpath=args.outpath
