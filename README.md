@@ -7,7 +7,7 @@
 
 OrthoSkim is a pipeline providing different tools to capture targeted genes from whole genome shotgun sequencing libraries for nuclear, chloroplastic, ribosomal and mitochondrial compartments.
 
-This software was developed under the PhyloAlps (https://www.france-genomique.org/projet/phyloalps/) project.
+This software was developed under the PhyloAlps project (https://www.france-genomique.org/projet/phyloalps/).
 
 
 ### 1 . Installation
@@ -215,7 +215,7 @@ VASVVSEIGLGSEPAFKVPEYDFRSAVDSLKKTLGLPKAVLPALGGLIVGLIALAYPEVLYWGFENVDILLESRPRGLSA
 ```
 
 
-By default, OrthoSkim is supplied with sequences for plants containing the BUSCO plant set ([viridiplantaeae_odb10](https://busco-archive.ezlab.org/v3/datasets/prerelease/viridiplantae_odb10.tar.gz)), 353 UCE designed for angiosperms ([Johnson et al., 2018](https://doi.org/10.5061/dryad.s3h9r6j)) and all chloroplast, mitochondrion and nucrdna genes and annotations retrieved on GenBank for plants (in **data/** directory). Users can easily adapted the files for other models by respecting the rrecommendations(see documentation).
+By default, OrthoSkim is supplied with sequences for plants containing the BUSCO plant set ([viridiplantaeae_odb10](https://busco-archive.ezlab.org/v3/datasets/prerelease/viridiplantae_odb10.tar.gz)) and 353 UCE designed for angiosperms ([Johnson et al., 2018](https://doi.org/10.5061/dryad.s3h9r6j)) (in **data/** directory). Annotations of chloroplast, mitochondrion and nucrdna genes and for plants can be downloaded as shown in the *4.2 OrthoSkim tutorials* section. Users can easily adapted the files for other models by respecting the rrecommendations(see documentation).
 
 
 
@@ -486,20 +486,44 @@ Annotation needs to be collected in a single file in genbank/embl format. Seeds 
 
 In this section, we described a tutorial to capture chloroplastic, mitochondrial and ribosomal genes for our list of taxa.
 
-After the collection of annotation files for in the [NCBI](https://www.ncbi.nlm.nih.gov/genbank/), the installation of dependencies, and the creation of a sample file, the first step consists on the edition of the *config_orthoskim.txt* and the *tools.sh* files.
+
+##### 4.2.1. databases
+
+To begin, users have to install all dependencies, create a sample file, edit the *config_orthoskim.txt* and the *tools.sh* files and collect annotations files for the targeted compartments.
+
+Here, we show an example to collect these annotations from the [NCBI](https://www.ncbi.nlm.nih.gov/genbank/) for the chloroplast for plants.
 
 ```
-nano config_orthoskim.txt
-nano tools.sh
+wget -m -np -nd 'ftp://ftp.ncbi.nlm.nih.gov/refseq/release/plastid/' -A.genomic.gbff.gz
+gunzip *.genomic.gbff.gz
+cat *.genomic.gbff >> plastid.genomic.gb
+rm *.genomic.gbff
 ```
 
-After this, we compute the database for the three targets. This step is skipped for the others targets, as databases are need to be supplied.
+We supplied with OrthoSkim a function *AnnotFilter.py* to filter annotations according to taxonomy (e.g. viridiplantae). Here, we collected all annotations of viridiplantae.
+
+```
+~/OrthoSkim-master/AnnotFilter.py -i plastid.genomic.gb -f genbank -l viridiplantae -o ~/OrthoSkim-master/data/chloroplast_plants.gb
+Filtering annotations on taxonomy
+1 level(s) of taxonomy set: viridiplantae
+ 	 parsing annotations [............................................................] 100 %
+4869 / 5201 annotations selected on taxonomy
+```
+
+**NOTE:** the output (given with **-o**) has to be the same which is set in the config file (line 11: **CHLORO_ANNOTATIONS=**~/OrthoSkim-master/data/chloroplast_plants.gb).
+
+**NOTE:** multiple taxonomic levels can be given in -l with a coma separator (*e.g.* -l asteraceae,helianthae).
+
+
+Once all annotations are collected, we compute the database for the three targets. This step is skipped for the others targets, as databases are need to be supplied.
 
 ```
 ./orthoskim -m database -t chloroplast -c config_orthoskim.txt
 ./orthoskim -m database -t mitochondrion -c config_orthoskim.txt
 ./orthoskim -m database -t nucrdna -c config_orthoskim.txt
 ```
+
+##### 4.2.1. assemblies
 
 We next perform global assemblies of our samples et reformate the outputs.
 
@@ -513,6 +537,8 @@ If we want to get summary statistics of assemblies, users can run the following 
 ```
 ./orthoskim -m stat_assembly -c config_orthoskim.txt
 ```
+
+##### 4.2.1. gene capture
 
 The next step consists on capture all targeted genes into these assemblies. To do this, we run the `capture` mode with our different targets.
 
@@ -532,6 +558,7 @@ Summary statistics about the capture can be obtained by using the following mode
 ```
 **NOTE:** Here, multiple targets (-t) are given in the command same line.
 
+##### 4.2.1. alignments
 
 Finally, we compute a supermatrix by aligning captured genes (here on chloroplastic data) to infer phylogeny.
 
