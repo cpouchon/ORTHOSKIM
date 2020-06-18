@@ -1,5 +1,5 @@
 trnF	UUU	AAA
-trnF	UUC	GAA
+trnF	UUC GAA 
 trnL	UUA	UAA
 trnL	UUG	CAA
 trnL	CUU	AAG
@@ -44,7 +44,7 @@ trnD	GAU	AUC
 trnD	GAC	GUC
 trnE	GAA	UUC
 trnE	GAG	CUC
-trnC	UGU	ACA	
+trnC	UGU	ACA
 trnC	UGC	GCA
 trnW	UGG	CCA
 trnR	CGU	ACG

@@ -93,13 +93,13 @@ for file in cur_genome:
                             if len(ncbi.get_name_translator([" ".join(org)]))==0:
                                 break
                             else:
-                                taxid=ncbi.get_name_translator([" ".join(org)]).values()[0][0]
+                                taxid=list(ncbi.get_name_translator([" ".join(org)]).values())[0][0]
                                 lineages=ncbi.get_lineage(taxid)
-                                names = ncbi.get_taxid_translator(lineages).values()
+                                names = list(ncbi.get_taxid_translator(lineages).values())
                                 lin_names = [name.lower() for name in names]
                         else:
                             lineages=ncbi.get_lineage(taxid)
-                            names = ncbi.get_taxid_translator(lineages).values()
+                            names = list(ncbi.get_taxid_translator(lineages).values())
                             lin_names = [name.lower() for name in names]
 
                         for req_lin in query_lineages:

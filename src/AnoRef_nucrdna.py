@@ -116,11 +116,11 @@ if args.single:
                 else:
                     org=feat.qualifiers['organism'][0].split(" ")
                     taxid=feat.qualifiers['db_xref'][0].split(":")[1]
-                    taxaname=str(taxid+"_"+"_".join(org))
+                    taxaname=str(taxid+"_"+"_".join(org).replace("'","").replace("[","").replace("]","").replace(".","").replace("(","").replace(")","").replace(",","").replace("&","").replace("__","_").replace("_&_","_").replace("_cf_","_"))
 
             if "misc_" in feat.type:
                 if 'gene' in feat.qualifiers:
-                    gene = feat.qualifiers['gene'][0].replace(" ","")
+                    gene = feat.qualifiers['gene'][0].replace(" ","").replace("_","-")
                     barp=barp+1
                     if feat.location_operator=="join":
                         length=0
@@ -144,7 +144,7 @@ if args.single:
                         flanked = FeatureLocation(s, e, strand)
                         out_seq = flanked.extract(record.seq)
 
-                    header = ">"+str(gene)+"_"+str(taxid)+"_"+"_".join(org)
+                    header = ">"+str(gene)+"_"+str(taxid)+"_"+"_".join(org).replace("'","").replace("[","").replace("]","").replace(".","").replace("(","").replace(")","").replace(",","").replace("&","").replace("__","_").replace("_&_","_").replace("_cf_","_")
                     fname = taxaname+".fa"
                     subdir=str(model)+"_misc_RNA"
 
@@ -175,7 +175,7 @@ if args.single:
 
             elif feat.type == "rRNA":
                 if 'gene' in feat.qualifiers:
-                    gene = feat.qualifiers['gene'][0].replace(" ","")
+                    gene = feat.qualifiers['gene'][0].replace(" ","").replace("_","-")
                     barp=barp+1
                     if feat.location_operator=="join":
                         length=0
@@ -199,7 +199,7 @@ if args.single:
                         flanked = FeatureLocation(s, e, strand)
                         out_seq = flanked.extract(record.seq)
 
-                    header = ">"+str(gene)+"_"+str(taxid)+"_"+"_".join(org)
+                    header = ">"+str(gene)+"_"+str(taxid)+"_"+"_".join(org).replace("'","").replace("[","").replace("]","").replace(".","").replace("(","").replace(")","").replace(",","").replace("&","").replace("__","_").replace("_&_","_").replace("_cf_","_")
                     fname = taxaname+".fa"
                     subdir=str(model)+"_"+str("rRNA")
 
@@ -249,13 +249,13 @@ else:
                 if feat.type == 'source':
                     org=feat.qualifiers['organism'][0].split(" ")
                     taxid=feat.qualifiers['db_xref'][0].split(":")[1]
-                    taxaname=str(taxid+"_"+"_".join(org))
+                    taxaname=str(taxid+"_"+"_".join(org).replace("'","").replace("[","").replace("]","").replace(".","").replace("(","").replace(")","").replace(",","").replace("&","").replace("__","_").replace("_&_","_").replace("_cf_","_"))
 
                 if feat.type == "CDS":
                     if 'gene' in feat.qualifiers:
-                        gene = feat.qualifiers['gene'][0]
+                        gene = feat.qualifiers['gene'][0].replace("_","-").replace(" ","")
                         barp=barp+1
-                        header = ">"+str(gene)+"_"+str(taxid)+"_"+"_".join(org)
+                        header = ">"+str(gene)+"_"+str(taxid)+"_"+"_".join(org).replace("'","").replace("[","").replace("]","").replace(".","").replace("(","").replace(")","").replace(",","").replace("&","").replace("__","_").replace("_&_","_").replace("_cf_","_")
                         if 'translation' in feat.qualifiers:
                             out_seq = feat.qualifiers['translation'][0]
                             fname = taxaname+".fa"
@@ -291,7 +291,7 @@ else:
 
                 elif feat.type == "tRNA":
                     if 'gene' in feat.qualifiers:
-                        gene = feat.qualifiers['gene'][0]
+                        gene = feat.qualifiers['gene'][0].replace(" ","").replace("_","-")
                         barp=barp+1
                         if "anticodon" in feat.qualifiers:
                             code=feat.qualifiers['anticodon'][0]
@@ -320,7 +320,7 @@ else:
                             flanked = FeatureLocation(s, e, strand)
                             out_seq = flanked.extract(record.seq)
 
-                        header = ">"+str(gene_codon)+"_"+str(taxid)+"_"+"_".join(org)
+                        header = ">"+str(gene_codon)+"_"+str(taxid)+"_"+"_".join(org).replace("'","").replace("[","").replace("]","").replace(".","").replace("(","").replace(")","").replace(",","").replace("&","").replace("__","_").replace("_&_","_").replace("_cf_","_")
                         fname = taxaname+".fa"
                         subdir=str(model)+"_"+str("tRNA")
 
@@ -376,7 +376,7 @@ else:
                             flanked = FeatureLocation(s, e, strand)
                             out_seq = flanked.extract(record.seq)
 
-                        header = ">"+str(gene)+"_"+str(taxid)+"_"+"_".join(org)
+                        header = ">"+str(gene)+"_"+str(taxid)+"_"+"_".join(org).replace("'","").replace("[","").replace("]","").replace(".","").replace("(","").replace(")","").replace(",","").replace("&","").replace("__","_").replace("_&_","_").replace("_cf_","_")
                         fname = taxaname+".fa"
                         subdir=str(model)+"_"+str("rRNA")
 

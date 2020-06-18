@@ -266,16 +266,16 @@ mkdir -p ${RES}/Extraction
 		echo "INFO: mode=$mode - Creation of mitochondrial database from annotations for CDS, tRNA and rRNA features"
 		mkdir -p ${RES}/references/unclean
     echo '*** extraction of all genes from annotations ***'
-    echo "CMD: `dirname $0`/src/AnoRef_extraction.py --single -in ${MITO_ANNOTATIONS} -o ${RES}/references/unclean -m mitochondrion -fmt ${DB_FMT}"
-		`dirname $0`/src/AnoRef_extraction.py --single -in ${MITO_ANNOTATIONS} -o ${RES}/references/unclean -m mitochondrion -fmt ${DB_FMT}
+    echo "CMD: `dirname $0`/src/AnoRef_extraction.py --single -in ${MITO_ANNOTATIONS} -o ${RES}/references/unclean -m mitochondrion -fmt ${DB_FMT} --codon `dirname $0`/ressources/tRNA_codons.tab"
+		`dirname $0`/src/AnoRef_extraction.py --single -in ${MITO_ANNOTATIONS} -o ${RES}/references/unclean -m mitochondrion -fmt ${DB_FMT} --codon `dirname $0`/ressources/tRNA_codons.tab
 
 		echo '*** alignment of CDS into mito seeds, and extraction of final CDS of reference ***'
 		for file in `find ${RES}/references/unclean/mitochondrion_CDS/ -type f -name \*.fa`;
 		do
-      echo "CMD: ${EXONERATE} -q ${SEEDS_MITO_CDS} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/references/tmp.exonerate"
-			${EXONERATE} -q ${SEEDS_MITO_CDS} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/references/tmp.exonerate
-      echo "CMD: `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_MITO_CDS} -g ${RES}/references/tmp.exonerate -m mitochondrion_CDS -o ${RES}/references/clean --threads ${THREADS}"
-      `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_MITO_CDS} -g ${RES}/references/tmp.exonerate -m mitochondrion_CDS -o ${RES}/references/clean --threads ${THREADS}
+      echo "CMD: ${EXONERATE} -s ${EXO_SCORE} -q ${SEEDS_MITO_CDS} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/references/tmp.exonerate"
+			${EXONERATE} -s ${EXO_SCORE} -q ${SEEDS_MITO_CDS} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/references/tmp.exonerate
+      echo "CMD: `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_MITO_CDS} -g ${RES}/references/tmp.exonerate -m mitochondrion_CDS -o ${RES}/references/clean --threads 1"
+      `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_MITO_CDS} -g ${RES}/references/tmp.exonerate -m mitochondrion_CDS -o ${RES}/references/clean --threads 1
 		done
 		cat ${RES}/references/clean/mitochondrion_CDS/*.fa > ${MITO_REF_CDS}
     rm -rf ${RES}/references/unclean/mitochondrion_CDS/
@@ -284,10 +284,10 @@ mkdir -p ${RES}/Extraction
     echo '*** alignment of rRNA into mito seeds, and extraction of final rRNA of reference ***'
 		for file in `find ${RES}/references/unclean/mitochondrion_rRNA/ -type f -name \*.fa`;
 		do
-      echo "CMD: ${EXONERATE} -q ${SEEDS_MITO_rRNA} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/references/tmp.exonerate"
-			${EXONERATE} -q ${SEEDS_MITO_rRNA} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/references/tmp.exonerate
-      echo "CMD: `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_MITO_rRNA} -g ${RES}/references/tmp.exonerate -m mitochondrion_rRNA -o ${RES}/references/clean --threads ${THREADS}"
-      `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_MITO_rRNA} -g ${RES}/references/tmp.exonerate -m mitochondrion_rRNA -o ${RES}/references/clean --threads ${THREADS}
+      echo "CMD: ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${SEEDS_MITO_rRNA} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/references/tmp.exonerate"
+			${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${SEEDS_MITO_rRNA} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/references/tmp.exonerate
+      echo "CMD: `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_MITO_rRNA} -g ${RES}/references/tmp.exonerate -m mitochondrion_rRNA -o ${RES}/references/clean --threads 1"
+      `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_MITO_rRNA} -g ${RES}/references/tmp.exonerate -m mitochondrion_rRNA -o ${RES}/references/clean --threads 1
 		done
 		cat ${RES}/references/clean/mitochondrion_rRNA/*.fa > ${MITO_REF_rRNA}
     rm -rf ${RES}/references/unclean/mitochondrion_rRNA/
@@ -310,16 +310,16 @@ mkdir -p ${RES}/Extraction
     echo "INFO: mode=$mode - Creation of nucrdna database from  annotations for rRNA features"
     mkdir -p ${RES}/references/unclean
     echo '*** extraction of all genes from annotations ***'
-    echo "CMD: `dirname $0`/src/AnoRef_nucrdna.py --single -in ${NRDNA_ANNOTATIONS} -o ${RES}/references/unclean -m mitochondrion -fmt ${DB_FMT}"
+    echo "CMD: `dirname $0`/src/AnoRef_nucrdna.py --single -in ${NRDNA_ANNOTATIONS} -o ${RES}/references/unclean -m nucrdna -fmt ${DB_FMT}"
     `dirname $0`/src/AnoRef_nucrdna.py --single -in ${NRDNA_ANNOTATIONS} -o ${RES}/references/unclean -m nucrdna -fmt ${DB_FMT}
 
     echo '*** alignment of rRNA into seeds, and extraction of final reference ***'
     for file in `find ${RES}/references/unclean/nucrdna_rRNA/ -type f -name \*.fa`;
     do
-      echo "CMD: ${EXONERATE} -q ${SEEDS_NRDNA} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/references/tmp.exonerate"
-      ${EXONERATE} -q ${SEEDS_NRDNA} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/references/tmp.exonerate
-      echo "CMD: `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_NRDNA} -g ${RES}/references/tmp.exonerate -m nucrdna_rRNA -o ${RES}/references/clean --threads ${THREADS}"
-      `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_NRDNA} -g ${RES}/references/tmp.exonerate -m nucrdna_rRNA -o ${RES}/references/clean --threads ${THREADS}
+      echo "CMD: ${EXONERATE} --model genome2genome -s 100 -q ${SEEDS_NRDNA} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/references/tmp.exonerate"
+      ${EXONERATE} --model genome2genome -s 100 -q ${SEEDS_NRDNA} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/references/tmp.exonerate
+      echo "CMD: `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_NRDNA} -g ${RES}/references/tmp.exonerate -m nucrdna_rRNA -o ${RES}/references/clean --threads 1"
+      `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_NRDNA} -g ${RES}/references/tmp.exonerate -m nucrdna_rRNA -o ${RES}/references/clean --threads 1
     done
 
     `dirname $0`/src/rrnITS.py -p ${RES}/references/clean/nucrdna_rRNA -o ${RES}/references/clean/nucrdna_misc_RNA
@@ -336,16 +336,16 @@ mkdir -p ${RES}/Extraction
 		echo "INFO: mode=$mode - Creation of chloroplast database from annotations for CDS, tRNA and rRNA features"
 		mkdir -p ${RES}/references/unclean
     echo '*** extraction of all genes from annotations ***'
-    echo "CMD: `dirname $0`/src/AnoRef_extraction.py --single -in ${CHLORO_ANNOTATIONS} -o ${RES}/references/unclean -m chloroplast -fmt ${DB_FMT}"
-		`dirname $0`/src/AnoRef_extraction.py --single -in ${CHLORO_ANNOTATIONS} -o ${RES}/references/unclean -m chloroplast -fmt ${DB_FMT}
+    echo "CMD: `dirname $0`/src/AnoRef_extraction.py --single -in ${CHLORO_ANNOTATIONS} -o ${RES}/references/unclean -m chloroplast -fmt ${DB_FMT} --codon `dirname $0`/ressources/tRNA_codons.tab"
+		`dirname $0`/src/AnoRef_extraction.py --single -in ${CHLORO_ANNOTATIONS} -o ${RES}/references/unclean -m chloroplast -fmt ${DB_FMT} --codon `dirname $0`/ressources/tRNA_codons.tab
 
 		echo '*** alignment of CDS into seeds, and extraction of final CDS of reference ***'
 		for file in `find ${RES}/references/unclean/chloroplast_CDS/ -type f -name \*.fa`;
 		do
-      echo "CMD: ${EXONERATE} -q ${SEEDS_CHLORO_CDS} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/references/tmp.exonerate"
-			${EXONERATE} -q ${SEEDS_CHLORO_CDS} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/references/tmp.exonerate
-      echo "CMD: `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_CHLORO_CDS} -g ${RES}/references/tmp.exonerate -m chloroplast_CDS -o ${RES}/references/clean --threads ${THREADS}"
-      `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_CHLORO_CDS} -g ${RES}/references/tmp.exonerate -m chloroplast_CDS -o ${RES}/references/clean --threads ${THREADS}
+      echo "CMD: ${EXONERATE} -s ${EXO_SCORE} -q ${SEEDS_CHLORO_CDS} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/references/tmp.exonerate"
+			${EXONERATE} -s ${EXO_SCORE} -q ${SEEDS_CHLORO_CDS} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/references/tmp.exonerate
+      echo "CMD: `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_CHLORO_CDS} -g ${RES}/references/tmp.exonerate -m chloroplast_CDS -o ${RES}/references/clean --threads 1"
+      `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_CHLORO_CDS} -g ${RES}/references/tmp.exonerate -m chloroplast_CDS -o ${RES}/references/clean --threads 1
 		done
 		cat ${RES}/references/clean/chloroplast_CDS/*.fa > ${CHLORO_REF_CDS}
     rm -rf ${RES}/references/unclean/chloroplast_CDS/
@@ -354,10 +354,10 @@ mkdir -p ${RES}/Extraction
     echo '*** alignment of rRNA into seeds, and extraction of final rRNA of reference ***'
 		for file in `find ${RES}/references/unclean/chloroplast_rRNA/ -type f -name \*.fa`;
 		do
-      echo "CMD: ${EXONERATE} -q ${SEEDS_CHLORO_rRNA} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/references/tmp.exonerate"
-			${EXONERATE} -q ${SEEDS_CHLORO_rRNA} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/references/tmp.exonerate
-      echo "CMD: `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_CHLORO_rRNA} -g ${RES}/references/tmp.exonerate -m chloroplast_rRNA -o ${RES}/references/clean --threads ${THREADS}"
-      `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_CHLORO_rRNA} -g ${RES}/references/tmp.exonerate -m chloroplast_rRNA -o ${RES}/references/clean --threads ${THREADS}
+      echo "CMD: ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${SEEDS_CHLORO_rRNA} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/references/tmp.exonerate"
+			${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${SEEDS_CHLORO_rRNA} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/references/tmp.exonerate
+      echo "CMD: `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_CHLORO_rRNA} -g ${RES}/references/tmp.exonerate -m chloroplast_rRNA -o ${RES}/references/clean --threads 1"
+      `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_CHLORO_rRNA} -g ${RES}/references/tmp.exonerate -m chloroplast_rRNA -o ${RES}/references/clean --threads 1
 		done
 		cat ${RES}/references/clean/chloroplast_rRNA/*.fa > ${CHLORO_REF_rRNA}
     rm -rf ${RES}/references/unclean/chloroplast_rRNA/
@@ -366,10 +366,10 @@ mkdir -p ${RES}/Extraction
     echo '*** alignment of tRNA into seeds, and extraction of final tRNA of reference ***'
 		for file in `find ${RES}/references/unclean/chloroplast_tRNA/ -type f -name \*.fa`;
 		do
-      echo "CMD: ${EXONERATE} -q ${SEEDS_CHLORO_tRNA} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/references/tmp.exonerate"
-			${EXONERATE} -q ${SEEDS_CHLORO_tRNA} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/references/tmp.exonerate
-      echo "CMD: `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_CHLORO_tRNA} -g ${RES}/references/tmp.exonerate -m chloroplast_tRNA -o ${RES}/references/clean --threads ${THREADS}"
-      `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_CHLORO_tRNA} -g ${RES}/references/tmp.exonerate -m chloroplast_tRNA -o ${RES}/references/clean --threads ${THREADS}
+      echo "CMD: ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${SEEDS_CHLORO_tRNA} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/references/tmp.exonerate"
+			${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${SEEDS_CHLORO_tRNA} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/references/tmp.exonerate
+      echo "CMD: `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_CHLORO_tRNA} -g ${RES}/references/tmp.exonerate -m chloroplast_tRNA -o ${RES}/references/clean --threads 1"
+      `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_CHLORO_tRNA} -g ${RES}/references/tmp.exonerate -m chloroplast_tRNA -o ${RES}/references/clean --threads 1
 		done
 		cat ${RES}/references/clean/chloroplast_tRNA/*.fa > ${CHLORO_REF_tRNA}
     rm -rf ${RES}/references/unclean/chloroplast_tRNA/

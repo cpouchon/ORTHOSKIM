@@ -79,18 +79,18 @@ def GeneExtraction(genenumber):
             hitparts={}
             hitlen={}
             for hits in besthits[geneid]:
-                if hits[1] in hitparts.keys():
+                if hits[1] in list(hitparts.keys()):
                     hitparts[hits[1]]=hitparts[hits[1]]+1
                 else:
                     hitparts[hits[1]]=1
-                if hits[1] in hitlen.keys():
+                if hits[1] in list(hitlen.keys()):
                     lenhit=int(hits[4])-int(hits[3])
                     hitlen[hits[1]]=hitlen[hits[1]]+lenhit
                 else:
                     lenhit=int(hits[4])-int(hits[3])
                     hitlen[hits[1]]=lenhit
 
-            if len(hitparts.keys()) ==1:
+            if len(list(hitparts.keys())) ==1:
                 'sequence unique donc on recupere le bon id'
                 seqid = besthits[geneid][0][1]
                 dna=str(seqs[seqid][0])
@@ -98,12 +98,12 @@ def GeneExtraction(genenumber):
 
             else:
                 lmax=list()
-                for uniqhit in hitparts.keys():
+                for uniqhit in list(hitparts.keys()):
                     lmax.append(hitlen[uniqhit])
                 orderindx=sorted(range(len(lmax)), key=lambda k: lmax[k])
                 orderindx.reverse()
                 'on garde le plus grand en alignement (reverse du min)'
-                seqid = hitparts.keys()[orderindx[0]]
+                seqid = list(hitparts.keys())[orderindx[0]]
                 dna=str(seqs[seqid][0])
                 newid = str(geneid)+"_"+"_".join(seqid.split("_")[1:len(seqid.split("_"))])
 
@@ -183,7 +183,7 @@ for record in cur_genome:
 for line in tab:
     l = line.rstrip().split("\t")
     'intialisation of the scan'
-    if l[0] in refnames:
+    if l[0] in refnames and "Target" in l[len(l)-1]:
 
         genename = l[0].split("_")[0]
 
@@ -199,7 +199,7 @@ for line in tab:
 
 
         'we make groups for gene with borne values'
-        if genename not in groups.keys():
+        if genename not in list(groups.keys()):
             dic=[]
             dic.append(rmin)
             dic.append(rmax)
@@ -260,7 +260,7 @@ for line in tab:
 
         contname=[]
         contname.append(seqid)
-        if genename not in counthits.keys():
+        if genename not in list(counthits.keys()):
              counthits.setdefault(genename, []).append(contname)
         else:
             newcont=[]
@@ -288,7 +288,7 @@ for line in tab:
             score = l[5]
             frame = l[6]
             id=(genename,seqid,refid,refposmin,refposmax)
-            if genename not in dicscore.keys():
+            if genename not in list(dicscore.keys()):
                 dicscore.setdefault(genename, []).append(int(score))
                 #besthits.setdefault(genename, []).append(dicinfo)
                 besthits.setdefault(genename, []).append(id)
