@@ -316,8 +316,8 @@ mkdir -p ${RES}/Extraction
     echo '*** alignment of rRNA into seeds, and extraction of final reference ***'
     for file in `find ${RES}/references/unclean/nucrdna_rRNA/ -type f -name \*.fa`;
     do
-      echo "CMD: ${EXONERATE} --model genome2genome -s 100 -q ${SEEDS_NRDNA} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/references/tmp.exonerate"
-      ${EXONERATE} --model genome2genome -s 100 -q ${SEEDS_NRDNA} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/references/tmp.exonerate
+      echo "CMD: ${EXONERATE} --model genome2genome -q ${SEEDS_NRDNA} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/references/tmp.exonerate"
+      ${EXONERATE} --model genome2genome -q ${SEEDS_NRDNA} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' > ${RES}/references/tmp.exonerate
       echo "CMD: `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_NRDNA} -g ${RES}/references/tmp.exonerate -m nucrdna_rRNA -o ${RES}/references/clean --threads 1"
       `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_NRDNA} -g ${RES}/references/tmp.exonerate -m nucrdna_rRNA -o ${RES}/references/clean --threads 1
     done
