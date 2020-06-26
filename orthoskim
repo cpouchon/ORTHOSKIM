@@ -77,7 +77,17 @@ if [ ${VERBOSE} -eq 1 ]; then
 fi
 
 
-echo "Processing OrthoSkim program"
+echo $'Processing OrthoSkim program\n'
+echo "
+____________________________________________________
+   ___       _   _          ____  _  ___
+' / _ \ _ __| |_| |__   ___/ ___|| |/ (_)_ __ ___  '
+'| | | |  __| __|  _ \ / _ \___ \|   /| |  _   _  \'
+'| |_| | |  | |_| | | | (_) |__) | . \| | | | | | |'
+' \___/|_|   \__|_| |_|\___/____/|_|\_\_|_| |_| |_|'
+____________________________________________________
+
+"
 
 mkdir -p ${RES}/Assembly/Samples
 mkdir -p ${RES}/Extraction
@@ -87,6 +97,7 @@ mkdir -p ${RES}/Extraction
     echo "CMD: `dirname $0`/src/Indexing.py -p ${path} -cfind > ${LIST_FILES}"
 		`dirname $0`/src/Indexing.py -p ${path} -cfind > ${LIST_FILES}
 		echo "STATUS: done"
+    echo ""
 		exit 0
 
 
@@ -103,6 +114,7 @@ mkdir -p ${RES}/Extraction
       fi
     done <${LIST_FILES}
 		echo "STATUS: done"
+    echo ""
 		exit 0
 
 	elif [ $mode == 'SPAdes_assembly' ]; then
@@ -139,6 +151,7 @@ mkdir -p ${RES}/Extraction
       fi
 		done <${LIST_FILES}
 		echo "STATUS: done"
+    echo ""
 		exit 0
 
 	elif [ $mode == 'capture' ] && [ $target == 'busco' ]; then
@@ -200,6 +213,7 @@ mkdir -p ${RES}/Extraction
       fi
 		done
 		echo "STATUS: done"
+    echo ""
 		exit 0
 
 	elif [ $mode == 'phyloskim_extraction_targeted' ] && [ $target == 'chloroplast' ]; then
@@ -209,23 +223,23 @@ mkdir -p ${RES}/Extraction
 			samplename=`echo ${f} | awk '{print $1}'`
 			file=`echo ${f} | awk '{print $4}'`
       if [ -s ${RES}/chloroplast_done.log ]; then
-        if grep -Fxq "${file}" ${RES}/chloroplast_done.log; then
-          echo "WARN: $file already processed"
+        if grep -Fxq "${samplename}" ${RES}/chloroplast_done.log; then
+          echo "WARN: $samplename already processed"
           continue
         else
           echo "CMD: `dirname $0`/src/AnoSamp_threads.py -t ${file} -n ${samplename} -m \"chloroplast\" -g ${CHLORO_GENES} -fmt ${DB_FMT} -o ${RES}/Extraction/ --threads ${THREADS}"
     			if `dirname $0`/src/AnoSamp_threads.py -t ${file} -n ${samplename} -m "chloroplast" -g ${CHLORO_GENES} -fmt ${DB_FMT} -o ${RES}/Extraction/ --threads ${THREADS}; then
-            echo $file >> ${RES}/chloroplast_done.log
+            echo $samplename >> ${RES}/chloroplast_done.log
           else
-            echo $file >> ${RES}/chloroplast_error.log
+            echo $samplename >> ${RES}/chloroplast_error.log
           fi
         fi
       else
         echo "CMD: `dirname $0`/src/AnoSamp_threads.py -t ${file} -n ${samplename} -m \"chloroplast\" -g ${CHLORO_GENES} -fmt ${DB_FMT} -o ${RES}/Extraction/ --threads ${THREADS}"
   			if `dirname $0`/src/AnoSamp_threads.py -t ${file} -n ${samplename} -m "chloroplast" -g ${CHLORO_GENES} -fmt ${DB_FMT} -o ${RES}/Extraction/ --threads ${THREADS}; then
-          echo $file >> ${RES}/chloroplast_done.log
+          echo $samplename >> ${RES}/chloroplast_done.log
         else
-          echo $file >> ${RES}/chloroplast_error.log
+          echo $samplename >> ${RES}/chloroplast_error.log
         fi
       fi
 		done <${LIST_FILES}
@@ -239,27 +253,28 @@ mkdir -p ${RES}/Extraction
 			samplename=`echo ${f} | awk '{print $1}'`
 			file=`echo ${f} | awk '{print $4}' | perl -pe 's/.chloro.embl/.rdnanuc.embl/'`
       if [ -s ${RES}/nucrdna_done.log ]; then
-        if grep -Fxq "${file}" ${RES}/nucrdna_done.log; then
-          echo "WARN: $file already processed"
+        if grep -Fxq "${samplename}" ${RES}/nucrdna_done.log; then
+          echo "WARN: $samplename already processed"
           continue
         else
           echo "CMD: `dirname $0`/src/AnoSamp_threads.py -t ${file} -n ${samplename} -m \"nucrdna\" -g ${NRDNA_GENES} -fmt ${DB_FMT} -o ${RES}/Extraction/ --threads ${THREADS}"
           if `dirname $0`/src/AnoSamp_threads.py -t ${file} -n ${samplename} -m "nucrdna" -g ${NRDNA_GENES} -fmt ${DB_FMT} -o ${RES}/Extraction/ --threads ${THREADS}; then
-            echo ${file} >> ${RES}/nucrdna_done.log
+            echo ${samplename} >> ${RES}/nucrdna_done.log
           else
-            echo ${file} >> ${RES}/nucrdna_error.log
+            echo ${samplename} >> ${RES}/nucrdna_error.log
           fi
         fi
       else
         echo "CMD: `dirname $0`/src/AnoSamp_threads.py -t ${file} -n ${samplename} -m \"nucrdna\" -g ${NRDNA_GENES} -fmt ${DB_FMT} -o ${RES}/Extraction/ --threads ${THREADS}"
         if `dirname $0`/src/AnoSamp_threads.py -t ${file} -n ${samplename} -m "nucrdna" -g ${NRDNA_GENES} -fmt ${DB_FMT} -o ${RES}/Extraction/ --threads ${THREADS}; then
-          echo ${file} >> ${RES}/nucrdna_done.log
+          echo ${samplename} >> ${RES}/nucrdna_done.log
         else
-          echo ${file} >> ${RES}/nucrdna_error.log
+          echo ${samplename} >> ${RES}/nucrdna_error.log
         fi
       fi
 		done <${LIST_FILES}
 		echo "STATUS: done"
+    echo ""
 		exit 0
 
 	elif [ $mode == 'database' ] && [ $target == 'mitochondrion' ]; then
@@ -292,6 +307,7 @@ mkdir -p ${RES}/Extraction
 		cat ${RES}/references/clean/mitochondrion_rRNA/*.fa > ${MITO_REF_rRNA}
     rm -rf ${RES}/references/unclean/mitochondrion_rRNA/
 		echo "STATUS: done"
+    echo ""
 
     # echo '*** alignment of tRNA into mito seeds, and extraction of final tRNA of reference ***'
 		# for file in `find ${RES}/references/unclean/mitochondrion_tRNA/ -type f -name \*.fa`;
@@ -329,6 +345,7 @@ mkdir -p ${RES}/Extraction
     cat ${RES}/references/clean/nucrdna_misc_RNA/*.fa >> ${NRDNA_REF}
     rm -rf ${RES}/references/unclean/nucrdna_rRNA/
     echo "STATUS: done"
+    echo ""
 
     exit 0
 
@@ -374,7 +391,7 @@ mkdir -p ${RES}/Extraction
 		cat ${RES}/references/clean/chloroplast_tRNA/*.fa > ${CHLORO_REF_tRNA}
     rm -rf ${RES}/references/unclean/chloroplast_tRNA/
 		echo "STATUS: done"
-
+    echo ""
 		exit 0
 
   elif [ $mode == 'phyloskim_database' ] && [ $target == 'chloroplast' ]; then
@@ -383,24 +400,25 @@ mkdir -p ${RES}/Extraction
     while read f;
 		do
 			file=`echo ${f} | awk '{print $4}'`
+      lib=`echo ${f} | awk '{print $1}'`
       if [ -s ${RES}/references/chloroplast_done.log ]; then
-        if grep -Fxq "${file}" ${RES}/references/chloroplast_done.log; then
-          echo "WARN: $file already processed"
+        if grep -Fxq "${lib}" ${RES}/references/chloroplast_done.log; then
+          echo "WARN: $lib already processed"
           continue
         else
           echo "CMD: `dirname $0`/src/AnoRef_phyloskim.py -i ${file} -m chloroplast -g ${CHLORO_GENES} -fmt ${DB_FMT} -o ${RES}/references/clean"
     			if `dirname $0`/src/AnoRef_phyloskim.py -i ${file} -m chloroplast -g ${CHLORO_GENES} -fmt ${DB_FMT} -o ${RES}/references/clean; then
-            echo $file >> ${RES}/references/chloroplast_done.log
+            echo $lib >> ${RES}/references/chloroplast_done.log
           else
-            echo $file >> ${RES}/references/chloroplast_error.log
+            echo $lib >> ${RES}/references/chloroplast_error.log
           fi
         fi
       else
         echo "CMD: `dirname $0`/src/AnoRef_phyloskim.py -i ${file} -m chloroplast -g ${CHLORO_GENES} -fmt ${DB_FMT} -o ${RES}/references/clean"
   			if `dirname $0`/src/AnoRef_phyloskim.py -i ${file} -m chloroplast -g ${CHLORO_GENES} -fmt ${DB_FMT} -o ${RES}/references/clean; then
-          echo $file >> ${RES}/references/chloroplast_done.log
+          echo $lib >> ${RES}/references/chloroplast_done.log
         else
-          echo $file >> ${RES}/references/chloroplast_error.log
+          echo $lib >> ${RES}/references/chloroplast_error.log
         fi
       fi
 		done <${LIST_FILES}
@@ -410,6 +428,7 @@ mkdir -p ${RES}/Extraction
     cat ${RES}/references/clean/chloroplast_genomes.{embl,gb} > ${CHLORO_ANNOTATIONS}
 
 		echo "STATUS: done"
+    echo ""
 		exit 0
 
   elif [ $mode == 'phyloskim_database' ] && [ $target == 'nucrdna' ]; then
@@ -418,36 +437,38 @@ mkdir -p ${RES}/Extraction
     while read f;
 		do
 			file=`echo ${f} | awk '{print $4}' | perl -pe 's/.chloro.embl/.rdnanuc.embl/'`
+      lib=`echo ${f} | awk '{print $1}'`
       if [ -s ${RES}/references/nucrdna_done.log ]; then
-        if grep -Fxq "${file}" ${RES}/references/nucrdna_done.log; then
-          echo "WARN: $file already processed"
+        if grep -Fxq "${lib}" ${RES}/references/nucrdna_done.log; then
+          echo "WARN: $lib already processed"
           continue
         else
           echo "CMD: `dirname $0`/src/AnoRef_phyloskim.py -i ${file} -m nucrdna -g ${NRDNA_GENES} -fmt ${DB_FMT} -o ${RES}/references/clean"
     			if `dirname $0`/src/AnoRef_phyloskim.py -i ${file} -m nucrdna -g ${NRDNA_GENES} -fmt ${DB_FMT} -o ${RES}/references/clean; then
-            echo $file >> ${RES}/references/nucrdna_done.log
+            echo $lib >> ${RES}/references/nucrdna_done.log
           else
-            echo $file >> ${RES}/references/nucrdna_error.log
+            echo $lib >> ${RES}/references/nucrdna_error.log
           fi
         fi
       else
         echo "CMD: `dirname $0`/src/AnoRef_phyloskim.py -i ${file} -m nucrdna -g ${NRDNA_GENES} -fmt ${DB_FMT} -o ${RES}/references/clean"
   			if `dirname $0`/src/AnoRef_phyloskim.py -i ${file} -m nucrdna -g ${NRDNA_GENES} -fmt ${DB_FMT} -o ${RES}/references/clean; then
-          echo $file >> ${RES}/references/nucrdna_done.log
+          echo $lib >> ${RES}/references/nucrdna_done.log
         else
-          echo $file >> ${RES}/references/nucrdna_error.log
+          echo $lib >> ${RES}/references/nucrdna_error.log
         fi
       fi
 		done <${LIST_FILES}
 
-    `dirname $0`/src/rrnITS.py -p ${RES}/references/clean/nucrdna_rRNA -o ${RES}/references/clean/nucrdna_misc_RNA
+    `dirname $0`/src/rrnITS.py -p ${RES}/references/clean/nucrdna_rRNA/ -o ${RES}/references/clean/nucrdna_misc_RNA/
     `dirname $0`/src/rrnITS_seeds.py -i ${SEEDS_NRDNA}
 
     cat ${RES}/references/clean/nucrdna_rRNA/*.fa > ${NRDNA_REF}
     cat ${RES}/references/clean/nucrdna_misc_RNA/*.fa >> ${NRDNA_REF}
-    cat ${RES}/references/clean/nucrdna_genomes.{embl,gb} > ${NRDNA_REF}
+    cat ${RES}/references/clean/nucrdna_genomes.{embl,gb} > ${NRDNA_ANNOTATIONS}
 
 		echo "STATUS: done"
+    echo ""
 		exit 0
 
   elif [ $mode == 'capture' ] && [ $target == 'mitochondrion_rRNA' ]; then
@@ -467,13 +488,8 @@ mkdir -p ${RES}/Extraction
             echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${MITO_REF_rRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} -s ${SEEDS_MITO_rRNA} --target mitochondrion_rRNA"
             `dirname $0`/src/ExtractRef_name.py -in ${MITO_REF_rRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} -s ${SEEDS_MITO_rRNA} --target ${target}
           else
-            if [ ${TAXONOMY_UPDATE} == "no" ]; then
-              echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${MITO_REF_rRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_MITO_rRNA} --target mitochondrion_rRNA"
-              `dirname $0`/src/ExtractRef_name.py -in ${MITO_REF_rRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_MITO_rRNA} --target ${target}
-            else
-              echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${MITO_REF_rRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_MITO_rRNA} --update --target mitochondrion_rRNA"
-              `dirname $0`/src/ExtractRef_name.py -in ${MITO_REF_rRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_MITO_rRNA} --update --target ${target}
-            fi
+            echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${MITO_REF_rRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_MITO_rRNA} --target mitochondrion_rRNA"
+            `dirname $0`/src/ExtractRef_name.py -in ${MITO_REF_rRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_MITO_rRNA} --target ${target}
           fi
           CLOSED_REF=${RES}/references/closed_${target}.fa
           if [ -s ${CLOSED_REF} ]; then
@@ -497,8 +513,13 @@ mkdir -p ${RES}/Extraction
                 else
                   echo "INFO: Selection of mitochondrial contigs in $lib assemblies"
                   echo "*** Extraction of closed genomes ***"
-                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${MITO_SIZE}"
-                  `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${MITO_SIZE}
+                  if [ ${MODE_REF} == "distance" ]; then
+                    echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m distance -s ${MITO_SIZE} -d ${DISTANCE_MATRIX}"
+                    `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m distance -s ${MITO_SIZE} -d ${DISTANCE_MATRIX}
+                  else
+                    echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${MITO_SIZE}"
+                    `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${MITO_SIZE}
+                  fi
                   CLOSED_GENOME=${RES}/references/closed_mitochondrion.fa
                   if [ -s ${CLOSED_GENOME} ]; then
                     echo "CMD: ${BLASTDB} -in ${CLOSED_GENOME} -dbtype nucl"
@@ -536,8 +557,13 @@ mkdir -p ${RES}/Extraction
               else
                 echo "INFO: Selection of mitochondrial contigs in $lib assemblies"
                 echo "*** Extraction of closed genomes ***"
-                echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${MITO_SIZE}"
-                `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${MITO_SIZE}
+                if [ ${MODE_REF} == "distance" ]; then
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m distance -s ${MITO_SIZE} -d ${DISTANCE_MATRIX}"
+                  `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m distance -s ${MITO_SIZE} -d ${DISTANCE_MATRIX}
+                else
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${MITO_SIZE}"
+                  `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${MITO_SIZE}
+                fi
                 CLOSED_GENOME=${RES}/references/closed_mitochondrion.fa
                 if [ -s ${CLOSED_GENOME} ]; then
                   echo "CMD: ${BLASTDB} -in ${CLOSED_GENOME} -dbtype nucl"
@@ -584,13 +610,8 @@ mkdir -p ${RES}/Extraction
           echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${MITO_REF_rRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} -s ${SEEDS_MITO_rRNA} --target ${target}"
           `dirname $0`/src/ExtractRef_name.py -in ${MITO_REF_rRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} -s ${SEEDS_MITO_rRNA} --target ${target}
         else
-          if [ ${TAXONOMY_UPDATE} == "no" ]; then
-            echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${MITO_REF_rRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_MITO_rRNA} --target ${target}"
-            `dirname $0`/src/ExtractRef_name.py -in ${MITO_REF_rRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_MITO_rRNA} --target ${target}
-          else
-            echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${MITO_REF_rRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_MITO_rRNA} --update --target ${target}"
-            `dirname $0`/src/ExtractRef_name.py -in ${MITO_REF_rRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_MITO_rRNA} --update --target ${target}
-          fi
+          echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${MITO_REF_rRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_MITO_rRNA} --target ${target}"
+          `dirname $0`/src/ExtractRef_name.py -in ${MITO_REF_rRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_MITO_rRNA} --target ${target}
         fi
         CLOSED_REF=${RES}/references/closed_${target}.fa
         if [ -s ${CLOSED_REF} ]; then
@@ -614,8 +635,13 @@ mkdir -p ${RES}/Extraction
               else
                 echo "INFO: Selection of mitochondrial contigs in $lib assemblies"
                 echo "*** Extraction of closed genomes ***"
-                echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${MITO_SIZE}"
-                `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${MITO_SIZE}
+                if [ ${MODE_REF} == "distance" ]; then
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m distance -s ${MITO_SIZE} -d ${DISTANCE_MATRIX}"
+                  `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m distance -s ${MITO_SIZE} -d ${DISTANCE_MATRIX}
+                else
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${MITO_SIZE}"
+                  `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${MITO_SIZE}
+                fi
                 CLOSED_GENOME=${RES}/references/closed_mitochondrion.fa
                 if [ -s ${CLOSED_GENOME} ]; then
                   echo "CMD: ${BLASTDB} -in ${CLOSED_GENOME} -dbtype nucl"
@@ -652,8 +678,13 @@ mkdir -p ${RES}/Extraction
             else
               echo "INFO: Selection of mitochondrial contigs in $lib assemblies"
               echo "*** Extraction of closed genomes ***"
-              echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${MITO_SIZE}"
-              `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${MITO_SIZE}
+              if [ ${MODE_REF} == "distance" ]; then
+                echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m distance -s ${MITO_SIZE} -d ${DISTANCE_MATRIX}"
+                `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m distance -s ${MITO_SIZE} -d ${DISTANCE_MATRIX}
+              else
+                echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${MITO_SIZE}"
+                `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${MITO_SIZE}
+              fi
               CLOSED_GENOME=${RES}/references/closed_mitochondrion.fa
               if [ -s ${CLOSED_GENOME} ]; then
                 echo "CMD: ${BLASTDB} -in ${CLOSED_GENOME} -dbtype nucl"
@@ -696,6 +727,7 @@ mkdir -p ${RES}/Extraction
       fi
     done
 		echo "STATUS: done"
+    echo ""
 		exit 0
 
   elif [ $mode == 'capture' ] && [ $target == 'mitochondrion_CDS' ]; then
@@ -715,13 +747,8 @@ mkdir -p ${RES}/Extraction
             echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${MITO_REF_CDS} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} -s ${SEEDS_MITO_CDS} --target ${target}"
             `dirname $0`/src/ExtractRef_name.py -in ${MITO_REF_CDS} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} -s ${SEEDS_MITO_CDS} --target ${target}
           else
-            if [ ${TAXONOMY_UPDATE} == "no" ]; then
-              echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${MITO_REF_CDS} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_MITO_CDS} --target ${target}"
-              `dirname $0`/src/ExtractRef_name.py -in ${MITO_REF_CDS} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_MITO_CDS} --target ${target}
-            else
-              echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${MITO_REF_CDS} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_MITO_CDS} --update --target ${target}"
-              `dirname $0`/src/ExtractRef_name.py -in ${MITO_REF_CDS} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_MITO_CDS} --update --target ${target}
-            fi
+            echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${MITO_REF_CDS} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_MITO_CDS} --target ${target}"
+            `dirname $0`/src/ExtractRef_name.py -in ${MITO_REF_CDS} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_MITO_CDS} --target ${target}
           fi
           CLOSED_REF=${RES}/references/closed_${target}.fa
           if [ -s ${CLOSED_REF} ]; then
@@ -745,8 +772,13 @@ mkdir -p ${RES}/Extraction
                 else
                   echo "INFO: Selection of mitochondrial contigs in $lib assemblies"
                   echo "*** Extraction of closed genomes ***"
-                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${MITO_SIZE}"
-                  `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${MITO_SIZE}
+                  if [ ${MODE_REF} == "distance" ]; then
+                    echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m distance -s ${MITO_SIZE} -d ${DISTANCE_MATRIX}"
+                    `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m distance -s ${MITO_SIZE} -d ${DISTANCE_MATRIX}
+                  else
+                    echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${MITO_SIZE}"
+                    `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${MITO_SIZE}
+                  fi
                   CLOSED_GENOME=${RES}/references/closed_mitochondrion.fa
                   if [ -s ${CLOSED_GENOME} ]; then
                     echo "CMD: ${BLASTDB} -in ${CLOSED_GENOME} -dbtype nucl"
@@ -783,8 +815,13 @@ mkdir -p ${RES}/Extraction
               else
                 echo "INFO: Selection of mitochondrial contigs in $lib assemblies"
                 echo "*** Extraction of closed genomes ***"
-                echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${MITO_SIZE}"
-                `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${MITO_SIZE}
+                if [ ${MODE_REF} == "distance" ]; then
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${MITO_SIZE} -d ${DISTANCE_MATRIX}"
+                  `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${MITO_SIZE} -d ${DISTANCE_MATRIX}
+                else
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${MITO_SIZE}"
+                  `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${MITO_SIZE}
+                fi
                 CLOSED_GENOME=${RES}/references/closed_mitochondrion.fa
                 if [ -s ${CLOSED_GENOME} ]; then
                   echo "CMD: ${BLASTDB} -in ${CLOSED_GENOME} -dbtype nucl"
@@ -831,13 +868,8 @@ mkdir -p ${RES}/Extraction
           echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${MITO_REF_CDS} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} -s ${SEEDS_MITO_CDS} --target ${target}"
           `dirname $0`/src/ExtractRef_name.py -in ${MITO_REF_CDS} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} -s ${SEEDS_MITO_CDS} --target ${target}
         else
-          if [ ${TAXONOMY_UPDATE} == "no" ]; then
-            echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${MITO_REF_CDS} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_MITO_CDS} --target ${target}"
-            `dirname $0`/src/ExtractRef_name.py -in ${MITO_REF_CDS} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_MITO_CDS} --target ${target}
-          else
-            echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${MITO_REF_CDS} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_MITO_CDS} --update --target ${target}"
-            `dirname $0`/src/ExtractRef_name.py -in ${MITO_REF_CDS} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_MITO_CDS} --update --target ${target}
-          fi
+          echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${MITO_REF_CDS} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_MITO_CDS} --target ${target}"
+          `dirname $0`/src/ExtractRef_name.py -in ${MITO_REF_CDS} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_MITO_CDS} --target ${target}
         fi
         CLOSED_REF=${RES}/references/closed_${target}.fa
         if [ -s ${CLOSED_REF} ]; then
@@ -861,8 +893,13 @@ mkdir -p ${RES}/Extraction
               else
                 echo "INFO: Selection of mitochondrial contigs in $lib assemblies"
                 echo "*** Extraction of closed genomes ***"
-                echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${MITO_SIZE}"
-                `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${MITO_SIZE}
+                if [ ${MODE_REF} == "distance" ]; then
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${MITO_SIZE} -d ${DISTANCE_MATRIX}"
+                  `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${MITO_SIZE} -d ${DISTANCE_MATRIX}
+                else
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${MITO_SIZE}"
+                  `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${MITO_SIZE}
+                fi
                 CLOSED_GENOME=${RES}/references/closed_mitochondrion.fa
                 if [ -s ${CLOSED_GENOME} ]; then
                   echo "CMD: ${BLASTDB} -in ${CLOSED_GENOME} -dbtype nucl"
@@ -899,8 +936,13 @@ mkdir -p ${RES}/Extraction
             else
               echo "INFO: Selection of mitochondrial contigs in $lib assemblies"
               echo "*** Extraction of closed genomes ***"
-              echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${MITO_SIZE}"
-              `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${MITO_SIZE}
+              if [ ${MODE_REF} == "distance" ]; then
+                echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${MITO_SIZE} -d ${DISTANCE_MATRIX}"
+                `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${MITO_SIZE} -d ${DISTANCE_MATRIX}
+              else
+                echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${MITO_SIZE}"
+                `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${MITO_SIZE}
+              fi
               CLOSED_GENOME=${RES}/references/closed_mitochondrion.fa
               if [ -s ${CLOSED_GENOME} ]; then
                 echo "CMD: ${BLASTDB} -in ${CLOSED_GENOME} -dbtype nucl"
@@ -943,6 +985,7 @@ mkdir -p ${RES}/Extraction
       fi
     done
     echo "STATUS: done"
+    echo ""
 		exit 0
 
   elif [ $mode == 'capture' ] && [ $target == 'uce' ]; then
@@ -962,13 +1005,8 @@ mkdir -p ${RES}/Extraction
             echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${UCE_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} --target ${target}"
             `dirname $0`/src/ExtractRef_nucluce.py -in ${UCE_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} --target ${target}
           else
-            if [ ${TAXONOMY_UPDATE} == "no" ]; then
-              echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${UCE_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --target ${target}"
-              `dirname $0`/src/ExtractRef_nucluce.py -in ${UCE_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --target ${target}
-            else
-              echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${MITO_REF_rRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --update --target ${target}"
-              `dirname $0`/src/ExtractRef_nucluce.py -in ${UCE_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --update --target ${target}
-            fi
+            echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${UCE_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --target ${target}"
+            `dirname $0`/src/ExtractRef_nucluce.py -in ${UCE_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --target ${target}
           fi
           CLOSED_REF=${RES}/references/closed_${target}.fa
           if [ -s ${CLOSED_REF} ]; then
@@ -1007,13 +1045,8 @@ mkdir -p ${RES}/Extraction
           echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${UCE_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} --target ${target}"
           `dirname $0`/src/ExtractRef_nucluce.py -in ${UCE_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} --target ${target}
         else
-          if [ ${TAXONOMY_UPDATE} == "no" ]; then
-            echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${UCE_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --target ${target}"
-            `dirname $0`/src/ExtractRef_nucluce.py -in ${UCE_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --target ${target}
-          else
-            echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${UCE_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --update --target ${target}"
-            `dirname $0`/src/ExtractRef_nucluce.py -in ${UCE_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --update --target ${target}
-          fi
+          echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${UCE_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --target ${target}"
+          `dirname $0`/src/ExtractRef_nucluce.py -in ${UCE_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --target ${target}
         fi
         CLOSED_REF=${RES}/references/closed_${target}.fa
         if [ -s ${CLOSED_REF} ]; then
@@ -1047,6 +1080,7 @@ mkdir -p ${RES}/Extraction
       fi
     done
 		echo "STATUS: done"
+    echo ""
 		exit 0
 
   elif [ $mode == 'capture' ] && [ $target == 'nucleus_nt' ]; then
@@ -1066,13 +1100,8 @@ mkdir -p ${RES}/Extraction
             echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_NT_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} --target ${target}"
             `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_NT_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} --target ${target}
           else
-            if [ ${TAXONOMY_UPDATE} == "no" ]; then
-              echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_NT_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --target ${target}"
-              `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_NT_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --target ${target}
-            else
-              echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_NT_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --update --target ${target}"
-              `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_NT_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --update --target ${target}
-            fi
+            echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_NT_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --target ${target}"
+            `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_NT_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --target ${target}
           fi
           CLOSED_REF=${RES}/references/closed_${target}.fa
           if [ -s ${CLOSED_REF} ]; then
@@ -1110,13 +1139,8 @@ mkdir -p ${RES}/Extraction
           echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_NT_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} --target ${target}"
           `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_NT_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} --target ${target}
         else
-          if [ ${TAXONOMY_UPDATE} == "no" ]; then
-            echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_NT_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --target ${target}"
-            `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_NT_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --target ${target}
-          else
-            echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_NT_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --update --target ${target}"
-            `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_NT_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --update --target ${target}
-          fi
+          echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_NT_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --target ${target}"
+          `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_NT_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --target ${target}
         fi
         CLOSED_REF=${RES}/references/closed_${target}.fa
         if [ -s ${CLOSED_REF} ]; then
@@ -1150,6 +1174,7 @@ mkdir -p ${RES}/Extraction
       fi
     done
 		echo "STATUS: done"
+    echo ""
 		exit 0
 
   elif [ $mode == 'capture' ] && [ $target == 'nucleus_aa' ]; then
@@ -1169,13 +1194,8 @@ mkdir -p ${RES}/Extraction
             echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_AA_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} --target ${target}"
             `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_AA_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} --target ${target}
           else
-            if [ ${TAXONOMY_UPDATE} == "no" ]; then
-              echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_AA_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --target ${target}"
-              `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_AA_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --target ${target}
-            else
-              echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_AA_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --update --target ${target}"
-              `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_AA_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --update --target ${target}
-            fi
+            echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_AA_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --target ${target}"
+            `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_AA_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --target ${target}
           fi
           CLOSED_REF=${RES}/references/closed_${target}.fa
           if [ -s ${CLOSED_REF} ]; then
@@ -1214,13 +1234,8 @@ mkdir -p ${RES}/Extraction
           echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_AA_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} --target ${target}"
           `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_AA_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} --target ${target}
         else
-          if [ ${TAXONOMY_UPDATE} == "no" ]; then
-            echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_AA_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --target ${target}"
-            `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_AA_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --target ${target}
-          else
-            echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_AA_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --update --target ${target}"
-            `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_AA_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --update --target ${target}
-          fi
+          echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_AA_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --target ${target}"
+          `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_AA_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --target ${target}
         fi
         CLOSED_REF=${RES}/references/closed_${target}.fa
         if [ -s ${CLOSED_REF} ]; then
@@ -1255,6 +1270,7 @@ mkdir -p ${RES}/Extraction
       fi
 		done
 		echo "STATUS: done"
+    echo ""
 		exit 0
 
   elif [ $mode == 'phyloskim_stat_chloro' ]; then
@@ -1264,6 +1280,7 @@ mkdir -p ${RES}/Extraction
 		#rm -rf ${RES}/report_chloro_assemblies/icarus_viewers/
 		rm ${RES}/report_chloro_assemblies/report.tex ${RES}/report_chloro_assemblies/report.tsv ${RES}/report_chloro_assemblies/report.txt ${RES}/report_chloro_assemblies/transposed_report.tex ${RES}/report_chloro_assemblies/transposed_report.tsv
 		echo "STATUS: done"
+    echo ""
 		exit 0
 
 	elif [ $mode == 'phyloskim_stat_rdna' ]; then
@@ -1301,12 +1318,12 @@ mkdir -p ${RES}/Extraction
         for element in "${target[@]}";
         do
           echo "INFO: selection of taxa for alignment"
-          inpath=${RES}/Extraction/${element}
+          inpath=${RES}/Extraction/${element}/
           echo "CMD: `dirname $0`/src/SelecTaxa.py --inpath $inpath --outpath ${RES}/Selection -t ${TAXALIST} -e ${EXTENSION} --threads ${THREADS}"
           `dirname $0`/src/SelecTaxa.py --inpath $inpath --outpath ${RES}/Selection -t ${TAXALIST} -e fa --threads ${THREADS}
 
           echo "INFO: Alignment of each gene"
-          alinpath=${RES}/Selection/${element}
+          alinpath=${RES}/Selection/${element}/
           mkdir -p ${RES}/Selection/Alignment/${element}/files/
           mkdir -p ${RES}/Selection/Alignment/${element}/trim/
 
@@ -1319,25 +1336,25 @@ mkdir -p ${RES}/Extraction
               echo "CMD: $TRIMAL -in ${RES}/Selection/Alignment/${element}/files/$(basename $f) -automated1 -out ${RES}/Selection/Alignment/${element}/trim/$(basename $f | perl -pe 's/.fa/.trim/')"
               $TRIMAL -in ${RES}/Selection/Alignment/${element}/files/$(basename $f) -automated1 -out ${RES}/Selection/Alignment/${element}/trim/$(basename $f | perl -pe 's/.fa/.trim/')
             else
-              pass
+              :
             fi
           done
         done
         echo "INFO: concatenation of alignments"
         alnfiles=${RES}/Selection/Alignment/
         if [ ${TRIMMING} == 'on' ]; then
-          echo "CMD: `dirname $0`/src/ConcatSeq.py -p ${alnfiles} --pathfind -o ${RES}/concatenated.fa -t ${TAXALIST} --missingfract ${MISSING_RATIO} --target ${listpath} --trim -g ${GENES_TO_CONCAT}"
-          `dirname $0`/src/ConcatSeq.py -p ${alnfiles} --pathfind -o ${RES}/concatenated.fa -t ${TAXALIST} --missingfract ${MISSING_RATIO} --target ${listpath} --trim -g ${GENES_TO_CONCAT}
+          echo "CMD: `dirname $0`/src/ConcatSeq.py -p ${alnfiles} --pathfind -o ${RES}/Selection/concatenated -t ${TAXALIST} --missingfract ${MISSING_RATIO} --target ${listpath} --trim -g ${GENES_TO_CONCAT}"
+          `dirname $0`/src/ConcatSeq.py -p ${alnfiles} --pathfind -o ${RES}/Selection/concatenated -t ${TAXALIST} --missingfract ${MISSING_RATIO} --target ${listpath} --trim -g ${GENES_TO_CONCAT}
         else
-          echo "CMD: `dirname $0`/src/ConcatSeq.py -p ${alnfiles} --pathfind -o ${RES}/concatenated.fa -t ${TAXALIST} --missingfract ${MISSING_RATIO} --target ${listpath} -g ${GENES_TO_CONCAT}"
-          `dirname $0`/src/ConcatSeq.py -p ${alnfiles} --pathfind -o ${RES}/concatenated.fa -t ${TAXALIST} --missingfract ${MISSING_RATIO} --target ${listpath} -g ${GENES_TO_CONCAT}
+          echo "CMD: `dirname $0`/src/ConcatSeq.py -p ${alnfiles} --pathfind -o ${RES}/Selection/concatenated -t ${TAXALIST} --missingfract ${MISSING_RATIO} --target ${listpath} -g ${GENES_TO_CONCAT}"
+          `dirname $0`/src/ConcatSeq.py -p ${alnfiles} --pathfind -o ${RES}/Selection/concatenated -t ${TAXALIST} --missingfract ${MISSING_RATIO} --target ${listpath} -g ${GENES_TO_CONCAT}
         fi
     else
       for element in "${target[@]}";
       do
         echo "INFO: No selection of taxa is made for alignment"
         echo "INFO: Alignment of each gene"
-        alinpath=${RES}/Extraction/${element}
+        alinpath=${RES}/Extraction/${element}/
         mkdir -p ${RES}/Alignment/${element}/files/
         mkdir -p ${RES}/Alignment/${element}/trim/
 
@@ -1350,7 +1367,7 @@ mkdir -p ${RES}/Extraction
             echo "CMD: $TRIMAL -in ${RES}/Alignment/${element}/files/$(basename $f) -automated1 -out ${RES}/Alignment/${element}/trim/$(basename $f | perl -pe 's/.fa/.trim/')"
             $TRIMAL -in ${RES}/Alignment/${element}/files/$(basename $f) -automated1 -out ${RES}/Alignment/${element}/trim/$(basename $f | perl -pe 's/.fa/.trim/')
           else
-            pass
+            :
           fi
         done
       done
@@ -1368,6 +1385,7 @@ mkdir -p ${RES}/Extraction
       fi
     fi
     echo "STATUS: done"
+    echo ""
     exit 0
 
   elif [ $mode == 'capture' ] && [ $target == 'chloroplast_rRNA' ]; then
@@ -1387,13 +1405,8 @@ mkdir -p ${RES}/Extraction
             echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_rRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} -s ${SEEDS_CHLORO_rRNA} --target ${target}"
             `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_rRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} -s ${SEEDS_CHLORO_rRNA} --target ${target}
           else
-            if [ ${TAXONOMY_UPDATE} == "no" ]; then
-              echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_rRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_rRNA} --target ${target}"
-              `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_rRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_rRNA} --target ${target}
-            else
-              echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_rRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_rRNA} --update --target ${target}"
-              `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_rRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_rRNA} --update --target ${target}
-            fi
+            echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_rRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_rRNA} --target ${target}"
+            `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_rRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_rRNA} --target ${target}
           fi
           CLOSED_REF=${RES}/references/closed_${target}.fa
           if [ -s ${CLOSED_REF} ]; then
@@ -1417,8 +1430,13 @@ mkdir -p ${RES}/Extraction
                 else
                   echo "INFO: Selection of chloroplastic contigs in $lib assemblies"
                   echo "*** Extraction of closed genome ***"
-                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE}"
-                  `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE}
+                  if [ ${MODE_REF} == "distance" ]; then
+                    echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE} -d ${DISTANCE_MATRIX}"
+                    `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE} -d ${DISTANCE_MATRIX}
+                  else
+                    echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${CHLORO_SIZE}"
+                    `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${CHLORO_SIZE}
+                  fi
                   CLOSED_GENOME=${RES}/references/closed_chloroplast.fa
                   if [ -s ${CLOSED_GENOME} ]; then
                     echo "CMD: ${BLASTDB} -in ${CLOSED_GENOME} -dbtype nucl"
@@ -1455,8 +1473,13 @@ mkdir -p ${RES}/Extraction
               else
                 echo "INFO: Selection of chloroplastic contigs in $lib assemblies"
                 echo "*** Extraction of closed genome ***"
-                echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE}"
-                `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE}
+                if [ ${MODE_REF} == "distance" ]; then
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE} -d ${DISTANCE_MATRIX}"
+                  `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE} -d ${DISTANCE_MATRIX}
+                else
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${CHLORO_SIZE}"
+                  `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${CHLORO_SIZE}
+                fi
                 CLOSED_GENOME=${RES}/references/closed_chloroplast.fa
                 if [ -s ${CLOSED_GENOME} ]; then
                   echo "CMD: ${BLASTDB} -in ${CLOSED_GENOME} -dbtype nucl"
@@ -1503,13 +1526,8 @@ mkdir -p ${RES}/Extraction
           echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_rRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} -s ${SEEDS_CHLORO_rRNA} --target ${target}"
           `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_rRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} -s ${SEEDS_CHLORO_rRNA} --target ${target}
         else
-          if [ ${TAXONOMY_UPDATE} == "no" ]; then
-            echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_rRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_rRNA} --target ${target}"
-            `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_rRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_rRNA} --target ${target}
-          else
-            echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_rRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_rRNA} --update --target ${target}"
-            `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_rRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_rRNA} --update --target ${target}
-          fi
+          echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_rRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_rRNA} --target ${target}"
+          `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_rRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_rRNA} --target ${target}
         fi
         CLOSED_REF=${RES}/references/closed_${target}.fa
         if [ -s ${CLOSED_REF} ]; then
@@ -1533,8 +1551,13 @@ mkdir -p ${RES}/Extraction
               else
                 echo "INFO: Selection of chloroplastic contigs in $lib assemblies"
                 echo "*** Extraction of closed genome ***"
-                echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE}"
-                `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE}
+                if [ ${MODE_REF} == "distance" ]; then
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE} -d ${DISTANCE_MATRIX}"
+                  `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE} -d ${DISTANCE_MATRIX}
+                else
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${CHLORO_SIZE}"
+                  `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${CHLORO_SIZE}
+                fi
                 CLOSED_GENOME=${RES}/references/closed_chloroplast.fa
                 if [ -s ${CLOSED_GENOME} ]; then
                   echo "CMD: ${BLASTDB} -in ${CLOSED_GENOME} -dbtype nucl"
@@ -1571,8 +1594,13 @@ mkdir -p ${RES}/Extraction
             else
               echo "INFO: Selection of chloroplastic contigs in $lib assemblies"
               echo "*** Extraction of closed genome ***"
-              echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE}"
-              `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE}
+              if [ ${MODE_REF} == "distance" ]; then
+                echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE} -d ${DISTANCE_MATRIX}"
+                `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE} -d ${DISTANCE_MATRIX}
+              else
+                echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${CHLORO_SIZE}"
+                `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${CHLORO_SIZE}
+              fi
               CLOSED_GENOME=${RES}/references/closed_chloroplast.fa
               if [ -s ${CLOSED_GENOME} ]; then
                 echo "CMD: ${BLASTDB} -in ${CLOSED_GENOME} -dbtype nucl"
@@ -1615,6 +1643,7 @@ mkdir -p ${RES}/Extraction
       fi
     done
 		echo "STATUS: done"
+    echo ""
 		exit 0
 
   elif [ $mode == 'capture' ] && [ $target == 'chloroplast_tRNA' ]; then
@@ -1634,13 +1663,8 @@ mkdir -p ${RES}/Extraction
             echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_tRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} -s ${SEEDS_CHLORO_tRNA} --target ${target}"
             `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_tRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} -s ${SEEDS_CHLORO_tRNA} --target ${target}
           else
-            if [ ${TAXONOMY_UPDATE} == "no" ]; then
-              echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_tRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_tRNA} --target ${target}"
-              `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_tRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_tRNA} --target ${target}
-            else
-              echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_tRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_tRNA} --update --target ${target}"
-              `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_tRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_tRNA} --update --target ${target}
-            fi
+            echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_tRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_tRNA} --target ${target}"
+            `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_tRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_tRNA} --target ${target}
           fi
           CLOSED_REF=${RES}/references/closed_${target}.fa
           if [ -s ${CLOSED_REF} ]; then
@@ -1664,8 +1688,13 @@ mkdir -p ${RES}/Extraction
                 else
                   echo "INFO: Selection of chloroplastic contigs in $lib assemblies"
                   echo "*** Extraction of closed genome ***"
-                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE}"
-                  `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE}
+                  if [ ${MODE_REF} == "distance" ]; then
+                    echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE} -d ${DISTANCE_MATRIX}"
+                    `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE} -d ${DISTANCE_MATRIX}
+                  else
+                    echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${CHLORO_SIZE}"
+                    `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${CHLORO_SIZE}
+                  fi
                   CLOSED_GENOME=${RES}/references/closed_chloroplast.fa
                   if [ -s ${CLOSED_GENOME} ]; then
                     echo "CMD: ${BLASTDB} -in ${CLOSED_GENOME} -dbtype nucl"
@@ -1702,8 +1731,13 @@ mkdir -p ${RES}/Extraction
               else
                 echo "INFO: Selection of chloroplastic contigs in $lib assemblies"
                 echo "*** Extraction of closed genome ***"
-                echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE}"
-                `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE}
+                if [ ${MODE_REF} == "distance" ]; then
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE} -d ${DISTANCE_MATRIX}"
+                  `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE} -d ${DISTANCE_MATRIX}
+                else
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${CHLORO_SIZE}"
+                  `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${CHLORO_SIZE}
+                fi
                 CLOSED_GENOME=${RES}/references/closed_chloroplast.fa
                 if [ -s ${CLOSED_GENOME} ]; then
                   echo "CMD: ${BLASTDB} -in ${CLOSED_GENOME} -dbtype nucl"
@@ -1750,13 +1784,8 @@ mkdir -p ${RES}/Extraction
           echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_tRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} -s ${SEEDS_CHLORO_tRNA} --target ${target}"
           `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_tRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} -s ${SEEDS_CHLORO_tRNA} --target ${target}
         else
-          if [ ${TAXONOMY_UPDATE} == "no" ]; then
-            echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_tRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_tRNA} --target ${target}"
-            `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_tRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_tRNA} --target ${target}
-          else
-            echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_tRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_tRNA} --update --target ${target}"
-            `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_tRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_tRNA} --update --target ${target}
-          fi
+          echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_tRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_tRNA} --target ${target}"
+          `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_tRNA} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_tRNA} --target ${target}
         fi
         CLOSED_REF=${RES}/references/closed_${target}.fa
         if [ -s ${CLOSED_REF} ]; then
@@ -1780,8 +1809,13 @@ mkdir -p ${RES}/Extraction
               else
                 echo "INFO: Selection of chloroplastic contigs in $lib assemblies"
                 echo "*** Extraction of closed genome ***"
-                echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE}"
-                `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE}
+                if [ ${MODE_REF} == "distance" ]; then
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE} -d ${DISTANCE_MATRIX}"
+                  `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE} -d ${DISTANCE_MATRIX}
+                else
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${CHLORO_SIZE}"
+                  `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${CHLORO_SIZE}
+                fi
                 CLOSED_GENOME=${RES}/references/closed_chloroplast.fa
                 if [ -s ${CLOSED_GENOME} ]; then
                   echo "CMD: ${BLASTDB} -in ${CLOSED_GENOME} -dbtype nucl"
@@ -1818,8 +1852,13 @@ mkdir -p ${RES}/Extraction
             else
               echo "INFO: Selection of chloroplastic contigs in $lib assemblies"
               echo "*** Extraction of closed genome ***"
-              echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE}"
-              `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE}
+              if [ ${MODE_REF} == "distance" ]; then
+                echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE} -d ${DISTANCE_MATRIX}"
+                `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE} -d ${DISTANCE_MATRIX}
+              else
+                echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${CHLORO_SIZE}"
+                `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${CHLORO_SIZE}
+              fi
               CLOSED_GENOME=${RES}/references/closed_chloroplast.fa
               if [ -s ${CLOSED_GENOME} ]; then
                 echo "CMD: ${BLASTDB} -in ${CLOSED_GENOME} -dbtype nucl"
@@ -1862,6 +1901,7 @@ mkdir -p ${RES}/Extraction
       fi
     done
 		echo "STATUS: done"
+    echo ""
 		exit 0
 
   elif [ $mode == 'capture' ] && [ $target == 'chloroplast_CDS' ]; then
@@ -1881,13 +1921,8 @@ mkdir -p ${RES}/Extraction
             echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_CDS} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} -s ${SEEDS_CHLORO_CDS} --target ${target}"
             `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_CDS} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} -s ${SEEDS_CHLORO_CDS} --target ${target}
           else
-            if [ ${TAXONOMY_UPDATE} == "no" ]; then
-              echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_CDS} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_CDS} --target ${target}"
-              `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_CDS} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_CDS} --target ${target}
-            else
-              echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_CDS} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_CDS} --update --target ${target}"
-              `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_CDS} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_CDS} --update --target ${target}
-            fi
+            echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_CDS} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_CDS} --target ${target}"
+            `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_CDS} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_CDS} --target ${target}
           fi
           CLOSED_REF=${RES}/references/closed_${target}.fa
           if [ -s ${CLOSED_REF} ]; then
@@ -1911,8 +1946,13 @@ mkdir -p ${RES}/Extraction
                 else
                   echo "INFO: Selection of chloroplastic contigs in $lib assemblies"
                   echo "*** Extraction of closed genomes ***"
-                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE}"
-                  `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE}
+                  if [ ${MODE_REF} == "distance" ]; then
+                    echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE} -d ${DISTANCE_MATRIX}"
+                    `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE} -d ${DISTANCE_MATRIX}
+                  else
+                    echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${CHLORO_SIZE}"
+                    `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${CHLORO_SIZE}
+                  fi
                   CLOSED_GENOME=${RES}/references/closed_chloroplast.fa
                   if [ -s ${CLOSED_GENOME} ]; then
                     echo "CMD: ${BLASTDB} -in ${CLOSED_GENOME} -dbtype nucl"
@@ -1949,8 +1989,13 @@ mkdir -p ${RES}/Extraction
               else
                 echo "INFO: Selection of chloroplastic contigs in $lib assemblies"
                 echo "*** Extraction of closed genomes ***"
-                echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE}"
-                `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE}
+                if [ ${MODE_REF} == "distance" ]; then
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE} -d ${DISTANCE_MATRIX}"
+                  `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE} -d ${DISTANCE_MATRIX}
+                else
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${CHLORO_SIZE}"
+                  `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${CHLORO_SIZE}
+                fi
                 CLOSED_GENOME=${RES}/references/closed_chloroplast.fa
                 if [ -s ${CLOSED_GENOME} ]; then
                   echo "CMD: ${BLASTDB} -in ${CLOSED_GENOME} -dbtype nucl"
@@ -1997,13 +2042,8 @@ mkdir -p ${RES}/Extraction
           echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_CDS} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} -s ${SEEDS_CHLORO_CDS} --target ${target}"
           `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_CDS} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} -s ${SEEDS_CHLORO_CDS} --target ${target}
         else
-          if [ ${TAXONOMY_UPDATE} == "no" ]; then
-            echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_CDS} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_CDS} --target ${target}"
-            `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_CDS} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_CDS} --target ${target}
-          else
-            echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_CDS} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_CDS} --update --target ${target}"
-            `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_CDS} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_CDS} --update --target ${target}
-          fi
+          echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_CDS} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_CDS} --target ${target}"
+          `dirname $0`/src/ExtractRef_name.py -in ${CHLORO_REF_CDS} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_CHLORO_CDS} --target ${target}
         fi
         CLOSED_REF=${RES}/references/closed_${target}.fa
         if [ -s ${CLOSED_REF} ]; then
@@ -2027,8 +2067,13 @@ mkdir -p ${RES}/Extraction
               else
                 echo "INFO: Selection of chloroplastic contigs in $lib assemblies"
                 echo "*** Extraction of closed genomes ***"
-                echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE}"
-                `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE}
+                if [ ${MODE_REF} == "distance" ]; then
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE} -d ${DISTANCE_MATRIX}"
+                  `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE} -d ${DISTANCE_MATRIX}
+                else
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${CHLORO_SIZE}"
+                  `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${CHLORO_SIZE}
+                fi
                 CLOSED_GENOME=${RES}/references/closed_chloroplast.fa
                 if [ -s ${CLOSED_GENOME} ]; then
                   echo "CMD: ${BLASTDB} -in ${CLOSED_GENOME} -dbtype nucl"
@@ -2065,8 +2110,13 @@ mkdir -p ${RES}/Extraction
             else
               echo "INFO: Selection of chloroplastic contigs in $lib assemblies"
               echo "*** Extraction of closed genomes ***"
-              echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE}"
-              `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE}
+              if [ ${MODE_REF} == "distance" ]; then
+                echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE} -d ${DISTANCE_MATRIX}"
+                `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${CHLORO_SIZE} -d ${DISTANCE_MATRIX}
+              else
+                echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${CHLORO_SIZE}"
+                `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${CHLORO_SIZE}
+              fi
               CLOSED_GENOME=${RES}/references/closed_chloroplast.fa
               if [ -s ${CLOSED_GENOME} ]; then
                 echo "CMD: ${BLASTDB} -in ${CLOSED_GENOME} -dbtype nucl"
@@ -2109,6 +2159,7 @@ mkdir -p ${RES}/Extraction
       fi
     done
     echo "STATUS: done"
+    echo ""
 		exit 0
 
   elif [ $mode == 'capture' ] && [ $target == 'nucrdna' ]; then
@@ -2128,15 +2179,10 @@ mkdir -p ${RES}/Extraction
             echo "CMD: `dirname $0`/src/ExtractRef_nucrdna.py -in ${NRDNA_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} -s ${SEEDS_NRDNA} --target ${target} -t ${RNA_THRESHOLD}"
             `dirname $0`/src/ExtractRef_nucrdna.py -in ${NRDNA_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} -s ${SEEDS_NRDNA} --target ${target} -t ${RNA_THRESHOLD}
           else
-            if [ ${TAXONOMY_UPDATE} == "no" ]; then
-              echo "CMD: `dirname $0`/src/ExtractRef_nucrdna.py -in ${NRDNA_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_NRDNA} --target ${target} -t ${RNA_THRESHOLD}"
-              `dirname $0`/src/ExtractRef_nucrdna.py -in ${NRDNA_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_NRDNA} --target ${target} -t ${RNA_THRESHOLD}
-            else
-              echo "CMD: `dirname $0`/src/ExtractRef_nucrdna.py -in ${NRDNA_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_NRDNA} --update --target ${target} -t ${RNA_THRESHOLD}"
-              `dirname $0`/src/ExtractRef_nucrdna.py -in ${NRDNA_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_NRDNA} --update --target ${target} -t ${RNA_THRESHOLD}
-            fi
+            echo "CMD: `dirname $0`/src/ExtractRef_nucrdna.py -in ${NRDNA_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_NRDNA} --target ${target} -t ${RNA_THRESHOLD}"
+            `dirname $0`/src/ExtractRef_nucrdna.py -in ${NRDNA_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_NRDNA} --target ${target} -t ${RNA_THRESHOLD}
           fi
-          CLOSED_REF=${RES}/references/closed_${target}.fa
+          CLOSED_REF=${RES}/references/closed_ref_${target}.fa
           if [ -s ${CLOSED_REF} ]; then
             if [ -s ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info ]; then
               echo "*** mapping and extraction of assemblies into reference ***"
@@ -2158,8 +2204,13 @@ mkdir -p ${RES}/Extraction
                 else
                   echo "INFO: Selection of nuclear ribosomal contigs in $lib assemblies"
                   echo "*** Extraction of closed genomes ***"
-                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${NRDNA_SIZE}"
-                  `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${NRDNA_SIZE}
+                  if [ ${MODE_REF} == "distance" ]; then
+                    echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${NRDNA_SIZE} -d ${DISTANCE_MATRIX}"
+                    `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${NRDNA_SIZE} -d ${DISTANCE_MATRIX}
+                  else
+                    echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${NRDNA_SIZE}"
+                    `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${NRDNA_SIZE}
+                  fi
                   CLOSED_GENOME=${RES}/references/closed_nucrdna.fa
                   if [ -s ${CLOSED_GENOME} ]; then
                     echo "CMD: ${BLASTDB} -in ${CLOSED_GENOME} -dbtype nucl"
@@ -2196,8 +2247,13 @@ mkdir -p ${RES}/Extraction
               else
                 echo "INFO: Selection of nuclear ribosomal contigs in $lib assemblies"
                 echo "*** Extraction of closed genomes ***"
-                echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${NRDNA_SIZE}"
-                `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${NRDNA_SIZE}
+                if [ ${MODE_REF} == "distance" ]; then
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${NRDNA_SIZE} -d ${DISTANCE_MATRIX}"
+                  `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${NRDNA_SIZE} -d ${DISTANCE_MATRIX}
+                else
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${NRDNA_SIZE}"
+                  `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${NRDNA_SIZE}
+                fi
                 CLOSED_GENOME=${RES}/references/closed_nucrdna.fa
                 if [ -s ${CLOSED_GENOME} ]; then
                   echo "CMD: ${BLASTDB} -in ${CLOSED_GENOME} -dbtype nucl"
@@ -2244,15 +2300,10 @@ mkdir -p ${RES}/Extraction
           echo "CMD: `dirname $0`/src/ExtractRef_nucrdna.py -in ${NRDNA_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} -s ${SEEDS_NRDNA} --target ${target} -t ${RNA_THRESHOLD}"
           `dirname $0`/src/ExtractRef_nucrdna.py -in ${NRDNA_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} -s ${SEEDS_NRDNA} --target ${target} -t ${RNA_THRESHOLD}
         else
-          if [ ${TAXONOMY_UPDATE} == "no" ]; then
-            echo "CMD: `dirname $0`/src/ExtractRef_nucrdna.py -in ${NRDNA_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_NRDNA} --target ${target} -t ${RNA_THRESHOLD}"
-            `dirname $0`/src/ExtractRef_nucrdna.py -in ${NRDNA_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_NRDNA} --target ${target} -t ${RNA_THRESHOLD}
-          else
-            echo "CMD: `dirname $0`/src/ExtractRef_nucrdna.py -in ${NRDNA_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_NRDNA} --update --target ${target} -t ${RNA_THRESHOLD}"
-            `dirname $0`/src/ExtractRef_nucrdna.py -in ${NRDNA_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_NRDNA} --update --target ${target} -t ${RNA_THRESHOLD}
-          fi
+          echo "CMD: `dirname $0`/src/ExtractRef_nucrdna.py -in ${NRDNA_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_NRDNA} --target ${target} -t ${RNA_THRESHOLD}"
+          `dirname $0`/src/ExtractRef_nucrdna.py -in ${NRDNA_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${SEEDS_NRDNA} --target ${target} -t ${RNA_THRESHOLD}
         fi
-        CLOSED_REF=${RES}/references/closed_${target}.fa
+        CLOSED_REF=${RES}/references/closed_ref_${target}.fa
         if [ -s ${CLOSED_REF} ]; then
           if [ -s ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info ]; then
             echo "*** mapping and extraction of assemblies into reference ***"
@@ -2274,8 +2325,13 @@ mkdir -p ${RES}/Extraction
               else
                 echo "INFO: Selection of nuclear ribosomal contigs in $lib assemblies"
                 echo "*** Extraction of closed genomes ***"
-                echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${NRDNA_SIZE}"
-                `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${NRDNA_SIZE}
+                if [ ${MODE_REF} == "distance" ]; then
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${NRDNA_SIZE} -d ${DISTANCE_MATRIX}"
+                  `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${NRDNA_SIZE} -d ${DISTANCE_MATRIX}
+                else
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${NRDNA_SIZE}"
+                  `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${NRDNA_SIZE}
+                fi
                 CLOSED_GENOME=${RES}/references/closed_nucrdna.fa
                 if [ -s ${CLOSED_GENOME} ]; then
                   echo "CMD: ${BLASTDB} -in ${CLOSED_GENOME} -dbtype nucl"
@@ -2312,8 +2368,13 @@ mkdir -p ${RES}/Extraction
             else
               echo "INFO: Selection of nuclear ribosomal contigs in $lib assemblies"
               echo "*** Extraction of closed genomes ***"
-              echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${NRDNA_SIZE}"
-              `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${NRDNA_SIZE}
+              if [ ${MODE_REF} == "distance" ]; then
+                echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${NRDNA_SIZE} -d ${DISTANCE_MATRIX}"
+                `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -s ${NRDNA_SIZE} -d ${DISTANCE_MATRIX}
+              else
+                echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${NRDNA_SIZE}"
+                `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${DB_FMT} -q ${lib} -o ${RES}/references/ -m taxonomy -s ${NRDNA_SIZE}
+              fi
               CLOSED_GENOME=${RES}/references/closed_nucrdna.fa
               if [ -s ${CLOSED_GENOME} ]; then
                 echo "CMD: ${BLASTDB} -in ${CLOSED_GENOME} -dbtype nucl"
@@ -2356,6 +2417,7 @@ mkdir -p ${RES}/Extraction
       fi
     done
     echo "STATUS: done"
+    echo ""
     exit 0
 
   elif [ $mode == 'validation' ]; then
@@ -2398,6 +2460,7 @@ mkdir -p ${RES}/Extraction
     fi
 
     echo "STATUS: done"
+    echo ""
     exit 0
 
 	fi

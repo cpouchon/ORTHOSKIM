@@ -1,3 +1,5 @@
 rRNA	rrn18S
-rRNA	rrn5.8S
+rRNA	5.8S rRNA
 rRNA	rrn28S
+misc_RNA	ITS1
+misc_RNA	ITS2

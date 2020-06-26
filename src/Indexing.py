@@ -55,7 +55,7 @@ for file in in_files:
         taxainfos=cf_parts[-4]
         ctaxaname=taxainfos.split(":")[0]
         taxid=taxainfos.split(":")[1]
-        ingenus=ctaxaname.split("_")[0]
+        #ingenus=ctaxaname.split("_")[0]
         samplename=str(ctaxaname+"_"+taxid+"_"+code+"_"+sequencing)
         embl_chloro=".".join([taxainfos,cf_parts[-3],cf_parts[-2],"chloro","embl"])
 
@@ -88,7 +88,7 @@ for file in in_files:
             r1path=os.path.dirname(cf)+"/"+r1[0]
             r2path=os.path.dirname(cf)+"/"+r2[0]
 
-        print ('%s\t%s\t%s\t%s\t%s\t%s' % (str(samplename),str(r1path),str(r2path),str(cfile_path.replace("indexing.done",embl_chloro))))
+        print ('%s\t%s\t%s\t%s' % (str(samplename),str(r1path),str(r2path),str(cfile_path.replace("indexing.done",embl_chloro))))
 
     except:
         pass

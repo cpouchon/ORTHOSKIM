@@ -440,7 +440,18 @@ for g in seeds_seq.keys():
                     else:
                         range_list.append([score])
                         closed_list.append([subdf.index[taxa]])
-            closed_taxa=closed_list[0]
+            if len(closed_list)==0:
+                lengthlist=list()
+                namelist=list()
+                seqlist=list()
+                seqlist=[b['seq'] for c in list(stored[gene_id].values()) for b in c]
+                lengthlist=[len(b['seq']) for c in list(stored[gene_id].values()) for b in c]
+                namelist=[a for a in list(stored[gene_id].keys())]
+                suborderindx=sorted(range(len(lengthlist)), key=lambda k: lengthlist[k])
+                suborderindx.reverse()
+                closed_taxa=[namelist[suborderindx[0]]]
+            else:
+                closed_taxa=closed_list[0]
 
         sub_best=list()
         sub_name=list()

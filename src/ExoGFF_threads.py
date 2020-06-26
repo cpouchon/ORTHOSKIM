@@ -253,7 +253,7 @@ def GeneExtraction(genenumber):
         genepart="exon+intron"
 
     if typeseq=="intron":
-        header = ">"+str(nameofsample)+"; "+"gene="+str(geneid)+"; "+"info="+str(genepart)+"; "+"type="+str(model)+"; "+"length="+str(newlength)+"; "+"match_contigs="+str("-".join(contpart))+"; "+"n_exons="+str("-".join(num_exon))+"; "+"n_introns"+str("-".join(num_intron))
+        header = ">"+str(nameofsample)+"; "+"gene="+str(geneid)+"; "+"info="+str(genepart)+"; "+"type="+str(model)+"; "+"length="+str(newlength)+"; "+"match_contigs="+str("-".join(contpart))+"; "+"n_exons="+str("-".join(num_exon))+"; "+"n_introns="+str("-".join(num_intron))
     else:
         if "CDS" in model or "nucleus_aa" in model or "busco" in model:
             ref_length=reflength[geneid]*3
@@ -262,7 +262,7 @@ def GeneExtraction(genenumber):
 
         genepercent=round(float(newlength)/float(ref_length),2)
 
-        header = ">"+str(nameofsample)+"; "+"gene="+str(geneid)+"; "+"info="+str(genepart)+"; "+"type="+str(model)+"; "+"length="+str(newlength)+"; "+"match_contigs="+str("-".join(contpart))+"; "+"ref_percent="+str(genepercent)+"; "+"n_exons="+str("-".join(num_exon))+"; "+"n_introns"+str("-".join(num_intron))
+        header = ">"+str(nameofsample)+"; "+"gene="+str(geneid)+"; "+"info="+str(genepart)+"; "+"type="+str(model)+"; "+"length="+str(newlength)+"; "+"match_contigs="+str("-".join(contpart))+"; "+"ref_percent="+str(genepercent)+"; "+"n_exons="+str("-".join(num_exon))+"; "+"n_introns="+str("-".join(num_intron))
 
     cond_min_length=0
     if newlength>=min_length:
@@ -329,6 +329,7 @@ for line in reftab:
     if line.startswith(">"):
         l=line.rstrip()
         genename = l.replace(">","")
+        seq=list()
         if genename not in refnames:
             refnames.append(genename)
         else:
@@ -339,7 +340,8 @@ for line in reftab:
             genename = l.replace(">","").split("_")[0]
     else:
         l=line.rstrip()
-        reflength[genename]=len(l)
+        seq.append(l)
+        reflength[genename]=len("".join(seq))
 
 'we store all sequences'
 cur_genome = SeqIO.parse(input_file, "fasta")
@@ -352,9 +354,7 @@ for record in cur_genome:
 'find each gene of ref and keep seqID,score,length,ref'
 for line in tab:
     l = line.rstrip().split("\t")
-    'intialisation of the scan'
-    if l[0] in refnames:
-
+    if l[0] in refnames and "Target" in l[len(l)-1]:
         if "UCE" in l[0]:
             genename = l[0].split("_")[0]+"_UCE"
         elif "BUSCO" in l[0]:

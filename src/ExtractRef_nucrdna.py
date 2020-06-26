@@ -127,7 +127,7 @@ else:
 mkdir(outpath)
 
 
-fname = "closed_"+str(mol)+".fa"
+fname = "closed_ref_"+str(mol)+".fa"
 open(os.path.join(outpath, fname), 'w').close()
 
 # with open(input_list_genes) as f:

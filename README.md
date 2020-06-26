@@ -85,58 +85,56 @@ COVERAGE=5                                                                      
 MINCONTLENGTH=1000                                                                   ## [17] Minimal contigs length allowed for genomic scan of targeted regions
 MODE_REF=distance                                                                    ## [18] Mode to select the closest reference from the database: [taxonomy,distance]
 DISTANCE_MATRIX=~/OrthoSkim-master/ressources/distance_matrix.csv                    ## [19] distance matrix at genus level in csv format if distance chosen mode.
-TAXONOMY_UPDATE=no                                                                   ## [20] update of NCBI taxonomy DB [no,yes]
-EXO_SCORE=250                                                                        ## [21] minimal score of mapping in exonerate (by default: 250). To
+EXO_SCORE=250                                                                        ## [20] minimal score of mapping in exonerate (by default: 250). To
 
 #---------  [busco] target --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-BUSCO_REF=~/OrthoSkim-master/data/BUSCO_viridiplantae.fa                             ## [22] multi-fasta of BUSCO sequences (ancestral variants)
-BUSCO_TYPE=exon                                                                      ## [23] type of sequence to capture: [exon,intron,all].
+BUSCO_REF=~/OrthoSkim-master/data/BUSCO_viridiplantae.fa                             ## [21] multi-fasta of BUSCO sequences (ancestral variants)
+BUSCO_TYPE=exon                                                                      ## [22] type of sequence to capture: [exon,intron,all].
 
 #---------  [uce] target ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-UCE_REF=~/OrthoSkim-master/data/UCE_Angiosperms353.fa                                ## [24] multi-fasta of UCE sequences. Headers have to respect the required format (genename_taxid_taxaname_others)
-UCE_TYPE=exon                                                                        ## [25] type of sequence to capture: [exon,intron,all].
+UCE_REF=~/OrthoSkim-master/data/UCE_Angiosperms353.fa                                ## [23] multi-fasta of UCE sequences. Headers have to respect the required format (genename_taxid_taxaname_others)
+UCE_TYPE=exon                                                                        ## [24] type of sequence to capture: [exon,intron,all].
 
 #---------  [nuclear] target ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-NUC_NT_REF=~/OrthoSkim-master/data/nucleusNT_unaligned.fa                            ## [26] multi-fasta of nuclear genes of reference.  Nucleotidic sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. LFY_3702,LFY_3811 for LFY gene).
-NUC_AA_REF=~/OrthoSkim-master/data/nucleusAA_unaligned.fa                            ## [27] multi-fasta of nuclear genes of reference.  Nucleotidic sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. LFY_3702,LFY_3811 for LFY gene).
-NUC_TYPE=exon                                                                        ## [28] Type of structure extracted from the gff: [exon,intron,all]
+NUC_NT_REF=~/OrthoSkim-master/data/nucleusNT_unaligned.fa                            ## [25] multi-fasta of nuclear genes of reference.  Nucleotidic sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. LFY_3702,LFY_3811 for LFY gene).
+NUC_AA_REF=~/OrthoSkim-master/data/nucleusAA_unaligned.fa                            ## [26] multi-fasta of nuclear genes of reference.  Nucleotidic sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. LFY_3702,LFY_3811 for LFY gene).
+NUC_TYPE=exon                                                                        ## [27] Type of structure extracted from the gff: [exon,intron,all]
 
 #---------  [mitochondrion] target -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-SEEDS_MITO_CDS=~/OrthoSkim-master/ressources/mitoCDS.seeds                           ## [29] CDS mitochondrial seeds of reference (from one organism; e.g. for Arabidopsis_thaliana_3702_genbank), proteic sequence required,  same restriction above the header name.
-SEEDS_MITO_rRNA=~/OrthoSkim-master/ressources/mitorRNA.seeds                         ## [30] rRNA mitochondrial seeds of reference (from one organism; e.g. for Arabidopsis_thaliana_3702_genbank), nucleotidic sequence required, same restriction above the header name.
-MITO_REF_CDS=~/OrthoSkim-master/data/mit_CDS_unaligned.fa                            ## [31] multi-fasta file/name of mitochondrial coding genes of reference.  Amino acid sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. cox1_3702_Genus_species,cox1_3811_Genus_species for cox1 gene).
-MITO_REF_rRNA=~/OrthoSkim-master/data/mit_rRNA_unaligned.fa                          ## [32] multi-fasta file/name of mitochondrial rRNA non-coding regions of reference.  Nucleotidic sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. rrn18S_3702_Genus_species,rrn18S_3811_Genus_species for rrn18S gene).
-MITO_TYPE=exon                                                                       ## [33] Type of structure extracted from the gff: [exon,intron,all]
+SEEDS_MITO_CDS=~/OrthoSkim-master/ressources/mitoCDS.seeds                           ## [28] CDS mitochondrial seeds of reference (from one organism; e.g. for Arabidopsis_thaliana_3702_genbank), proteic sequence required,  same restriction above the header name.
+SEEDS_MITO_rRNA=~/OrthoSkim-master/ressources/mitorRNA.seeds                         ## [29] rRNA mitochondrial seeds of reference (from one organism; e.g. for Arabidopsis_thaliana_3702_genbank), nucleotidic sequence required, same restriction above the header name.
+MITO_REF_CDS=~/OrthoSkim-master/data/mit_CDS_unaligned.fa                            ## [30] multi-fasta file/name of mitochondrial coding genes of reference.  Amino acid sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. cox1_3702_Genus_species,cox1_3811_Genus_species for cox1 gene).
+MITO_REF_rRNA=~/OrthoSkim-master/data/mit_rRNA_unaligned.fa                          ## [31] multi-fasta file/name of mitochondrial rRNA non-coding regions of reference.  Nucleotidic sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. rrn18S_3702_Genus_species,rrn18S_3811_Genus_species for rrn18S gene).
+MITO_TYPE=exon                                                                       ## [32] Type of structure extracted from the gff: [exon,intron,all]
 
 #--------- [chloroplast] target ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-SEEDS_CHLORO_CDS=~/OrthoSkim-master/ressources/chloroCDS.seeds                       ## [34] chloroplastic CDS seeds of reference (from one organism; e.g. for Arabidopsis_thaliana_3702_genbank), proteic sequences required, restriction on headers.
-SEEDS_CHLORO_rRNA=~/OrthoSkim-master/ressources/chlororRNA.seeds                     ## [35] chloroplastic rRNA seeds of reference (from one organism; e.g. for Arabidopsis_thaliana_3702_genbank), nucleotidic sequences required, restriction on headers.
-SEEDS_CHLORO_tRNA=~/OrthoSkim-master/ressources/chlorotRNA.seeds                     ## [36] chloroplastic tRNA seeds of reference (from one organism; e.g. for Arabidopsis_thaliana_3702_genbank), nucleotidic sequences required, restriction on headers with the anticodon name (e.g. trnL-UAA_taxid_genus_species)
-CHLORO_REF_CDS=~/OrthoSkim-master/data/chloro_CDS_unaligned.fa                       ## [37] multi-fasta file/name of chloroplastic coding genes of reference.  Amino acid sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. matK_3702_Genus_species,matK_3811_Genus_species for matK gene).
-CHLORO_REF_rRNA=~/OrthoSkim-master/data/chloro_rRNA_unaligned.fa                     ## [38] multi-fasta file/name of chloroplastic rRNA genes of reference.  Nucleotidic sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments.
-CHLORO_REF_tRNA=~/OrthoSkim-master/data/chloro_tRNA_unaligned.fa                     ## [39] multi-fasta file/name of chloroplastic tRNA genes of reference.  Nucleotidic sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. matK_3702_Genus_species,matK_3811_Genus_species for matK gene).
-CHLORO_TYPE=exon                                                                     ## [40] Type of structure extracted from the gff: [exon,intron,all]
+SEEDS_CHLORO_CDS=~/OrthoSkim-master/ressources/chloroCDS.seeds                       ## [33] chloroplastic CDS seeds of reference (from one organism; e.g. for Arabidopsis_thaliana_3702_genbank), proteic sequences required, restriction on headers.
+SEEDS_CHLORO_rRNA=~/OrthoSkim-master/ressources/chlororRNA.seeds                     ## [34] chloroplastic rRNA seeds of reference (from one organism; e.g. for Arabidopsis_thaliana_3702_genbank), nucleotidic sequences required, restriction on headers.
+SEEDS_CHLORO_tRNA=~/OrthoSkim-master/ressources/chlorotRNA.seeds                     ## [35] chloroplastic tRNA seeds of reference (from one organism; e.g. for Arabidopsis_thaliana_3702_genbank), nucleotidic sequences required, restriction on headers with the anticodon name (e.g. trnL-UAA_taxid_genus_species)
+CHLORO_REF_CDS=~/OrthoSkim-master/data/chloro_CDS_unaligned.fa                       ## [36] multi-fasta file/name of chloroplastic coding genes of reference.  Amino acid sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. matK_3702_Genus_species,matK_3811_Genus_species for matK gene).
+CHLORO_REF_rRNA=~/OrthoSkim-master/data/chloro_rRNA_unaligned.fa                     ## [37] multi-fasta file/name of chloroplastic rRNA genes of reference.  Nucleotidic sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments.
+CHLORO_REF_tRNA=~/OrthoSkim-master/data/chloro_tRNA_unaligned.fa                     ## [38] multi-fasta file/name of chloroplastic tRNA genes of reference.  Nucleotidic sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments (e.g. matK_3702_Genus_species,matK_3811_Genus_species for matK gene).
+CHLORO_TYPE=exon                                                                     ## [39] Type of structure extracted from the gff: [exon,intron,all]
 
 #--------- [nucrdna] target --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-NRDNA_REF=~/OrthoSkim-master/data/nucrdna_rRNA_unaligned.fa                          ## [41] multi-fasta file/name of ribosomal rRNA genes of reference.  Nucleotidic sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments.
-SEEDS_NRDNA=~/OrthoSkim-master/ressources/nucrdna.seeds                              ## [42] ribosomal rRNA seeds of reference (from one organism; e.g. for Arabidopsis_thaliana_3702_genbank), nucleotidic sequences required, restriction on headers.
-NRDNA_TYPE=exon                                                                      ## [43] Type of structure extracted from the gff: [exon,intron,all]
-RNA_THRESHOLD=0.8                                                                    ## [44] minimal percent of seed length of RNA genes kept as reference. For example, if rrn28S in seeds is 3375bp longer, only rrn28S genes with length >= 0.8*3375bp will be considered in closed reference list.
+NRDNA_REF=~/OrthoSkim-master/data/nucrdna_rRNA_unaligned.fa                          ## [40] multi-fasta file/name of ribosomal rRNA genes of reference.  Nucleotidic sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments.
+SEEDS_NRDNA=~/OrthoSkim-master/ressources/nucrdna.seeds                              ## [41] ribosomal rRNA seeds of reference (from one organism; e.g. for Arabidopsis_thaliana_3702_genbank), nucleotidic sequences required, restriction on headers.
+NRDNA_TYPE=exon                                                                      ## [42] Type of structure extracted from the gff: [exon,intron,all]
+RNA_THRESHOLD=0.8                                                                    ## [43] minimal percent of seed length of RNA genes kept as reference. For example, if rrn28S in seeds is 3375bp longer, only rrn28S genes with length >= 0.8*3375bp will be considered in closed reference list.
 
 # [alignment] mode -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-SELECTION=on                                                                         ## [45] Option to perform a selection of taxa before alignments: [on/off]
-TAXALIST=~/OrthoSkim-master/ressources/selTaxa_Primulaceae.tab                       ## [46] list of taxa to select if selection mode turned on (tab format with taxa in lines)
-TRIMMING=on                                                                          ## [47] Option to trim alignments using trimAl: [on/off]
-MISSING_RATIO=1.0                                                                    ## [48] maximal missing data threshold allowed to consider final sequence (e.g. 0.5 meaning that final sequence has fewer than 0.5 of missing data)
-GENES_TO_CONCAT=~/OrthoSkim-master/ressources/listGenes_To_Concat.tab                ## [49] list of genes to include in the concatenation (tab format with genes in lines)
+SELECTION=on                                                                         ## [44] Option to perform a selection of taxa before alignments: [on/off]
+TAXALIST=~/OrthoSkim-master/ressources/selTaxa_Primulaceae.tab                       ## [45] list of taxa to select if selection mode turned on (tab format with taxa in lines)
+TRIMMING=on                                                                          ## [46] Option to trim alignments using trimAl: [on/off]
+MISSING_RATIO=1.0                                                                    ## [47] maximal missing data threshold allowed to consider final sequence (e.g. 0.5 meaning that final sequence has fewer than 0.5 of missing data)
+GENES_TO_CONCAT=~/OrthoSkim-master/ressources/listGenes_To_Concat.tab                ## [48] list of genes to include in the concatenation (tab format with genes in lines)
 
 
 
 # ONLY for phyloskims users --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-CHLORO_GENES=~/OrthoSkim-master/ressources/listGenes.chloro                          ## [50] list of chloroplastic genes that will be processed. Specific format of table: $1=type (CDS,rRNA,tRNA), $2=genename. This file could be modified by adding/removing specific lines.
-MITO_GENES=~/OrthoSkim-master/ressources/listGenes.mito                              ## [51] list of mitochondrial genes that will be processed. Specific format of table: $1=type (CDS,rRNA,tRNA), $2=genename. This file could be modified by adding/removing specific lines.
-NRDNA_GENES=~/OrthoSkim-master/ressources/listGenes.rdna                             ## [52] list of rdna nuclear genes for extraction.Specific format of table: $1=type (rRNA,misc_RNA), $2=genename. This file could be modified by adding/removing specific lines.
-
+CHLORO_GENES=~/OrthoSkim-master/ressources/listGenes.chloro                          ## [49] list of chloroplastic genes that will be processed. Specific format of table: $1=type (CDS,rRNA,tRNA), $2=genename. This file could be modified by adding/removing specific lines.
+MITO_GENES=~/OrthoSkim-master/ressources/listGenes.mito                              ## [50] list of mitochondrial genes that will be processed. Specific format of table: $1=type (CDS,rRNA,tRNA), $2=genename. This file could be modified by adding/removing specific lines.
+NRDNA_GENES=~/OrthoSkim-master/ressources/listGenes.rdna                             ## [51] list of rdna nuclear genes for extraction.Specific format of table: $1=type (rRNA,misc_RNA), $2=genename. This file could be modified by adding/removing specific lines.
 ```
 
 #### 2.2 - Dependencies (tools.sh)
@@ -155,6 +153,8 @@ EXONERATE=/usr/local/bin/exonerate
 QUAST=/Users/pouchonc/miniconda2/bin/quast.py
 BLASTDB=/Users/pouchonc/miniconda2/bin/makeblastdb
 BLASTN=/Users/pouchonc/miniconda2/bin/blastn
+MAFFT=
+TRIMAL=
 ```
 
 #### 2.3 - Sample file
@@ -179,9 +179,9 @@ Androsace_helvetica_199610_CLA000520_BGN_ETA    /Users/pouchonc/PhyloAlps/CDS/An
 
 OrthoSkim uses a list of references on diverse taxa to capture targeted genes into assemblies for all the different targets (see *3. Pipeline description* below part).
 
-This bank of references is created in OrthoSkim pipeline for the *nucrdna*, *chloroplast* and *mitochondrion* targets directly from genomic annotations of each region collected from users in a single file in genbank or embl format (location set in config file at lines 9-11). These annotations can be collected directly from the [NCBI](https://www.ncbi.nlm.nih.gov/genbank/) for example. To achieve this, seeds are required for each type of gene (CDS, rRNA + tRNA for chloroplast) to identify each gene with a standard name (header) as following **">genename_taxid_Genus_species_other-arguments"** (e.g. *cox1_3702_Arabidopsis_thaliana* for cox1 gene). Location of seeds is given in lines 29-30, 34-36 and 42 of the config file.
+This bank of references is created in OrthoSkim pipeline for the *nucrdna*, *chloroplast* and *mitochondrion* targets directly from genomic annotations of each region collected from users in a single file in genbank or embl format (location set in config file at lines 9-11). These annotations can be collected directly from the [NCBI](https://www.ncbi.nlm.nih.gov/genbank/) for example. To achieve this, seeds are required for each type of gene (CDS, rRNA + tRNA for chloroplast) to identify each gene with a standard name (header) as following **">genename_taxid_Genus_species_other-arguments"** (e.g. *cox1_3702_Arabidopsis_thaliana* for cox1 gene). Location of seeds is given in lines 28-29, 33-35 and 41 of the config file.
 
-OrthoSkim create a bank in a multi-fasta file for the coding regions (CDS) with amino acid sequences and for the non-coding regions (rRNA + tRNA only for *chloroplast* target) with nucleotidic sequences. Location of these output files are set in the *config_orthoskim.txt* file at **$[CHLORO,MITO,NRDNA]\_REF_[CDS,tRNA,rRNA]** arguments (lines 31-32, 37-39 and 41).
+OrthoSkim create a bank in a multi-fasta file for the coding regions (CDS) with amino acid sequences and for the non-coding regions (rRNA + tRNA only for *chloroplast* target) with nucleotidic sequences. Location of these output files are set in the *config_orthoskim.txt* file at **$[CHLORO,MITO,NRDNA]\_REF_[CDS,tRNA,rRNA]** arguments (lines 30-31, 36-38 and 40).
 
 Here, an example of output CDS bank from mitonchondrial annotations (using the mode -m *"database"* and the target -t *"mitochondrion"*).
 ```
@@ -208,8 +208,8 @@ MRLYIIGILAKILGIIIPLLLGVAFLVLAERKIMASMQRRKGPNVVGLFGLLQPLADGLKLMIKEPILPSSANLFIFLMA
 ```
 
 
-Concerning the *nucleus_aa*, *nucleus_nt* and *uce* targets, users have to supplied the multi-fasta files and set their location in the config file to the corresponding sections (lines 24, 26-27 of the config file). In addition, the gene name restrictions have to be respected.
-For the *busco* target, the multi-fasta file must contain the  [BUSCO](https://busco.ezlab.org) dataset of ancestral sequences in amino acid sequences, called *ancestral_variants* in datasets. The location of this database is given in line 22 of the config file).
+Concerning the *nucleus_aa*, *nucleus_nt* and *uce* targets, users have to supplied the multi-fasta files and set their location in the config file to the corresponding sections (lines 23, 25-26 of the config file). In addition, the gene name restrictions have to be respected.
+For the *busco* target, the multi-fasta file must contain the  [BUSCO](https://busco.ezlab.org) dataset of ancestral sequences in amino acid sequences, called *ancestral_variants* in datasets. The location of this database is given in line 21 of the config file).
 
 
 Here, an overview of the busco sequences needed:
@@ -282,13 +282,13 @@ The capture of genomic regions of interested is made using the `-m capture` mode
 
 ##### 3.3.2 - Alignment
 
-   Alignments are conducted on the selected contigs and the selected genes from [exonerate](https://www.ebi.ac.uk/about/vertebrate-genomics/software/exonerate), incorporating all the appropriate gaps and frameshifts, and modelling of introns, by using the *protein2genome* mode when CDS are targeted or the *genome2genome* mode for other targets. A *gff* output table is created in **${RES}/Mapping/[nucleus,mitochondrion,chloroplast]/** folder for each sample. Only sequences with a mapping score above the **$EXO_SCORE** value are kept (line 21 of the config file).
-   By default we set this score at 250. We recommend to not set too high values (if the gene length is short) as a selection in alignment scores is next performed.
+   Alignments are conducted on the selected contigs and the selected genes from [exonerate](https://www.ebi.ac.uk/about/vertebrate-genomics/software/exonerate), incorporating all the appropriate gaps and frameshifts, and modelling of introns, by using the *protein2genome* mode when CDS are targeted or the *genome2genome* mode for other targets. A *gff* output table is created in **${RES}/Mapping/[nucleus,mitochondrion,chloroplast]/** folder for each sample. Only sequences with a mapping score above the **$EXO_SCORE** value are kept (line 20 of the config file).
+   By default we set this score at 50. We recommend to not set too high values (if the gene length is short) as a selection in alignment scores is next performed. Otherwise short genes could be skipped.
 
 
 ##### 3.3.3 - Genes extraction
 
-   Extraction of selected genes is conducted from the gff table by identifying the best alignment for each covered regions of each gene. Type of gene structure (exon, intron or all, *i.e* exon+intron) targeted are reported in (at lines 23, 25, 28, 33, 40, 43, of the config file). This step is conducted into multiple processors using the **<THREADS>** specified in the the *config_orthoskim.txt* file (line 3).
+   Extraction of selected genes is conducted from the gff table by identifying the best alignment for each covered regions of each gene. Type of gene structure (exon, intron or all, *i.e* exon+intron) targeted are reported in (at lines 22, 24, 27, 32, 39, 42, of the config file). This step is conducted into multiple processors using the **<THREADS>** specified in the the *config_orthoskim.txt* file (line 3).
    For the nucrdna target, ITS1 and ITS2 barcodes are extracted from the intronic regions of rRNA probes designed during the database step.
 
 
@@ -393,10 +393,10 @@ head ~/PATH/report.log
 
 #### 3.5 - Alignment of taxa
 
-OrthoSkim provides a mode to align taxa for each captured genes by using the `-m alignment` mode. We use [MAFFT](https://mafft.cbrc.jp/alignment/software/) to align each gene individually with the ‘--adjustdirectionaccurately’ option. This alignment can be filtered if the option is chosen by users using [trimAl](http://trimal.cgenomics.org/) with the heuristic ‘automated1’ method (*on/off* at line 47 of the config file).  
-In addition, users can choose which taxa will be aligned by stating if a selection is made on taxa (*on/off* at line 45 of the config file). In such case, a list of taxa to align has to be given (line 46).
+OrthoSkim provides a mode to align taxa for each captured genes by using the `-m alignment` mode. We use [MAFFT](https://mafft.cbrc.jp/alignment/software/) to align each gene individually with the ‘--adjustdirectionaccurately’ option. This alignment can be filtered if the option is chosen by users using [trimAl](http://trimal.cgenomics.org/) with the heuristic ‘automated1’ method (*on/off* at line 46 of the config file).  
+In addition, users can choose which taxa will be aligned by stating if a selection is made on taxa (*on/off* at line 45 of the config file). In such case, a list of taxa to align has to be given (line 45).
 
-OrthoSkim will output the concatenated alignment of genes along with a partition file under a RAxML-style format suitable for phylogenetic inferences. For such needs, a list if gene that will processed has to be given (line 49). A tab with information about gappy or missing data is also produced by sample.
+OrthoSkim will output the concatenated alignment of genes along with a partition file under a RAxML-style format suitable for phylogenetic inferences. For such needs, a list if gene that will processed has to be given (line 48). A tab with information about gappy or missing data is also produced by sample.
 
 
 ```
@@ -593,7 +593,7 @@ This step allowed to guide the pipeline according to an indexing tab based on sa
 
 #### 5.2 - List of genes files
 
-The extraction of orthologous regions and the creation of databases from annotations are based on a given list of genes. This list is supplied in **$CHLORO_GENES**, **$MITO_GENES** and **$NRDNA_GENES** (lines [59-61] of the config file) and must contain:
+The extraction of orthologous regions and the creation of databases from annotations are based on a given list of genes. This list is supplied in **$CHLORO_GENES**, **$MITO_GENES** and **$NRDNA_GENES** (lines [49-51] of the config file) and must contain:
 + the type of gene (e.g. CDS,rRNA,tRNA,misc_RNA)
 + the gene name
 
@@ -618,7 +618,7 @@ By default, OrthoSkim provided tRNA, rRNA and CDS in chloroplastic and mitochond
 
 #### 5.3 - phyloDB database of references
 
-OrthoSkim provides a mode to create a database from the all annotations performed within the project with the *phyloskim_indexing* mode, using the `-m phyloskim_database` mode. To do this, all genes found in these annotations files are extracted with the header restrictions. Output files are created according to the name and the path set in the config file (**$CHLORO_REF_CDS**, **$CHLORO_REF_rRNA**, **$CHLORO_REF_tRNA** and  **$NRDNA_REF** at lines 39-41 and 42 of the config file)  
+OrthoSkim provides a mode to create a database from the all annotations performed within the project with the *phyloskim_indexing* mode, using the `-m phyloskim_database` mode. To do this, all genes found in these annotations files are extracted with the header restrictions. Output files are created according to the name and the path set in the config file (**$CHLORO_REF_CDS**, **$CHLORO_REF_rRNA**, **$CHLORO_REF_tRNA** and  **$NRDNA_REF** at lines 36-38 and 40 of the config file)  
 
 #### 5.3 - phyloDB extraction from annotations
 

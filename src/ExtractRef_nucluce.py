@@ -139,44 +139,39 @@ for record in cur_genome:
     seqID=record.id
     sequence=record.seq
     genename=seqID.split("_")[0]
-
     tax_id=seqID.split("_")[1]
     species="_".join(seqID.split("_")[2:len(seqID.split("_"))])
     genus=seqID.split("_")[2:len(seqID.split("_"))][0]
-
     tokeep={}
     tokeep['seq']=sequence
     tokeep['id']=str(tax_id)+"_"+str(species)
-
     if tax_id=="NA":
         continue
     else:
-
         if model=="taxonomy":
-            if genename not in stored.keys():
+            if genename not in list(stored.keys()):
                 stored[genename]=dict()
-                if tax_id not in stored[genename].keys():
+                if tax_id not in list(stored[genename].keys()):
                     stored[genename][tax_id]=[]
                     stored[genename][tax_id].append(tokeep)
                 else:
                     stored[genename][tax_id].append(tokeep)
             else:
-                if tax_id not in stored[genename].keys():
+                if tax_id not in list(stored[genename].keys()):
                     stored[genename][tax_id]=[]
                     stored[genename][tax_id].append(tokeep)
                 else:
                     stored[genename][tax_id].append(tokeep)
-
         elif model=="distance":
-            if genename not in stored.keys():
+            if genename not in list(stored.keys()):
                 stored[genename]=dict()
-                if genus not in stored[genename].keys():
+                if genus not in list(stored[genename].keys()):
                     stored[genename][genus]=[]
                     stored[genename][genus].append(tokeep)
                 else:
                     stored[genename][genus].append(tokeep)
             else:
-                if genus not in stored[genename].keys():
+                if genus not in list(stored[genename].keys()):
                     stored[genename][genus]=[]
                     stored[genename][genus].append(tokeep)
                 else:
@@ -184,7 +179,7 @@ for record in cur_genome:
 
 
 "we search the closed ref for each gene"
-for g in stored.keys():
+for g in list(stored.keys()):
     gene_id=g
     if model=="taxonomy":
         if query_error>0:
@@ -193,9 +188,9 @@ for g in stored.keys():
             lengthlist=list()
             namelist=list()
             seqlist=list()
-            seqlist=[b['seq'] for c in stored[gene_id].values() for b in c]
-            lengthlist=[len(b['seq']) for c in stored[gene_id].values() for b in c]
-            namelist=[b['id'] for c in stored[gene_id].values() for b in c]
+            seqlist=[b['seq'] for c in list(stored[gene_id].values()) for b in c]
+            lengthlist=[len(b['seq']) for c in list(stored[gene_id].values()) for b in c]
+            namelist=[b['id'] for c in list(stored[gene_id].values()) for b in c]
             suborderindx=sorted(range(len(lengthlist)), key=lambda k: lengthlist[k])
             suborderindx.reverse()
             out_header=">"+str(gene_id)+"_"+str(namelist[suborderindx[0]])
@@ -219,10 +214,9 @@ for g in stored.keys():
                     out.write(out_header+'\n')
                     out.write(str(out_seq)+'\n')
             continue
-
         else:
             taxid_list=[]
-            if str(query) in stored[gene_id].keys():
+            if str(query) in list(stored[gene_id].keys()):
                 closed_taxa = [str(query)]
                 sub_best=list()
                 sub_name=list()
@@ -233,16 +227,13 @@ for g in stored.keys():
                     sub_orderindx=sorted(range(len(sub_lmax)), key=lambda k: sub_lmax[k])
                     sub_orderindx.reverse()
                     sub_best.append(stored[gene_id][taxa][sub_orderindx[0]])
-
                 lmax=list()
                 for seq in sub_best:
                     lmax.append(len(seq['seq']))
                 orderindx=sorted(range(len(lmax)), key=lambda k: lmax[k])
                 orderindx.reverse()
-
                 out_header=">"+str(gene_id)+"_"+str(sub_best[orderindx[0]]['id'])
                 out_seq=str(sub_best[orderindx[0]]['seq'])
-
                 if os.path.isfile(os.path.join(outpath, fname)):
                     with open(os.path.join(outpath, fname), 'a+') as file:
                         old_headers = []
@@ -262,20 +253,19 @@ for g in stored.keys():
                         out.write(out_header+'\n')
                         out.write(str(out_seq)+'\n')
             else:
-                for i in stored[gene_id].keys():
+                for i in list(stored[gene_id].keys()):
                     if len(ncbi.get_taxid_translator([int(i)]))==0:
                         continue
                     else:
                         taxid_list.append(int(i))
-
                 if len(taxid_list)==0:
                     #we extract the longest sequence for the gene
                     lengthlist=list()
                     namelist=list()
                     seqlist=list()
-                    seqlist=[b['seq'] for c in stored[gene_id].values() for b in c]
-                    lengthlist=[len(b['seq']) for c in stored[gene_id].values() for b in c]
-                    namelist=[b['id'] for c in stored[gene_id].values() for b in c]
+                    seqlist=[b['seq'] for c in list(stored[gene_id].values()) for b in c]
+                    lengthlist=[len(b['seq']) for c in list(stored[gene_id].values()) for b in c]
+                    namelist=[b['id'] for c in list(stored[gene_id].values()) for b in c]
                     suborderindx=sorted(range(len(lengthlist)), key=lambda k: lengthlist[k])
                     suborderindx.reverse()
                     out_header=">"+str(gene_id)+"_"+str(namelist[suborderindx[0]])
@@ -332,9 +322,9 @@ for g in stored.keys():
                                     lengthlist=list()
                                     namelist=list()
                                     seqlist=list()
-                                    seqlist=[b['seq'] for c in stored[gene_id].values() for b in c]
-                                    lengthlist=[len(b['seq']) for c in stored[gene_id].values() for b in c]
-                                    namelist=[b['id'] for c in stored[gene_id].values() for b in c]
+                                    seqlist=[b['seq'] for c in list(stored[gene_id].values()) for b in c]
+                                    lengthlist=[len(b['seq']) for c in list(stored[gene_id].values()) for b in c]
+                                    namelist=[b['id'] for c in list(stored[gene_id].values()) for b in c]
                                     suborderindx=sorted(range(len(lengthlist)), key=lambda k: lengthlist[k])
                                     suborderindx.reverse()
                                     out_header=">"+str(gene_id)+"_"+str(namelist[suborderindx[0]])
@@ -363,9 +353,9 @@ for g in stored.keys():
                                 lengthlist=list()
                                 namelist=list()
                                 seqlist=list()
-                                seqlist=[b['seq'] for c in stored[gene_id].values() for b in c]
-                                lengthlist=[len(b['seq']) for c in stored[gene_id].values() for b in c]
-                                namelist=[b['id'] for c in stored[gene_id].values() for b in c]
+                                seqlist=[b['seq'] for c in list(stored[gene_id].values()) for b in c]
+                                lengthlist=[len(b['seq']) for c in list(stored[gene_id].values()) for b in c]
+                                namelist=[b['id'] for c in list(stored[gene_id].values()) for b in c]
                                 suborderindx=sorted(range(len(lengthlist)), key=lambda k: lengthlist[k])
                                 suborderindx.reverse()
                                 out_header=">"+str(gene_id)+"_"+str(namelist[suborderindx[0]])
@@ -402,16 +392,14 @@ for g in stored.keys():
                                 closed_taxa.remove(str(query))
                             else:
                                 pass
-
     else:
         subdf = df.sort_values(by=query)[query]
-        genera_list = [str(i) for i in stored[gene_id].keys()]
+        genera_list = [str(i) for i in list(stored[gene_id].keys())]
         part = 0
         range_list = list()
         closed_list = list()
         for taxa in range(len(subdf.index)):
             if subdf.index[taxa] in genera_list:
-                # we create list for taxa that are at the same phylogenetic distance from the query
                 score=subdf[taxa]
                 if len(range_list)>0:
                     if score in range_list[part]:
@@ -423,18 +411,28 @@ for g in stored.keys():
                 else:
                     range_list.append([score])
                     closed_list.append([subdf.index[taxa]])
-        closed_taxa=closed_list[0]
-
+        if len(closed_list)==0:
+            lengthlist=list()
+            namelist=list()
+            seqlist=list()
+            seqlist=[b['seq'] for c in list(stored[gene_id].values()) for b in c]
+            lengthlist=[len(b['seq']) for c in list(stored[gene_id].values()) for b in c]
+            namelist=[a for a in list(stored[gene_id].keys())]
+            suborderindx=sorted(range(len(lengthlist)), key=lambda k: lengthlist[k])
+            suborderindx.reverse()
+            closed_taxa=[namelist[suborderindx[0]]]
+            print("WARN: Error to extract %s locus for the taxa: %s, the longest sequence will be extracted." % (str(gene_id),str(query_name)))
+        else:
+            closed_taxa=closed_list[0]
     sub_best=list()
     sub_name=list()
-
     if len(closed_taxa)==0:
         lengthlist=list()
         namelist=list()
         seqlist=list()
-        seqlist=[b['seq'] for c in stored[gene_id].values() for b in c]
-        lengthlist=[len(b['seq']) for c in stored[gene_id].values() for b in c]
-        namelist=[b['id'] for c in stored[gene_id].values() for b in c]
+        seqlist=[b['seq'] for c in list(stored[gene_id].values()) for b in c]
+        lengthlist=[len(b['seq']) for c in list(stored[gene_id].values()) for b in c]
+        namelist=[b['id'] for c in list(stored[gene_id].values()) for b in c]
         suborderindx=sorted(range(len(lengthlist)), key=lambda k: lengthlist[k])
         suborderindx.reverse()
         out_header=">"+str(gene_id)+"_"+str(namelist[suborderindx[0]])
@@ -468,16 +466,13 @@ for g in stored.keys():
             sub_orderindx.reverse()
             sub_best.append(stored[gene_id][taxa][sub_orderindx[0]])
             #sub_name.append(taxa)
-
         lmax=list()
         for seq in sub_best:
             lmax.append(len(seq['seq']))
         orderindx=sorted(range(len(lmax)), key=lambda k: lmax[k])
         orderindx.reverse()
-
         out_header=">"+str(gene_id)+"_"+str(sub_best[orderindx[0]]['id'])
         out_seq=str(sub_best[orderindx[0]]['seq'])
-
         if os.path.isfile(os.path.join(outpath, fname)):
             with open(os.path.join(outpath, fname), 'a+') as file:
                 old_headers = []

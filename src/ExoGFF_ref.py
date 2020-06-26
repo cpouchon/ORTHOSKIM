@@ -17,7 +17,7 @@ parser = argparse.ArgumentParser(description='Export regions of query database f
 parser.add_argument("-i","--infile", help="Fasta input contigs file",
                     type=str)
 parser.add_argument("-m","--model", help="molecular type compartment",
-                    type=str,choices=["mitochondrion_CDS","mitochondrion_rRNA","mitochondrion_tRNA","chloroplast_CDS","chloroplast_RNA","nucrdna_rRNA"])
+                    type=str,choices=["mitochondrion_CDS","mitochondrion_rRNA","chloroplast_CDS","chloroplast_rRNA","chloroplast_tRNA","nucrdna_rRNA"])
 parser.add_argument("-o","--outdir", help="Out directory path",
                     type=str)
 parser.add_argument("-g","--gfftab", help="input gff table from exonerate alignment",

@@ -219,24 +219,44 @@ def GeneExtraction(genenumber):
 
                                 typeofgene = g_tab[0]
 
-                                if os.path.isfile(os.path.join(outpath+"/"+model+'_'+typeofgene, fname)):
-                                    with open(os.path.join(outpath+"/"+model+'_'+typeofgene, fname), 'a+') as file:
-                                        old_headers = []
-                                        end_file=file.tell()
-                                        file.seek(0)
-                                        for line in file:
-                                            if line.startswith(">"):
-                                                old_headers.append(line.replace(">","").split(";")[0])
-                                        if not name in old_headers:
-                                            file.seek(end_file)
-                                            file.write(header+'\n')
-                                            file.write(str(out_seq)+'\n')
-                                        else:
-                                            pass
-                                else :
-                                    with open(os.path.join(outpath+"/"+model+'_'+typeofgene, fname), 'w') as out:
-                                        out.write(header+'\n')
-                                        out.write(str(out_seq)+'\n')
+                                if model=="nucrdna":
+                                    if os.path.isfile(os.path.join(outpath+"/"+model, fname)):
+                                        with open(os.path.join(outpath+"/"+model, fname), 'a+') as file:
+                                            old_headers = []
+                                            end_file=file.tell()
+                                            file.seek(0)
+                                            for line in file:
+                                                if line.startswith(">"):
+                                                    old_headers.append(line.replace(">","").split(";")[0])
+                                            if not name in old_headers:
+                                                file.seek(end_file)
+                                                file.write(header+'\n')
+                                                file.write(str(out_seq)+'\n')
+                                            else:
+                                                pass
+                                    else :
+                                        with open(os.path.join(outpath+"/"+model, fname), 'w') as out:
+                                            out.write(header+'\n')
+                                            out.write(str(out_seq)+'\n')
+                                else:
+                                    if os.path.isfile(os.path.join(outpath+"/"+model+'_'+typeofgene, fname)):
+                                        with open(os.path.join(outpath+"/"+model+'_'+typeofgene, fname), 'a+') as file:
+                                            old_headers = []
+                                            end_file=file.tell()
+                                            file.seek(0)
+                                            for line in file:
+                                                if line.startswith(">"):
+                                                    old_headers.append(line.replace(">","").split(";")[0])
+                                            if not name in old_headers:
+                                                file.seek(end_file)
+                                                file.write(header+'\n')
+                                                file.write(str(out_seq)+'\n')
+                                            else:
+                                                pass
+                                    else :
+                                        with open(os.path.join(outpath+"/"+model+'_'+typeofgene, fname), 'w') as out:
+                                            out.write(header+'\n')
+                                            out.write(str(out_seq)+'\n')
 
                     else:
                         pass
@@ -290,8 +310,11 @@ if model in ("chloroplast","nucrdna","mitochondrion"):
     for g in genes:
         g_tab = g.rstrip().split('\t')
         types.append(g_tab[0])
-    for type in set(types):
-        mkdir(str(outpath+"/"+model+'_'+type))
+    if model=="nucrdna":
+        mkdir(str(outpath+"/"+model))
+    else:
+        for type in set(types):
+            mkdir(str(outpath+"/"+model+'_'+type))
     '''
     process the extraction
     '''

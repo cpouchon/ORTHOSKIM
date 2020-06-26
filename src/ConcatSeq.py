@@ -128,20 +128,20 @@ for file in in_files:
                 seqID=record.id.split(";")[0]
             sequence=record.seq.upper()
 
-            if seqID not in seqs.keys():
+            if seqID not in list(seqs.keys()):
                 seqs[seqID]=dict()
-                if genename not in seqs[seqID].keys():
+                if genename not in list(seqs[seqID].keys()):
                     seqs[seqID][genename]=sequence
                 else:
                     pass
             else:
-                if genename not in seqs[seqID].keys():
+                if genename not in list(seqs[seqID].keys()):
                     seqs[seqID][genename]=sequence
                 else:
                     pass
 
         start=end+1
-        end=(start-1)+len(str(seqs[seqs.keys()[0]][genename]))
+        end=(start-1)+len(str(seqs[list(seqs.keys())[0]][genename]))
         partnumber=partnumber+1
 
         splitfile=os.path.split(os.path.abspath(fname))

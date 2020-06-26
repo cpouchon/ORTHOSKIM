@@ -73,6 +73,8 @@ for r, d, f in os.walk(path):
 
 stored={}
 
+mkdir(opath)
+
 for file in in_files:
     cur_genome = SeqIO.parse(file, "fasta")
     for record in cur_genome:
