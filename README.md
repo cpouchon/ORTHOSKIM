@@ -85,7 +85,7 @@ COVERAGE=5                                                                      
 MINCONTLENGTH=1000                                                                   ## [17] Minimal contigs length allowed for genomic scan of targeted regions
 MODE_REF=distance                                                                    ## [18] Mode to select the closest reference from the database: [taxonomy,distance]
 DISTANCE_MATRIX=~/OrthoSkim-master/ressources/distance_matrix.csv                    ## [19] distance matrix at genus level in csv format if distance chosen mode.
-EXO_SCORE=250                                                                        ## [20] minimal score of mapping in exonerate (by default: 250). To
+EXO_SCORE=50                                                                        ## [20] minimal score of mapping in exonerate (by default: 50). To
 
 #---------  [busco] target --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 BUSCO_REF=~/OrthoSkim-master/data/BUSCO_viridiplantae.fa                             ## [21] multi-fasta of BUSCO sequences (ancestral variants)
