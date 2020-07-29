@@ -156,8 +156,8 @@ if model in ("chloroplast","nucrdna","mitochondrion"):
                             gene = feat.qualifiers['gene'][0].replace("_1","")
                         elif "_2" in feat.qualifiers['gene'][0]:
                             gene = feat.qualifiers['gene'][0].replace("_2","")
-                        elif feat.qualifiers['gene'][0]=="5.8S rRNA":
-                            gene = "rrn5.8S"
+                        #elif feat.qualifiers['gene'][0]=="5.8S rRNA":
+                        #    gene = "rrn5.8S"
                         else:
                             gene = feat.qualifiers['gene'][0]
                         if feat.type == "tRNA" :
@@ -266,9 +266,14 @@ if model in ("chloroplast","nucrdna","mitochondrion"):
                                     flanked = FeatureLocation(s, e, strand)
                                     out_seq = flanked.extract(record.seq)
 
-                                header = ">"+str(gene)+"_"+str(taxid)+"_"+"_".join(org)
-                                fname = gene+".fa"
-                                typeofgene=feat.type
+                                if gene == "5.8S rRNA":
+                                    header = ">"+"rrn5.8S"+"_"+str(taxid)+"_"+"_".join(org)
+                                    fname = "rrn5.8S.fa"
+                                    typeofgene=feat.type
+                                else:
+                                    header = ">"+str(gene)+"_"+str(taxid)+"_"+"_".join(org)
+                                    fname = gene+".fa"
+                                    typeofgene=feat.type
 
                                 if 'ITS' in gene:
                                     pass
