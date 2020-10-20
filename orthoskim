@@ -42,8 +42,8 @@ OrthoSkim: in silico gene-capture from whole genome shotgun sequencing
                   - [phyloskim_stat_rdna] (output summary statistic for rdna assemblies)
                   - [phyloskim_extraction_targeted] (extraction of genes from targeted assemblies directly with
                                           annotations; target: chloroplast,nucrdna)
-                  - [SPAdes_assembly] (run SPAdes de novo assembly for each samples)
-                  - [SPAdes_reformate] (reformates SPAdes output according to OrthoSkim pipeline)
+                  - [assembly] (run de novo assembly for each samples)
+                  - [reformate] (reformates assemblies output)
                   - [stat_assembly] (check assemblies by generating summary statistics)
                   - [stat_capture] (get statistics of gene extraction for targets (-t), possibily to give multiple targets)
                   - [check_taxonomy] (taxonomy check of gene captured from blast to NCBI database)
@@ -61,6 +61,7 @@ OrthoSkim: in silico gene-capture from whole genome shotgun sequencing
                   - [chloroplast_rRNA] (*capture*,*stat_capture*)
                   - [mitochondrion_CDS] (*capture*,*stat_capture*)
                   - [mitochondrion_rRNA] (*capture*,*stat_capture*)
+                  - [spades] (*assembly*,*reformate*)
             -p  (path) [only for phyloskims users] give path to indexing file
             "
   exit 0
