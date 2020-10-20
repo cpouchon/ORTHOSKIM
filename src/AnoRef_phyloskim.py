@@ -3,9 +3,9 @@
 import glob
 from Bio import SeqIO
 from Bio.SeqFeature import FeatureLocation
-from Bio.Alphabet import *
+#from Bio.Alphabet import *
 from Bio.SeqRecord import *
-from Bio.Alphabet.IUPAC import IUPACAmbiguousDNA;
+#from Bio.Alphabet.IUPAC import IUPACAmbiguousDNA;
 from Bio.Seq import *
 from Bio.SeqUtils import *
 from joblib import Parallel, delayed
@@ -321,9 +321,9 @@ if model in ("chloroplast","nucrdna","mitochondrion"):
 
     if len("".join(to_annot_file['seq'])) >= cond_size:
         newrecord=SeqRecord(seq=Seq(concat_seq), id=to_annot_file['id'], name=to_annot_file['name'],
-        description=to_annot_file['description'],dbxrefs=[])
-        from Bio.Alphabet import generic_dna
-        newrecord.seq.alphabet = generic_dna
+        description=to_annot_file['description'],dbxrefs=[],annotations={"molecule_type": "DNA"})
+        #from Bio.Alphabet import generic_dna
+        #newrecord.seq.alphabet = generic_dna
 
         from Bio import SeqFeature
         my_start_pos = SeqFeature.ExactPosition(0)

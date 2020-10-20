@@ -6,5 +6,5 @@ EXONERATE=/usr/local/bin/exonerate
 QUAST=/Users/pouchonc/miniconda2/bin/quast.py
 BLASTDB=/Users/pouchonc/miniconda2/bin/makeblastdb
 BLASTN=/Users/pouchonc/miniconda2/bin/blastn
-MAFFT=
-TRIMAL=
+MAFFT=/path/to/mafft
+TRIMAL=/path/to/trimal

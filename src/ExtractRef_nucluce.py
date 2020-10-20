@@ -3,9 +3,9 @@
 import glob
 from Bio import SeqIO
 from Bio.SeqFeature import FeatureLocation
-from Bio.Alphabet import *
+#from Bio.Alphabet import *
 from Bio.SeqRecord import *
-from Bio.Alphabet.IUPAC import IUPACAmbiguousDNA;
+#from Bio.Alphabet.IUPAC import IUPACAmbiguousDNA;
 from Bio.Seq import *
 from Bio.SeqUtils import *
 from ete3 import NCBITaxa

@@ -10,7 +10,7 @@ from joblib import Parallel, delayed
 import multiprocessing
 
 from Bio.Seq import Seq
-from Bio.Alphabet import generic_dna
+#from Bio.Alphabet import generic_dna
 
 
 parser = argparse.ArgumentParser(description='Create ITS probes. Script was writen by C. Pouchon (2019).')

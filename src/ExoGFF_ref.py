@@ -10,7 +10,7 @@ from joblib import Parallel, delayed
 import multiprocessing
 
 from Bio.Seq import Seq
-from Bio.Alphabet import generic_dna
+#from Bio.Alphabet import generic_dna
 
 
 parser = argparse.ArgumentParser(description='Export regions of query database from exonerate alignment. Filtering is made according to rawscore. Script was writen by C. Pouchon (2019).')
@@ -109,9 +109,11 @@ def GeneExtraction(genenumber):
 
         header = ">"+str(newid)
         taxa="_".join(seqid.split("_")[1:len(seqid.split("_"))])
-
-        if os.path.isfile(os.path.join(outpath+"/"+model, taxa+".fa")):
-            with open(os.path.join(outpath+"/"+model, taxa+".fa"), 'a+') as file:
+        fname = geneid+".fa"
+        #if os.path.isfile(os.path.join(outpath+"/"+model, taxa+".fa")):
+        if os.path.isfile(os.path.join(outpath+"/"+model, fname)):
+            #with open(os.path.join(outpath+"/"+model, taxa+".fa"), 'a+') as file:
+            with open(os.path.join(outpath+"/"+model, fname), 'a+') as file:
                 old_headers = []
                 end_file=file.tell()
                 file.seek(0)
@@ -125,7 +127,8 @@ def GeneExtraction(genenumber):
                 else:
                     pass
         else :
-            with open(os.path.join(outpath+"/"+model, taxa+".fa"), 'w') as out:
+            #with open(os.path.join(outpath+"/"+model, taxa+".fa"), 'w') as out:
+            with open(os.path.join(outpath+"/"+model, fname), 'w') as out:
                 out.write(header+'\n')
                 out.write(str(dna)+'\n')
     else:
