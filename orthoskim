@@ -55,13 +55,13 @@ OrthoSkim: in silico gene-capture from whole genome shotgun sequencing
                   - [nucleus_aa] (*capture*,*stat_capture*)
                   - [nucleus_nt] (*capture*,*stat_capture*)
                   - [busco] (*capture*,*stat_capture*)
-                  - [uce] (*capture*,*stat_capture*)
                   - [chloroplast_CDS] (*capture*,*stat_capture*)
                   - [chloroplast_tRNA] (*capture*,*stat_capture*)
                   - [chloroplast_rRNA] (*capture*,*stat_capture*)
                   - [mitochondrion_CDS] (*capture*,*stat_capture*)
                   - [mitochondrion_rRNA] (*capture*,*stat_capture*)
                   - [spades] (*assembly*,*reformate*)
+                  - [rnaspades] (*assembly*,*reformate*)
             -p  (path) [only for phyloskims users] give path to indexing file
             "
   exit 0
@@ -102,7 +102,6 @@ mkdir -p ${RES}/Extraction
     echo ""
 		exit 0
 
-
   elif [ $mode == 'reformate' ] && [ $target=='spades' ]; then
 		echo "INFO: mode=$mode - preprocessing of assemblies files from SPAdes"
     mkdir -p ${RES}/Assembly/Samples/unfiltered/
@@ -111,6 +110,23 @@ mkdir -p ${RES}/Extraction
 			samplename=`echo ${f} | awk '{print $1}'`
       if [ -s ${RES}/Assembly/SPADES/${samplename}/scaffolds.fasta ]; then
         cp ${RES}/Assembly/SPADES/${samplename}/scaffolds.fasta ${RES}/Assembly/Samples/unfiltered/${samplename}.fa
+      else
+        echo "WARN: $samplename unprocessed"
+        continue
+      fi
+    done <${LIST_FILES}
+		echo "STATUS: done"
+    echo ""
+		exit 0
+
+  elif [ $mode == 'reformate' ] && [ $target=='rnaspades' ]; then
+		echo "INFO: mode=$mode - preprocessing of assemblies files from SPAdes"
+    mkdir -p ${RES}/Assembly/Samples/unfiltered/
+		while read f;
+		do
+			samplename=`echo ${f} | awk '{print $1}'`
+      if [ -s ${RES}/Assembly/RNASPADES/${samplename}/transcripts.fasta ]; then
+        cp ${RES}/Assembly/RNASPADES/${samplename}/transcripts.fasta ${RES}/Assembly/Samples/unfiltered/${samplename}.fa
       else
         echo "WARN: $samplename unprocessed"
         continue
@@ -206,6 +222,43 @@ mkdir -p ${RES}/Extraction
 		echo "STATUS: done"
     echo ""
 		exit 0
+
+  elif [ $mode == 'assembly' ] && [ $target == 'rnaspades' ]; then
+    echo "INFO: mode=$mode - RNASPAdes assembly run"
+    mkdir -p ${RES}/Assembly/RNASPADES
+    while read f;
+    do
+      samplename=`echo ${f} | awk '{print $1}'`
+      r1=`echo ${f} | awk '{print $2}'`
+      r2=`echo ${f} | awk '{print $3}'`
+      #outp=`echo ${f} | awk '{print $6}'`
+      # if assembly_done existed
+      if [ -s ${RES}/assembly_done.log ]; then
+        # we checked if sample already in done.log to continue to another sample
+        if grep -Fxq "${samplename}" ${RES}/assembly_done.log; then
+          echo "WARN: $samplename already processed"
+          continue
+        else
+          echo "${SPADES} --rna -1 ${r1} -2 ${r2} -o ${RES}/Assembly/RNASPADES/${samplename} -t ${THREADS} -m ${MEMORY} -k ${KMER}"
+          # we check if no error on function run
+          if ${SPADES} --rna -1 ${r1} -2 ${r2} -o ${RES}/Assembly/RNASPADES/${samplename} -t ${THREADS} -m ${MEMORY} -k ${KMER}; then
+            echo $samplename >> ${RES}/assembly_done.log
+          else
+            echo $samplename >> ${RES}/assembly_error.log
+          fi
+        fi
+      else
+        echo "${SPADES} --rna -1 ${r1} -2 ${r2} -o ${RES}/Assembly/RNASPADES/${samplename} -t ${THREADS} -m ${MEMORY} -k ${KMER}"
+        if ${SPADES} --rna -1 ${r1} -2 ${r2} -o ${RES}/Assembly/RNASPADES/${samplename} -t ${THREADS} -m ${MEMORY} -k ${KMER}; then
+          echo ${samplename} >> ${RES}/assembly_done.log
+        else
+          echo ${samplename} >> ${RES}/assembly_error.log
+        fi
+      fi
+    done <${LIST_FILES}
+    echo "STATUS: done"
+    echo ""
+    exit 0
 
 	elif [ $mode == 'capture' ] && [ $target == 'busco' ]; then
 		echo "INFO: mode=$mode - Extraction of BUSCO from assemblies"
@@ -2085,108 +2138,108 @@ mkdir -p ${RES}/Extraction
     echo ""
 		exit 0
 
-  elif [ $mode == 'capture' ] && [ $target == 'uce' ]; then
-    echo 'INFO: mode=$mode - Extraction of UCE loci from assemblies'
-    mkdir -p ${RES}/Mapping/uce
-    mkdir -p ${RES}/references
-    #for f in `find ${RES}/Assembly/Samples/ -type f -name \*.fa`;
-    while read f;
-    do
-      #lib=`basename $f | perl -pe 's/\.fa//'`
-      lib=`echo ${f} | awk '{print $1}'`
-      file=${RES}/Assembly/Samples/filtered/${lib}.fa
-      if [ -s $file ]; then
-        if [ -s ${RES}/uce_done.log ]; then
-          if grep -Fxq "${lib}" ${RES}/uce_done.log; then
-            echo "WARN: $lib already processed"
-            continue
-          else
-            echo "*** make formatted reference on the closest taxa from the database ***"
-            if [ ${MODE_REF} == "distance" ]; then
-              echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${UCE_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} --target ${target}"
-              `dirname $0`/src/ExtractRef_nucluce.py -in ${UCE_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} --target ${target}
-            else
-              echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${UCE_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --target ${target}"
-              `dirname $0`/src/ExtractRef_nucluce.py -in ${UCE_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --target ${target}
-            fi
-            CLOSED_REF=${RES}/references/closed_${target}.fa
-            if [ -s ${CLOSED_REF} ]; then
-              # copier ici ancienne version d'orthoskim avec le blast/diamond sur les genes
-              echo "CMD: ${BLASTDB} -in ${CLOSED_REF} -dbtype nucl"
-              ${BLASTDB} -in ${CLOSED_REF} -dbtype nucl
-              echo "*** mapping and extraction of assemblies into reference ***"
-              echo "CMD: ${BLASTN} -db ${CLOSED_REF} -query $file -out ${RES}/Mapping/uce/matches_uce_${lib} -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn"
-        			${BLASTN} -db ${CLOSED_REF} -query $file -out ${RES}/Mapping/uce/matches_uce_${lib} -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn
-        			awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print $1}' ${RES}/Mapping/uce/matches_uce_${lib} | sort | uniq > ${RES}/Mapping/uce/hits_uce_${lib}
-              if [ -s ${RES}/Mapping/uce/hits_uce_${lib} ]; then
-                awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $file | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/uce/hits_uce_${lib} - > ${RES}/Mapping/uce/contigs_hits_uce_${lib}.fasta
-                echo "CMD: ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSED_REF} -t ${RES}/Mapping/uce/contigs_hits_uce_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=$0;next;}{entry = entry "\n" $0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/uce/out_uce_${lib}.gff"
-                if ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSED_REF} -t ${RES}/Mapping/uce/contigs_hits_uce_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=$0;next;}{entry = entry "\n" $0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/uce/out_uce_${lib}.gff; then
-                  echo "CMD: `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/uce/contigs_hits_uce_${lib}.fasta -g ${RES}/Mapping/uce/out_uce_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${UCE_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSED_REF} -rp ${REFPCT}"
-                  `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/uce/contigs_hits_uce_${lib}.fasta -g ${RES}/Mapping/uce/out_uce_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${UCE_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSED_REF} -rp ${REFPCT}
-                  rm ${RES}/Mapping/uce/contigs_hits_uce_${lib}.fasta ${RES}/Mapping/uce/hits_uce_${lib} ${RES}/Mapping/uce/matches_uce_${lib}
-                  echo ${lib} >> ${RES}/uce_done.log
-                else
-                  echo ${lib} >> ${RES}/uce_error.log
-                fi
-              else
-                echo "WARN: No hits were detected when mapping ${lib} into ${CLOSED_REF} database"
-                echo ${lib} >> ${RES}/uce_error.log
-                continue
-              fi
-            else
-              echo "WARN: error to extract closed sequences into ${CLOSED_REF} database"
-              echo ${lib} >> ${RES}/uce_error.log
-              continue
-            fi
-          fi
-        else
-          echo "*** make formatted reference on the closest taxa from the database ***"
-          if [ ${MODE_REF} == "distance" ]; then
-            echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${UCE_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} --target ${target}"
-            `dirname $0`/src/ExtractRef_nucluce.py -in ${UCE_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} --target ${target}
-          else
-            echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${UCE_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --target ${target}"
-            `dirname $0`/src/ExtractRef_nucluce.py -in ${UCE_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --target ${target}
-          fi
-          CLOSED_REF=${RES}/references/closed_${target}.fa
-          if [ -s ${CLOSED_REF} ]; then
-            echo "CMD: ${BLASTDB} -in ${CLOSED_REF} -dbtype nucl"
-            ${BLASTDB} -in ${CLOSED_REF} -dbtype nucl
-            echo "*** mapping and extraction of assemblies into reference ***"
-            echo "CMD: ${BLASTN} -db ${CLOSED_REF} -query $file -out ${RES}/Mapping/uce/matches_uce_${lib} -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn"
-            ${BLASTN} -db ${CLOSED_REF} -query $file -out ${RES}/Mapping/uce/matches_uce_${lib} -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn
-            awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print $1}' ${RES}/Mapping/uce/matches_uce_${lib} | sort | uniq > ${RES}/Mapping/uce/hits_uce_${lib}
-            if [ -s ${RES}/Mapping/uce/hits_uce_${lib} ]; then
-              awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $file | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/uce/hits_uce_${lib} - > ${RES}/Mapping/uce/contigs_hits_uce_${lib}.fasta
-              echo "CMD: ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSED_REF} -t ${RES}/Mapping/uce/contigs_hits_uce_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=$0;next;}{entry = entry "\n" $0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/uce/out_uce_${lib}.gff"
-              if ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSED_REF} -t ${RES}/Mapping/uce/contigs_hits_uce_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=$0;next;}{entry = entry "\n" $0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/uce/out_uce_${lib}.gff; then
-                echo "CMD: `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/uce/contigs_hits_uce_${lib}.fasta -g ${RES}/Mapping/uce/out_uce_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${UCE_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSED_REF} -rp ${REFPCT}"
-                `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/uce/contigs_hits_uce_${lib}.fasta -g ${RES}/Mapping/uce/out_uce_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${UCE_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSED_REF} -rp ${REFPCT}
-                rm ${RES}/Mapping/uce/contigs_hits_uce_${lib}.fasta ${RES}/Mapping/uce/hits_uce_${lib} ${RES}/Mapping/uce/matches_uce_${lib}
-                echo ${lib} >> ${RES}/uce_done.log
-              else
-                echo ${lib} >> ${RES}/uce_error.log
-              fi
-            else
-              echo "WARN: No hits were detected when mapping ${lib} into ${CLOSED_REF} database"
-              echo ${lib} >> ${RES}/uce_error.log
-              continue
-            fi
-          else
-            echo "WARN: error to extract closed sequences into ${CLOSED_REF} database"
-            echo ${lib} >> ${RES}/uce_error.log
-            continue
-          fi
-        fi
-      else
-        echo "no assemblies done for $lib"
-        echo ${lib} >> ${RES}/uce_error.log
-      fi
-		done <${LIST_FILES}
-		echo "STATUS: done"
-    echo ""
-		exit 0
+  # elif [ $mode == 'capture' ] && [ $target == 'uce' ]; then
+  #   echo 'INFO: mode=$mode - Extraction of UCE loci from assemblies'
+  #   mkdir -p ${RES}/Mapping/uce
+  #   mkdir -p ${RES}/references
+  #   #for f in `find ${RES}/Assembly/Samples/ -type f -name \*.fa`;
+  #   while read f;
+  #   do
+  #     #lib=`basename $f | perl -pe 's/\.fa//'`
+  #     lib=`echo ${f} | awk '{print $1}'`
+  #     file=${RES}/Assembly/Samples/filtered/${lib}.fa
+  #     if [ -s $file ]; then
+  #       if [ -s ${RES}/uce_done.log ]; then
+  #         if grep -Fxq "${lib}" ${RES}/uce_done.log; then
+  #           echo "WARN: $lib already processed"
+  #           continue
+  #         else
+  #           echo "*** make formatted reference on the closest taxa from the database ***"
+  #           if [ ${MODE_REF} == "distance" ]; then
+  #             echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${UCE_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} --target ${target}"
+  #             `dirname $0`/src/ExtractRef_nucluce.py -in ${UCE_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} --target ${target}
+  #           else
+  #             echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${UCE_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --target ${target}"
+  #             `dirname $0`/src/ExtractRef_nucluce.py -in ${UCE_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --target ${target}
+  #           fi
+  #           CLOSED_REF=${RES}/references/closed_${target}.fa
+  #           if [ -s ${CLOSED_REF} ]; then
+  #             # copier ici ancienne version d'orthoskim avec le blast/diamond sur les genes
+  #             echo "CMD: ${BLASTDB} -in ${CLOSED_REF} -dbtype nucl"
+  #             ${BLASTDB} -in ${CLOSED_REF} -dbtype nucl
+  #             echo "*** mapping and extraction of assemblies into reference ***"
+  #             echo "CMD: ${BLASTN} -db ${CLOSED_REF} -query $file -out ${RES}/Mapping/uce/matches_uce_${lib} -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn"
+  #       			${BLASTN} -db ${CLOSED_REF} -query $file -out ${RES}/Mapping/uce/matches_uce_${lib} -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn
+  #       			awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print $1}' ${RES}/Mapping/uce/matches_uce_${lib} | sort | uniq > ${RES}/Mapping/uce/hits_uce_${lib}
+  #             if [ -s ${RES}/Mapping/uce/hits_uce_${lib} ]; then
+  #               awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $file | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/uce/hits_uce_${lib} - > ${RES}/Mapping/uce/contigs_hits_uce_${lib}.fasta
+  #               echo "CMD: ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSED_REF} -t ${RES}/Mapping/uce/contigs_hits_uce_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=$0;next;}{entry = entry "\n" $0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/uce/out_uce_${lib}.gff"
+  #               if ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSED_REF} -t ${RES}/Mapping/uce/contigs_hits_uce_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=$0;next;}{entry = entry "\n" $0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/uce/out_uce_${lib}.gff; then
+  #                 echo "CMD: `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/uce/contigs_hits_uce_${lib}.fasta -g ${RES}/Mapping/uce/out_uce_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${UCE_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSED_REF} -rp ${REFPCT}"
+  #                 `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/uce/contigs_hits_uce_${lib}.fasta -g ${RES}/Mapping/uce/out_uce_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${UCE_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSED_REF} -rp ${REFPCT}
+  #                 rm ${RES}/Mapping/uce/contigs_hits_uce_${lib}.fasta ${RES}/Mapping/uce/hits_uce_${lib} ${RES}/Mapping/uce/matches_uce_${lib}
+  #                 echo ${lib} >> ${RES}/uce_done.log
+  #               else
+  #                 echo ${lib} >> ${RES}/uce_error.log
+  #               fi
+  #             else
+  #               echo "WARN: No hits were detected when mapping ${lib} into ${CLOSED_REF} database"
+  #               echo ${lib} >> ${RES}/uce_error.log
+  #               continue
+  #             fi
+  #           else
+  #             echo "WARN: error to extract closed sequences into ${CLOSED_REF} database"
+  #             echo ${lib} >> ${RES}/uce_error.log
+  #             continue
+  #           fi
+  #         fi
+  #       else
+  #         echo "*** make formatted reference on the closest taxa from the database ***"
+  #         if [ ${MODE_REF} == "distance" ]; then
+  #           echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${UCE_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} --target ${target}"
+  #           `dirname $0`/src/ExtractRef_nucluce.py -in ${UCE_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} -d ${DISTANCE_MATRIX} --target ${target}
+  #         else
+  #           echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${UCE_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --target ${target}"
+  #           `dirname $0`/src/ExtractRef_nucluce.py -in ${UCE_REF} -q ${lib} -o ${RES}/references/ -m ${MODE_REF} --target ${target}
+  #         fi
+  #         CLOSED_REF=${RES}/references/closed_${target}.fa
+  #         if [ -s ${CLOSED_REF} ]; then
+  #           echo "CMD: ${BLASTDB} -in ${CLOSED_REF} -dbtype nucl"
+  #           ${BLASTDB} -in ${CLOSED_REF} -dbtype nucl
+  #           echo "*** mapping and extraction of assemblies into reference ***"
+  #           echo "CMD: ${BLASTN} -db ${CLOSED_REF} -query $file -out ${RES}/Mapping/uce/matches_uce_${lib} -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn"
+  #           ${BLASTN} -db ${CLOSED_REF} -query $file -out ${RES}/Mapping/uce/matches_uce_${lib} -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn
+  #           awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print $1}' ${RES}/Mapping/uce/matches_uce_${lib} | sort | uniq > ${RES}/Mapping/uce/hits_uce_${lib}
+  #           if [ -s ${RES}/Mapping/uce/hits_uce_${lib} ]; then
+  #             awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $file | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/uce/hits_uce_${lib} - > ${RES}/Mapping/uce/contigs_hits_uce_${lib}.fasta
+  #             echo "CMD: ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSED_REF} -t ${RES}/Mapping/uce/contigs_hits_uce_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=$0;next;}{entry = entry "\n" $0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/uce/out_uce_${lib}.gff"
+  #             if ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSED_REF} -t ${RES}/Mapping/uce/contigs_hits_uce_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=$0;next;}{entry = entry "\n" $0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/uce/out_uce_${lib}.gff; then
+  #               echo "CMD: `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/uce/contigs_hits_uce_${lib}.fasta -g ${RES}/Mapping/uce/out_uce_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${UCE_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSED_REF} -rp ${REFPCT}"
+  #               `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/uce/contigs_hits_uce_${lib}.fasta -g ${RES}/Mapping/uce/out_uce_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${UCE_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSED_REF} -rp ${REFPCT}
+  #               rm ${RES}/Mapping/uce/contigs_hits_uce_${lib}.fasta ${RES}/Mapping/uce/hits_uce_${lib} ${RES}/Mapping/uce/matches_uce_${lib}
+  #               echo ${lib} >> ${RES}/uce_done.log
+  #             else
+  #               echo ${lib} >> ${RES}/uce_error.log
+  #             fi
+  #           else
+  #             echo "WARN: No hits were detected when mapping ${lib} into ${CLOSED_REF} database"
+  #             echo ${lib} >> ${RES}/uce_error.log
+  #             continue
+  #           fi
+  #         else
+  #           echo "WARN: error to extract closed sequences into ${CLOSED_REF} database"
+  #           echo ${lib} >> ${RES}/uce_error.log
+  #           continue
+  #         fi
+  #       fi
+  #     else
+  #       echo "no assemblies done for $lib"
+  #       echo ${lib} >> ${RES}/uce_error.log
+  #     fi
+	# 	done <${LIST_FILES}
+	# 	echo "STATUS: done"
+  #   echo ""
+	# 	exit 0
 
   elif [ $mode == 'capture' ] && [ $target == 'nucleus_nt' ]; then
     echo 'INFO: mode=$mode - Extraction of nuclear loci from assemblies'
