@@ -181,9 +181,9 @@ TRIMAL=/path/to/trimal
 
 A sample file must be supplied in the <font size="2">**$LIST_FILES**</font> tab file (line 7 in *config_orthoskim.txt*).
 This tab must contain for each sample the following columns :
-+ 1) the sample name following *Genus_species_taxid_sampleid_otherids*
-+ 2) the file-path to forward reads
-+ 3) the file-path reverse reads
++ the sample name following *Genus_species_taxid_sampleid_otherids*
++ the file-path to forward reads
++ the file-path reverse reads
 
 
 
@@ -194,7 +194,7 @@ Veronica_crassifolia_996476_CAR009639_BGN_NFI   /Users/pouchonc/PhyloAlps/CDS/Ve
 Androsace_helvetica_199610_CLA000520_BGN_ETA    /Users/pouchonc/PhyloAlps/CDS/Androsace_helvetica:199610/BGN_ETAOSW_2_1_C8MR2ACXX.IND13_clean.fastq.gz  /Users/pouchonc/PhyloAlps/CDS/Androsace_helvetica:199610/BGN_ETAOSW_2_2_C8MR2ACXX.IND13_clean.fastq.gz
 ```
 
-### 2.5 - References files (database)
+### 2.4 - References files (database)
 
 ORTHOSKIM uses a multi-taxa references bank to capture targeted genes into assemblies for all the different targets (see *3. Pipeline description* below part).
 
@@ -250,7 +250,7 @@ Users can easily adapted the files for other models by respecting the recommenda
 
 
 
-### 3. Pipeline description
+## 3. Pipeline description
 ---------------------------
 
 The gene capture is driven on genomic or transcriptomic global assemblies. This allowed to capture from a single assembly run different targeted genes (*e.g.* chloroplast, mitochondrial and ribosomal genes) thanks to alignments of contigs into gene database.
@@ -260,7 +260,7 @@ ORTHOSKIM pipeline uses different mode to compute the databases, capture targete
 > **Note**: A *mode_done.log* file is created containing samples that were correctly processed, whereas unprocessed samples were added into *mode_error.log* file. This file could be used to remove processed samples from the initial sample file if the script has to be rerun. Command lines are also print if users want to rerun specific commands on samples.
 
 
-#### 3.1 - Database (optional)
+### 3.1 - Database (optional)
 
 ORTHOSKIM provides a mode to create gene database for the mitochondrial, chloroplast and ribosomal regions with `-m database` mode along with `-t mitochondrion, chloroplast, nucrdna` targets. To do this, genomic annotations of these compartments has to be collected across taxa in a single file for each regions and set into the config file.
 
@@ -270,9 +270,9 @@ ORTHOSKIM will then extract all notified CDS, rRNA and tRNA genes and align them
 
 
 
-#### 3.2 - Global assemblies and cleaning
+### 3.2 - Global assemblies and cleaning
 
-##### 3.2.1 - genomic/transcriptomic assembly
+#### 3.2.1 - genomic/transcriptomic assembly
 
 Global assemblies are performed for each taxon of the taxa file (l.7) by using [SPAdes](http://cab.spbu.ru/software/spades/) and have to be run using the `-m assembly` mode and `-t spades` or `-t rnaspades` target (according to the type of library). [SPAdes](http://cab.spbu.ru/software/spades/) will be run by using the assembly options (<font size="2">**$THREADS**</font>,<font size="2">**$MEMORY**</font>,<font size="2">**$KMER**</font>) specified in the config file (l.4, 8-9).
 
@@ -284,7 +284,7 @@ After [SPAdes](http://cab.spbu.ru/software/spades/) runs, ORTHOSKIM has to prepr
 This is made under `-m reformate` mode and `-t spades` or `-t rnaspades` targets according to the version used.
 
 
-##### 3.2.2 - assemblies cleaning
+#### 3.2.2 - assemblies cleaning
 
 The capture of genes will be run only on cleaned assemblies after running `-m cleaning` mode. This step identifies contigs which are not expected in the assembly dataset and removes them.
 
@@ -294,13 +294,13 @@ The best hits are identified for each contigs, and only contigs mapping to the e
 > **NOTE:** Please check the taxonomy provided in the ~/OrthoSkim-master/ressources/rRNA_database_taxonomy.txt file to set a correct phylum (*e.g.* "Embryophyta", "Eumetazoa","Arthropoda","Annelida" etc). We also recommend to keep low values for parameters of <font size="2">**$SIMILARITY_CONTA_THSLD**</font> and <font size="2">**$MAPPING_CONTA_LENGTH**</font> (l.10-11) as a taxonomic comparison is done between entries in the database.  
 
 
-#### 3.3 - Gene capture
+### 3.3 - Gene capture
 
 The capture of targeted genomic regions is made using the `-m capture` mode according to three steps:
 
-##### 3.3.1 - References selection
+#### 3.3.1 - References selection
 
-###### 3.3.1.a. gene selection
+#### 3.3.1.a. gene selection
 
  For all targets (with the exception of BUSCO), ORTHOSKIM will first select the closest reference for each gene and for each taxa from the given database of references.
 
@@ -310,7 +310,7 @@ The capture of targeted genomic regions is made using the `-m capture` mode acco
 
    After this, if CDS are targeted, a [diamond](https://github.com/bbuchfink/diamond) database is created for each amino acid sequences provided in the retained sequences (with *diamond makedb*). Otherwise, a [blast](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download) database (*makeblastdb* program) is formatted.
 
-###### 3.3.1.b. contig selection
+#### 3.3.1.b. contig selection
 
 
 Cleaned contigs are selected to reduce the computational time of the following alignments and to correctly identify the right genomic origin of the targeted genes.
@@ -322,7 +322,7 @@ For example, as near to 35% of the ancestral plastid genomes has been estimated 
 For the other targets, the selection is performed by mapping the contigs directly on the selected genes by using [diamond](https://github.com/bbuchfink/diamond) or [blast](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download) if the sequences are proteic or nucleotidic. A threshold on the kmer coverage (<font size="2">**$COVERAGE**</font>), the contig length (<font size="2">**$MINCONTLENGTH**</font>) and the minimal evalue (<font size="2">**$EVALUE**</font>) is set by users to exclude all contigs below these values for the following step.
 
 
-##### 3.3.2 - Exon-intron gene prediction
+#### 3.3.2 - Exon-intron gene prediction
 
 Alignments are conducted on the selected contigs and the selected genes from [exonerate](https://www.ebi.ac.uk/about/vertebrate-genomics/software/exonerate) by incorporating all the appropriate gaps and frameshifts, and by modelling introns.  The *protein2genome* mode is used when CDS are targeted or the *genome2genome* mode for other targets. A *gff* output table is created in <font size="2">**${RES}/Mapping/[nucleus,mitochondrion,chloroplast]/**</font> folder for each sample. Only sequences with a mapping score above the <font size="2">**$EXO_SCORE**</font> value are kept (line 20 of the config file).
 By default we set this score at 50. We recommend to not set too high values (if the gene length is short) as a selection in alignment scores is next performed. Otherwise short genes could be skipped.
@@ -330,7 +330,7 @@ By default we set this score at 50. We recommend to not set too high values (if 
 > **Note:** Concerning plant models, we performed a second control during the gene alignment to ensure the right origin of organelle. To achieve this, for example, during the chloroplast capture, we align the mitochondrial seeds on selected chloroplast contigs to check if a contig position best align on selected genes than on seeds. This allows to verify if chimeric organelle contig were assembled on the conserved regions and thus wrongly pass the selection of contigs. Seeds of both mitochondrion and chloroplast have to be done by users even if only chloroplast genes will be captured.     
 
 
-##### 3.3.3 - gene extraction
+#### 3.3.3 - gene extraction
 
    Extraction of selected genes is conducted from the gff table by identifying the best alignment for each covered regions of each gene. Type of gene structure extracted (i.e. exon, intron or all) is choosen by the users in the config file. This step is conducted into multiple processors using the <font size="2">**<THREADS>**</font> specified in the the *config_orthoskim.txt* file (l. 4).
    For the nucrdna target, ITS1 and ITS2 barcodes are extracted from the intronic regions of rRNA probes designed during the database step.
@@ -359,7 +359,7 @@ Abies_sibirica_97169_TROM_V_97238_CDM_AVE	TRUE	TRUE
 
 
 
-#### 3.4 - Summary statistics
+### 3.4 - Summary statistics
 
 **a. on assemblies**
 
@@ -461,7 +461,7 @@ with -p: path where genes are extracted and -t: list of taxa to compute statisti
 
 <br>
 
-#### 3.5 - Alignment of taxa
+### 3.5 - Alignment of taxa
 
 ORTHOSKIM provides a mode to align taxa for each captured genes by using the `-m alignment` mode. We use [MAFFT](https://mafft.cbrc.jp/alignment/software/) to align each gene individually with the ‘--adjustdirectionaccurately’ option. This alignment can be filtered if the option is chosen by users using [trimAl](http://trimal.cgenomics.org/) with the heuristic ‘automated1’ method (*on/off* at line 52 of the config file).  
 In addition, users can choose which taxa will be aligned by stating if a selection is made on taxa (*on/off* at line 50 of the config file). In such case, a list of taxa to align has to be given (l. 51).
@@ -500,7 +500,7 @@ DNA, part1 = 1-625
 
 
 
-### 4. Running ORTHOSKIM
+## 4. Running ORTHOSKIM
 ------------------
 
 ORTHOSKIM uses a command line interface (CLI) that can be accessed through a terminal. Please use the -help (-h) flag to see a description of the main arguments.
@@ -516,7 +516,7 @@ We detail instructions here through the description of arguments and the tutoria
 
 
 
-#### 4.1. ORTHOSKIM arguments
+### 4.1. ORTHOSKIM arguments
 
 **-c (config file):** config file edited by users.  See instructions above.
 
@@ -563,12 +563,12 @@ Annotation needs to be collected in a single file in genbank/embl format. Seeds 
 > * **spades** (use of SPAdes software to compute genomic assemblies)
 > * **rnaspades** (use RNA version of SPAdes software to compute transcriptomic assemblies)
 
-#### 4.2. ORTHOSKIM tutorials
+### 4.2. ORTHOSKIM tutorials
 
 In this section, we describe a tutorial to capture chloroplast, mitochondrial and ribosomal genes for our list of taxa.
 
 
-##### 4.2.1. databases
+#### 4.2.1. databases
 
 To begin, users have to install all dependencies, create a sample file, edit the *config_orthoskim.txt* and the *tools.sh* files and collect annotations files for the targeted compartments. By default, subsets of genomic annotations are given for Viridiplantae with ORTHOSKIM to quickly run the software.
 
@@ -610,7 +610,7 @@ SortDB.py -i chloroplast_ncbi.gb -f genbank -l 5 -o selected_chloroplast_CDS.emb
 with -i input genes/genomes file; -l number of queried lineages by family; -f input file format (embl/ genbank/fasta); -o output name (format fasta for genes or embl for genomes); -m mode (gene/genome)
 
 
-##### 4.2.2. assemblies and filtering
+#### 4.2.2. assemblies and filtering
 
 We next perform global assemblies of our samples and reformate the outputs. After that, assemblies were cleaned by removing all potential contaminants.
 
@@ -628,7 +628,7 @@ If you want to get summary statistics of assemblies, users can run the following
 ./orthoskim -m stat_assembly -c config_orthoskim.txt
 ```
 
-##### 4.2.3. gene capture
+#### 4.2.3. gene capture
 
 The next step consists on capture all targeted genes into these assemblies. To do this, we run the `capture` mode with our different targets.
 
@@ -650,7 +650,7 @@ Summary statistics about the capture can be obtained by using the following mode
 ```
 > **NOTE:** Here, multiple targets (-t) are given in the command same line.
 
-##### 4.2.4. alignments
+#### 4.2.4. alignments
 
 Finally, we compute a supermatrix by aligning captured genes (here on chloroplast data) that can be used for phylogenetic inferences.
 
@@ -661,11 +661,11 @@ Finally, we compute a supermatrix by aligning captured genes (here on chloroplas
 > **NOTE:** all outputs are detailed in the previous section.  
 
 
-### 5. Additional modes for PhyloDB users
+## 5. Additional modes for PhyloDB users
 
 Additional modes were implemented for PhyloDB users (*i.e.* for PHA, PHN, PHC member project) to use ORTHOSKIM along with annotations performed under these projects with [Org.Asm](https://git.metabarcoding.org/org-asm/org-asm) assembler. Users can easily use all modes supplied in ORTHOSKIM in complement.
 
-#### 5.1 - Sample file
+### 5.1 - Sample file
 
 Sample file can be created directly from samples location into the [GriCAD](https://gricad-doc.univ-grenoble-alpes.fr/hpc/description/) infrastructures on the */bettik/LECA/phyloskims/release/* folder. This tab is produced by the `-m phyloskim_indexing` mode. This allowed to screen each sample that will be used for the gene extraction from `-p path/to/seek/files/`. Unwanted samples must be removed from the list before processing other modes.
 
@@ -674,7 +674,7 @@ Sample file can be created directly from samples location into the [GriCAD](http
 ./orthoskim -m indexing -c config_orthoskim.txt -p /bettik/LECA/phyloskims/release/
 ```
 
-#### 5.2 - List of genes files
+### 5.2 - List of genes files
 
 The extraction of orthologous regions and the creation of databases from annotations are based on a given list of genes. This list is supplied in <font size="2">**$CHLORO_GENES**</font>, <font size="2">**$MITO_GENES**</font> and <font size="2">**$NRDNA_GENES**</font> (lines [63-65] of the config file) and must contain:
 + the type of gene (*e.g.* CDS,rRNA,tRNA,misc_RNA)
@@ -699,13 +699,13 @@ CDS     psbK
 By default, ORTHOSKIM provided a list for tRNA, rRNA and CDS genes in chloroplast (see <font size="2">**$CHLORO_GENES**</font> and <font size="2">**$MITO_GENES**</font>). For the ribosomal complex, the gene type correspond to rRNA (*i.e.* for rrn18S, 5.8S rRNA, rrn28S) and misc_RNA (*i.e.* ITS1 and ITS2) (see <font size="2">**$NRDNA_GENES**</font>) as annotated in Org.Asm assembler.
 
 
-#### 5.3 - phyloDB database of references
+### 5.3 - phyloDB database of references
 
 ORTHOSKIM provides a mode to create a database from the all annotations performed within the project by using the `-m phyloskim_database` mode. To do this, all genes found in these annotations files are extracted with the header restrictions. Output files are created according to the name and the path set in the config file (<font size="2">**$CHLORO_REF_CDS**</font>, <font size="2">**$CHLORO_REF_rRNA**</font>, <font size="2">**$CHLORO_REF_tRNA**</font> and  <font size="2">**$NRDNA_REF**</font> at lines 42-44 and 46 of the config file).
 
 >**Note:** For chloroplast annotations, only genes found in single and circular contig will be extracted.   
 
-#### 5.4 - phyloDB extraction from annotations
+### 5.4 - phyloDB extraction from annotations
 
 For each sample of the sample file, ORTHOSKIM will perform genes extraction directly from annotation with `-m phyloskim_extraction_targeted` mode, according to a list of genes for `-t [chloroplast, nucrdna]` targets.
 
@@ -722,6 +722,6 @@ ls -l ~/RES/chloroplast_CDS/
 ```
 
 
-### 6. Funding
+## 6. Funding
 
 The PhyloAlps data collection was largely funded from the European Research Council under the European Community’s Seventh Framework Programme FP7/2007-2013 grant agreement 281422 (TEEMBIO), the Sixth European Framework Programme (GOCE-CT-2007-036866), the Swiss SNF (Grant 31003A_149508/1), the ANR DIVERSITALP Project (ANR-07-BDIV-014), ANR project Origin-Alps (ANR-16-CE93-0004), France Génomique (ANR-10-INBS-09-08) and the NextBarcode project (Institut Français de Bioinformatique).
