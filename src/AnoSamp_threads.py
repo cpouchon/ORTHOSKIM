@@ -87,50 +87,62 @@ def GeneExtraction(genenumber):
                             if feat.type == "tRNA" :
                                 code=feat.qualifiers['anticodon'][0]
                                 gene_codon=gene+"-"+code
-                                if feat.location_operator=="join":
-                                    length=0
-                                    out_seq=""
-                                    joinlocation=str(feat.location).replace("join{","").replace("}","").replace("(-)","").replace("(+)","").replace("]","").split(",")
-                                    for parts in joinlocation:
-                                        clean=parts.split("[")[1]
-                                        if ">" in clean or "<" in clean:
-                                            pass
-                                        else:
-                                            spart = int(float(clean.split(":")[0]))
-                                            epart = int(float(clean.split(":")[1]))
-                                            strand = feat.location.strand
-                                            flanked = FeatureLocation(spart, epart, strand)
-                                            seq = flanked.extract(record.seq)
-                                            length = length+len(str(seq))
-                                            out_seq=out_seq+seq
+                                if gene_codon == g_tab[1]:
+                                    if feat.location_operator=="join":
+                                        length=0
+                                        out_seq=""
+                                        joinlocation=str(feat.location).replace("join{","").replace("}","").replace("(-)","").replace("(+)","").replace("]","").split(",")
+                                        spart=0
+                                        epart=0
+                                        for parts in joinlocation:
+                                            clean=parts.split("[")[1]
+                                            if ">" in clean or "<" in clean:
+                                                pass
+                                            else:
+                                                mp = int(float(clean.split(":")[0]))
+                                                Mp = int(float(clean.split(":")[1]))
+                                                if spart==0 and epart==0:
+                                                    spart = mp
+                                                    epart = Mp
+                                                else:
+                                                    if mp > spart:
+                                                        spart=spart
+                                                        epart=Mp
+                                                    else:
+                                                        spart=mp
+                                                        epart=epart
+
+                                        strand = feat.location.strand
+                                        flanked = FeatureLocation(spart, epart, strand)
+                                        out_seq = flanked.extract(record.seq)
+                                        length = epart-spart
+
+                                        header = ">"+str(name)+"; "+"gene="+str(gene_codon)+"; "+"type="+str(model)+"; "+"length="+str(length)+"; "+"taxa="+taxaname+"; "+"taxid="+taxid_num+"; "+"count="+str(dict_genes[gene_codon])
+                                        fname = gene_codon+".fa"
+                                        typeofgene = g_tab[0]
+
+                                        if os.path.isfile(os.path.join(outpath+"/"+model+'_'+typeofgene, fname)):
+                                            with open(os.path.join(outpath+"/"+model+'_'+typeofgene, fname), 'a+') as file:
+                                                old_headers = []
+                                                end_file=file.tell()
+                                                file.seek(0)
+                                                for line in file:
+                                                    if line.startswith(">"):
+                                                        old_headers.append(line.replace(">","").split(";")[0])
+                                                if not name in old_headers:
+                                                    file.seek(end_file)
+                                                    file.write(header+'\n')
+                                                    file.write(str(out_seq)+'\n')
+                                                else:
+                                                    pass
+                                        else :
+                                            with open(os.path.join(outpath+"/"+model+'_'+typeofgene, fname), 'a') as out:
+                                                out.write(header+'\n')
+                                                out.write(str(out_seq)+'\n')
+                                    else:
+                                        continue
                                 else:
-                                    s, e, strand = feat.location.start, feat.location.end, feat.location.strand
-                                    length = e-s
-                                    flanked = FeatureLocation(s, e, strand)
-                                    out_seq = flanked.extract(record.seq)
-
-                                header = ">"+str(name)+"; "+"gene="+str(gene_codon)+"; "+"type="+str(model)+"; "+"length="+str(length)+"; "+"taxa="+taxaname+"; "+"taxid="+taxid_num+"; "+"count="+str(dict_genes[gene_codon])
-                                fname = gene_codon+".fa"
-                                typeofgene = g_tab[0]
-
-                                if os.path.isfile(os.path.join(outpath+"/"+model+'_'+typeofgene, fname)):
-                                    with open(os.path.join(outpath+"/"+model+'_'+typeofgene, fname), 'a+') as file:
-                                        old_headers = []
-                                        end_file=file.tell()
-                                        file.seek(0)
-                                        for line in file:
-                                            if line.startswith(">"):
-                                                old_headers.append(line.replace(">","").split(";")[0])
-                                        if not name in old_headers:
-                                            file.seek(end_file)
-                                            file.write(header+'\n')
-                                            file.write(str(out_seq)+'\n')
-                                        else:
-                                            pass
-                                else :
-                                    with open(os.path.join(outpath+"/"+model+'_'+typeofgene, fname), 'a') as out:
-                                        out.write(header+'\n')
-                                        out.write(str(out_seq)+'\n')
+                                    pass
 
                             elif feat.type == "CDS" :
                                 if feat.location_operator=="join":
@@ -342,10 +354,11 @@ if model in ("chloroplast","nucrdna","mitochondrion"):
                             if feat.type == "tRNA" :
                                 code=feat.qualifiers['anticodon'][0]
                                 gene_codon=gene+"-"+code
-                                if gene_codon in dict_genes.keys():
-                                    dict_genes[gene_codon] = dict_genes[gene_codon]+1
-                                else:
-                                    dict_genes[gene_codon] = 1
+                                if gene_codon==g_tab[1]:
+                                    if gene_codon in dict_genes.keys():
+                                        dict_genes[gene_codon] = dict_genes[gene_codon]+1
+                                    else:
+                                        dict_genes[gene_codon] = 1
                             else:
                                 if gene in dict_genes.keys():
                                     dict_genes[gene] = dict_genes[gene]+1

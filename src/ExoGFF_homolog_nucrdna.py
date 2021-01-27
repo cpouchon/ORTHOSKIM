@@ -8,10 +8,11 @@ import os, errno
 import argparse
 from joblib import Parallel, delayed
 import multiprocessing
+import time
 
 from Bio.Seq import Seq
 #from Bio.Alphabet import generic_dna
-
+start_time = time.time()
 
 parser = argparse.ArgumentParser(description='Export regions of query database from exonerate alignment. Filtering is made according to rawscore. Script was writen by C. Pouchon (2019).')
 parser.add_argument("-i","--infile", help="Fasta input contigs file",
@@ -1083,20 +1084,28 @@ for g in list(besthits.keys()):
             besthits_filtered[g].append(bhits)
         else:
             bhit_partcount=bhit_partcount+1
+            frame_bhits=[i["frame"] for i in stored[bhits] if "frame" in list(i.keys())][0]
             for hit in stored.keys():
                 if hit[0]==bhits[0] and hit[1]==bhits[1] and hit[2]==bhits[2]:
                     if hit!=bhits:
                         #cond overlapp ratio 80%
                         minhit=hit[3]
                         maxhit=hit[4]
+                        shit=int(hit[5])
+                        sbhit=int(bhits[5])
+                        rscore=float(shit)/float(sbhit)
                         rhit=set(range(minhit,maxhit))
                         rbhit=set(range(bhits[3],bhits[4]))
                         intersection=rhit.intersection(rbhit)
                         ratio=float(len(intersection))/float(len(rbhit))
-                        if ratio>0.8:
-                            if stat_stored[hit]['intron']<stat_stored[bhits]['intron']:
-                                besthits_filtered[g].append(hit)
-                                bhitfilt_parcount=bhitfilt_parcount+1
+                        frame_hit=[i["frame"] for i in stored[hit] if "frame" in list(i.keys())][0]
+                        if ratio>0.8 and rscore>0.8:
+                            if frame_bhits!=frame_hit:
+                                if stat_stored[hit]['intron']<stat_stored[bhits]['intron']:
+                                    besthits_filtered[g].append(hit)
+                                    bhitfilt_parcount=bhitfilt_parcount+1
+                                else:
+                                    pass
                             else:
                                 pass
                         else:
@@ -1127,7 +1136,7 @@ if "rrnITS2" in besthits_filtered.keys():
 for g in list(besthits_filtered.keys()):
     if g=="rrn18S" or g=="rrn16S":
         contid=besthits_filtered[g][0][1]
-        if "rrn5.8S" and "rrnITS1" in besthits_filtered.keys():
+        if "rrn5.8S" in besthits_filtered.keys() and "rrnITS1" in besthits_filtered.keys():
             if contid==cont_rrn5 and contid==cont_rnITS1:
                 besthits_filtered2[g]=besthits_filtered[g]
             else:
@@ -1158,7 +1167,7 @@ for g in list(besthits_filtered.keys()):
             pass
     elif g=="rrn23S" or g=="rrn26S" or g=="rrn28S":
         contid=besthits_filtered[g][0][1]
-        if "rrn5.8S" and "rrnITS2" in besthits_filtered.keys():
+        if "rrn5.8S" in besthits_filtered.keys() and "rrnITS2" in besthits_filtered.keys():
             if contid==cont_rrn5 and contid==cont_rnITS2:
                 besthits_filtered2[g]=besthits_filtered[g]
             else:
@@ -1302,3 +1311,5 @@ else:
     outcontp=os.path.dirname(os.path.abspath(file))
     with open(os.path.join(outcontp, str(nameofsample+".cont_nucrdna.log")), 'w') as outcontt:
         outcontt.write("None")
+
+print("--- %s seconds ---" % (time.time() - start_time))

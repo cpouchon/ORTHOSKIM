@@ -1,30 +1,21 @@
 #! /usr/bin/env python
 
-import glob
 import sys
 import os, errno
 import argparse
-import fnmatch
-#import numpy
-from Bio import SeqIO
-from Bio import AlignIO
-from Bio.SeqFeature import FeatureLocation
 
 
 parser = argparse.ArgumentParser(description='')
 parser.add_argument("-p","--path", help="searching path of sequences files",
                     type=str)
-parser.add_argument("-trim", help="[mode] statistics made on trimmed alignments",
-                    action="store_true")
-parser.add_argument("-s","--size", help="taxa number in alignment",
-                    type=int)
+parser.add_argument("-t","--taxa", help="taxa list",
+                    type=str)
 if len(sys.argv)==1:
     parser.print_help(sys.stderr)
     sys.exit(1)
 
 args = parser.parse_args()
 
-taxa_size=args.size
 
 path = args.path
 
@@ -43,7 +34,7 @@ for line in taxal:
 for taxa in taxa_dict.keys():
         #chloro=list()
         try:
-            with open(os.path.join(str(path+"chloroplast"), str(taxa+".contigs_chloro.info")), 'r') as out:
+            with open(os.path.join(str(path+"chloroplast"), str(taxa+".cont_cpdna.log")), 'r') as out:
                 chloro=out.read().splitlines()
             chloro_size=0
             chloro_count=len(chloro)
@@ -57,7 +48,34 @@ for taxa in taxa_dict.keys():
             chloro_count=0
             chloro_cov=0.0
 
-        
+        try:
+            with open(os.path.join(str(path+"mitochondrion"), str(taxa+".cont_mtdna.log")), 'r') as out:
+                mito=out.read().splitlines()
+            mito_size=0
+            mito_count=len(mito)
+            cov=0
+            for cont in mito:
+                mito_size=mito_size+int(cont.split("length_")[1].split("_")[0])
+                cov=cov+float(cont.split("cov_")[1])*int(cont.split("length_")[1].split("_")[0])
+            mito_cov=round(cov/mito_size,2)
+        except:
+            mito_size=0
+            mito_count=0
+            mito_cov=0.0
 
+        try:
+            with open(os.path.join(str(path+"nucrdna"), str(taxa+".cont_nucrdna.log")), 'r') as out:
+                rdna=out.read().splitlines()
+            rdna_size=0
+            rdna_count=len(rdna)
+            cov=0
+            for cont in rdna:
+                rdna_size=rdna_size+int(cont.split("length_")[1].split("_")[0])
+                cov=cov+float(cont.split("cov_")[1])*int(cont.split("length_")[1].split("_")[0])
+            rdna_cov=round(cov/rdna_size,2)
+        except:
+            rdna_size=0
+            rdna_count=0
+            rdna_cov=0.0
 
-    print ("%s\t%s\t%s\t%s\t%s\t%s\t%s" % (str(gene_name),int(aln_size),int(mp1),int(mp2),int(mp3),int(mp4),int(info_sites)))
+        print ("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s" % (str(taxa),int(chloro_count),int(chloro_size),float(chloro_cov),int(mito_count),int(mito_size),float(mito_cov),int(rdna_count),int(rdna_size),float(rdna_cov)))

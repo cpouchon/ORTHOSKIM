@@ -81,9 +81,9 @@ for file in in_files:
         geneid = record.id.split("_")[0]
         seqID="_".join(record.id.split("_")[1:len(record.id.split("_"))])
         sequence=record.seq
-        if seqID not in stored.keys():
+        if seqID not in list(stored.keys()):
             stored[seqID]=dict()
-            if geneid not in stored[seqID].keys():
+            if geneid not in list(stored[seqID].keys()):
                 stored[seqID][geneid]=sequence
             else:
                 pass
@@ -91,7 +91,7 @@ for file in in_files:
             stored[seqID][geneid]=sequence
 
 for taxa in stored.keys():
-    if 'rrn18S' in stored[taxa].keys() and 'rrn5.8S' in stored[taxa].keys():
+    if 'rrn18S' in stored[taxa].keys() and 'rrn5.8S' in list(stored[taxa].keys()):
         if len(str(stored[taxa]['rrn18S']))>50:
             amorce_18S=str(stored[taxa]['rrn18S'])[-51:len(str(stored[taxa]['rrn18S']))]
         else:
@@ -107,7 +107,7 @@ for taxa in stored.keys():
                 file.seek(0)
                 for line in file:
                     if line.startswith(">"):
-                        old_headers.append(line.replace(">","").split(";")[0])
+                        old_headers.append(line.rstrip().replace(">","").split(";")[0])
                 if not str(genename+"_"+taxa) in old_headers:
                     file.seek(end_file)
                     file.write(header+'\n')
@@ -118,7 +118,34 @@ for taxa in stored.keys():
             with open(os.path.join(opath, fname), 'w') as out:
                 out.write(header+'\n')
                 out.write(str(catseq)+'\n')
-    if 'rrn28S' in stored[taxa].keys() and 'rrn5.8S' in stored[taxa].keys():
+    elif 'rrn16S' in stored[taxa].keys() and 'rrn5.8S' in list(stored[taxa].keys()):
+        if len(str(stored[taxa]['rrn16S']))>50:
+            amorce_18S=str(stored[taxa]['rrn16S'])[-51:len(str(stored[taxa]['rrn16S']))]
+        else:
+            amorce_18S=str(stored[taxa]['rrn16S'])
+        catseq="".join((str(amorce_18S),str(stored[taxa]['rrn5.8S'])))
+        genename = "rrnITS1"
+        header=">"+genename+"_"+taxa
+        fname=taxa+".fa"
+        if os.path.isfile(os.path.join(opath, fname)):
+            with open(os.path.join(opath, fname), 'a+') as file:
+                old_headers = []
+                end_file=file.tell()
+                file.seek(0)
+                for line in file:
+                    if line.startswith(">"):
+                        old_headers.append(line.rstrip().replace(">","").split(";")[0])
+                if not str(genename+"_"+taxa) in old_headers:
+                    file.seek(end_file)
+                    file.write(header+'\n')
+                    file.write(str(catseq)+'\n')
+                else:
+                    pass
+        else :
+            with open(os.path.join(opath, fname), 'w') as out:
+                out.write(header+'\n')
+                out.write(str(catseq)+'\n')
+    if 'rrn28S' in stored[taxa].keys() and 'rrn5.8S' in list(stored[taxa].keys()):
         if len(str(stored[taxa]['rrn28S']))>50:
             amorce_28S=str(stored[taxa]['rrn28S'])[0:50]
         else:
@@ -134,7 +161,7 @@ for taxa in stored.keys():
                 file.seek(0)
                 for line in file:
                     if line.startswith(">"):
-                        old_headers.append(line.replace(">","").split(";")[0])
+                        old_headers.append(line.rstrip().replace(">","").split(";")[0])
                 if not str(genename+"_"+taxa) in old_headers:
                     file.seek(end_file)
                     file.write(header+'\n')
@@ -145,7 +172,34 @@ for taxa in stored.keys():
             with open(os.path.join(opath, fname), 'w') as out:
                 out.write(header+'\n')
                 out.write(str(catseq)+'\n')
-    elif 'rrn26S' in stored[taxa].keys() and 'rrn5.8S' in stored[taxa].keys():
+    if 'rrn23S' in stored[taxa].keys() and 'rrn5.8S' in list(stored[taxa].keys()):
+        if len(str(stored[taxa]['rrn23S']))>50:
+            amorce_28S=str(stored[taxa]['rrn23S'])[0:50]
+        else:
+            amorce_28S=str(stored[taxa]['rrn23S'])
+        catseq="".join((str(stored[taxa]['rrn5.8S']),str(amorce_28S)))
+        genename = "rrnITS2"
+        header=">"+genename+"_"+taxa
+        fname=taxa+".fa"
+        if os.path.isfile(os.path.join(opath, fname)):
+            with open(os.path.join(opath, fname), 'a+') as file:
+                old_headers = []
+                end_file=file.tell()
+                file.seek(0)
+                for line in file:
+                    if line.startswith(">"):
+                        old_headers.append(line.rstrip().replace(">","").split(";")[0])
+                if not str(genename+"_"+taxa) in old_headers:
+                    file.seek(end_file)
+                    file.write(header+'\n')
+                    file.write(str(catseq)+'\n')
+                else:
+                    pass
+        else :
+            with open(os.path.join(opath, fname), 'w') as out:
+                out.write(header+'\n')
+                out.write(str(catseq)+'\n')
+    elif 'rrn26S' in stored[taxa].keys() and 'rrn5.8S' in list(stored[taxa].keys()):
         if len(str(stored[taxa]['rrn26S']))>50:
             amorce_28S=str(stored[taxa]['rrn26S'])[0:50]
         else:
@@ -161,7 +215,7 @@ for taxa in stored.keys():
                 file.seek(0)
                 for line in file:
                     if line.startswith(">"):
-                        old_headers.append(line.replace(">","").split(";")[0])
+                        old_headers.append(line.rstrip().replace(">","").split(";")[0])
                 if not str(genename+"_"+taxa) in old_headers:
                     file.seek(end_file)
                     file.write(header+'\n')

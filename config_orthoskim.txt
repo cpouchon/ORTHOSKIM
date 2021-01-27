@@ -26,17 +26,19 @@ CHLORO_ANNOTATIONS=~/OrthoSkim-master/data/chloroplast_viridiplantae.gb         
 MITO_DB_FMT=genbank                                                                  ## [16] database format: genbank,embl
 NRDNA_DB_FMT=genbank                                                                 ## [17] database format: genbank,embl
 CHLORO_DB_FMT=genbank                                                                ## [18] database format: genbank,embl
-MITO_SIZE=200000                                                                     ## [19] minimal size of mitochondrial genomes considered in mapping to assemblies during the contig selection
-NRDNA_SIZE=2000                                                                      ## [20] minimal size of nuclear ribosomal complex considered in mapping to assemblies during the contig selection
-CHLORO_SIZE=140000                                                                   ## [21] minimal size of chloroplastic genomes considered in mapping to assemblies during the contig selection
+MITO_SIZE_MIN=200000                                                                 ## [19] minimal size of mitochondrial genomes considered in mapping to assemblies during the contig selection
+MITO_SIZE_MAX=1000000                                                                ## [19] maximal size of mitochondrial genomes considered in mapping to assemblies during the contig selection
+NRDNA_SIZE_MIN=2000                                                                  ## [20] minimal size of nuclear ribosomal complex considered in mapping to assemblies during the contig selection
+NRDNA_SIZE_MAX=9000                                                                  ## [20] maximal size of nuclear ribosomal complex considered in mapping to assemblies during the contig selection
+CHLORO_SIZE_MIN=140000                                                               ## [21] minimal size of chloroplastic genomes considered in mapping to assemblies during the contig selection
+CHLORO_SIZE_MAX=200000                                                               ## [21] maximal size of chloroplastic genomes considered in mapping to assemblies during the contig selection
+SEEDS_THRESHOLD=0.8                                                                  ## [49] minimal percent of seed length of genes kept as reference. For example, if rrn28S in seeds is 3375bp longer, only rrn28S genes with length >= 0.8*3375bp will be considered in close reference list.
 
 # [capture]: extraction steps from mapping assemblies into a reference ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 MINLENGTH=90                                                                         ## [22] minimal length of alignment allowed mapping to reference
 REFPCT=0.25                                                                          ## [23] minimal covered part of the reference allowed (for exon only)
 COVERAGE=5                                                                           ## [24] Minimal contigs coverage (kmer coverage) allowed for genomic scan of targeted regions
 MINCONTLENGTH=1000                                                                   ## [25] Minimal contigs length allowed for genomic scan of targeted regions
-MODE_REF=distance                                                                    ## [26] Mode to select the closest reference from the database: [taxonomy,distance]
-DISTANCE_MATRIX=~/OrthoSkim-master/ressources/distance_matrix.csv                    ## [27] distance matrix at genus level in csv format if distance chosen mode.
 EXO_SCORE=100                                                                        ## [28] minimal score of mapping in exonerate (by default: 250). To
 
 #---------  [busco] target --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -68,7 +70,6 @@ CHLORO_TYPE=exon                                                                
 NRDNA_REF=~/OrthoSkim-master/data/nucrdna_rRNA_unaligned.fa                          ## [46] multi-fasta file/name of ribosomal rRNA genes of reference.  Nucleotidic sequence is specified. As the file contains bank of genes, gene name (header) has to be written following name_other-arguments.
 SEEDS_NRDNA=~/OrthoSkim-master/ressources/nucrdna.seeds                              ## [47] ribosomal rRNA seeds of reference (from one organism; e.g. for Arabidopsis_thaliana_3702_genbank), nucleotidic sequences required, restriction on headers.
 NRDNA_TYPE=exon                                                                      ## [48] Type of structure extracted from the gff: [exon,intron,all]
-RNA_THRESHOLD=0.8                                                                    ## [49] minimal percent of seed length of RNA genes kept as reference. For example, if rrn28S in seeds is 3375bp longer, only rrn28S genes with length >= 0.8*3375bp will be considered in close reference list.
 
 # [alignment] mode -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 SELECTION=on                                                                         ## [50] Option to perform a selection of taxa before alignments: [on/off]

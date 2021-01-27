@@ -110,23 +110,6 @@ with open(rdnatab) as f:
         else:
             rdna_contigs[contigid][refid]=lenmapp
 
-with open(mitotab) as f:
-    for l in f:
-        contigid=l.rstrip().split("\t")[0]
-        mito_contigs.setdefault(contigid, {})
-        all_contigs.setdefault(contigid, {})
-
-        refid=l.rstrip().split("\t")[1]
-        lenmapp=int(l.rstrip().split("\t")[3])
-
-        if refid in mito_contigs[contigid].keys():
-            oldval=int(mito_contigs[contigid][refid])
-            newval=oldval+lenmapp
-            mito_contigs[contigid][refid]=newval
-        else:
-            mito_contigs[contigid][refid]=lenmapp
-
-
 select_chloro=list()
 select_mito=list()
 select_rdna=list()

@@ -26,6 +26,8 @@ parser.add_argument("-s","--seeds", help="input reference seeds",
                     type=str)
 parser.add_argument("--threads", help="number of threads to use",
                     type=int)
+parser.add_argument("-t","--threshold", help="minimal threshold length of RNA gene sequence according to seed length",
+                    type=float)
 if len(sys.argv)==1:
     parser.print_help(sys.stderr)
     sys.exit(1)
@@ -111,26 +113,28 @@ def GeneExtraction(genenumber):
         taxa="_".join(seqid.split("_")[1:len(seqid.split("_"))])
         fname = geneid+".fa"
         #if os.path.isfile(os.path.join(outpath+"/"+model, taxa+".fa")):
-        if os.path.isfile(os.path.join(outpath+"/"+model, fname)):
-            #with open(os.path.join(outpath+"/"+model, taxa+".fa"), 'a+') as file:
-            with open(os.path.join(outpath+"/"+model, fname), 'a+') as file:
-                old_headers = []
-                end_file=file.tell()
-                file.seek(0)
-                for line in file:
-                    if line.startswith(">"):
-                        old_headers.append(line.rstrip().replace(">",""))
-                if not str(newid) in old_headers:
-                    file.seek(end_file)
-                    file.write(header+'\n')
-                    file.write(str(dna)+'\n')
-                else:
-                    pass
-        else :
-            #with open(os.path.join(outpath+"/"+model, taxa+".fa"), 'w') as out:
-            with open(os.path.join(outpath+"/"+model, fname), 'w') as out:
-                out.write(header+'\n')
-                out.write(str(dna)+'\n')
+        if float(len(dna))/float(len(ref_seqs[geneid])) >= thld:
+            if os.path.isfile(os.path.join(outpath+"/"+model, fname)):
+                #with open(os.path.join(outpath+"/"+model, taxa+".fa"), 'a+') as file:
+                with open(os.path.join(outpath+"/"+model, fname), 'a+') as file:
+                    old_headers = []
+                    end_file=file.tell()
+                    file.seek(0)
+                    for line in file:
+                        if line.startswith(">"):
+                            old_headers.append(line.rstrip().replace(">",""))
+                    if not str(newid) in old_headers:
+                        file.seek(end_file)
+                        file.write(header+'\n')
+                        file.write(str(dna)+'\n')
+                    else:
+                        pass
+            else :
+                #with open(os.path.join(outpath+"/"+model, taxa+".fa"), 'w') as out:
+                with open(os.path.join(outpath+"/"+model, fname), 'w') as out:
+                    out.write(header+'\n')
+                    out.write(str(dna)+'\n')
+
     else:
         pass
 
@@ -143,6 +147,7 @@ model = args.model
 outpath=args.outdir
 num_cores = args.threads
 tabseeds=args.seeds
+thld=args.threshold
 
 stored={}
 dicscore={}
@@ -173,6 +178,13 @@ for line in reftab:
             refnames.append(genename)
         else:
             pass
+
+ref_seqs={}
+ref_genome = SeqIO.parse(tabseeds, "fasta")
+for srecord in ref_genome:
+    sseqID=srecord.id
+    ssequence=srecord.seq
+    ref_seqs[sseqID.split("_")[0]]=ssequence
 
 'we store all sequences'
 cur_genome = SeqIO.parse(input_file, "fasta")

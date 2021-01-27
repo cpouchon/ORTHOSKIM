@@ -11,6 +11,12 @@ from Bio.SeqUtils import *
 from joblib import Parallel, delayed
 import multiprocessing
 
+try:
+    from Bio.Alphabet import generic_dna
+except ImportError:
+    generic_dna is None
+
+
 import argparse
 import sys
 import os, errno
@@ -20,13 +26,21 @@ parser = argparse.ArgumentParser(description='Extract genes for an annotated fil
 parser.add_argument("-i","--infile", help="input assembled annotated file",
                     type=str)
 parser.add_argument("-m","--model", help="molecular type position",
-                    type=str,choices=["chloroplast", "mitochondrion","nucrdna"])
+                    type=str,choices=["chloroplast","nucrdna"])
 parser.add_argument("-g","--geneslist", help="list of genes to extract",
                     type=str)
 parser.add_argument("-fmt","--annotationfmt", help="format of annotated file",choices=["embl", "genbank"],
                     type=str)
 parser.add_argument("-o","--outdir", help="out directory path",
                     type=str)
+parser.add_argument("--rrnaseeds", help="seeds of rRNA genes",
+                    type=str)
+parser.add_argument("--trnaseeds", help="seeds of tRNA genes",
+                    type=str)
+parser.add_argument("--cdsseeds", help="seeds of CDS genes",
+                    type=str)
+parser.add_argument("-t","--threshold", help="minimal threshold length of RNA gene sequence according to seed length",
+                    type=float)
 
 if len(sys.argv)==1:
     parser.print_help(sys.stderr)
@@ -90,6 +104,7 @@ for g in genes:
 
 model=args.model
 outpath=args.outdir
+thld=args.threshold
 
 modelextens=''
 if model == "chloroplast":
@@ -107,6 +122,32 @@ elif formatin == "genbank":
     formatextens = '.gb'
 
 stored = {}
+
+
+ref_seqs={}
+
+if model == "chloroplast":
+    ref_rrna = SeqIO.parse(args.rrnaseeds, "fasta")
+    for srecord in ref_rrna:
+        sseqID=srecord.id
+        ssequence=srecord.seq
+        ref_seqs[sseqID.split("_")[0]]=ssequence
+    ref_trna = SeqIO.parse(args.trnaseeds, "fasta")
+    for srecord in ref_trna:
+        sseqID=srecord.id
+        ssequence=srecord.seq
+        ref_seqs[sseqID.split("_")[0]]=ssequence
+    ref_cds = SeqIO.parse(args.cdsseeds, "fasta")
+    for srecord in ref_cds:
+        sseqID=srecord.id
+        ssequence=srecord.seq
+        ref_seqs[sseqID.split("_")[0]]=ssequence
+if model == "nucrdna":
+    ref_rrna = SeqIO.parse(args.rrnaseeds, "fasta")
+    for srecord in ref_rrna:
+        sseqID=srecord.id
+        ssequence=srecord.seq
+        ref_seqs[sseqID.split("_")[0]]=ssequence
 
 
 '#########################################################'
@@ -188,9 +229,86 @@ if model in ("chloroplast","nucrdna","mitochondrion"):
                                             length = e-s
                                             flanked = FeatureLocation(s, e, strand)
                                             out_seq = flanked.extract(record.seq)
+
                                         header = ">"+str(gene_codon)+"_"+str(taxid)+"_"+"_".join(org)
                                         fname = gene_codon+".fa"
                                         typeofgene = "tRNA"
+
+                                        if gene_codon in ref_seqs.keys():
+                                            if float(len(out_seq))/float(len(ref_seqs[gene_codon])) >= thld:
+                                                if os.path.isfile(os.path.join(outpath+"/"+model+'_'+typeofgene, fname)):
+                                                    with open(os.path.join(outpath+"/"+model+'_'+typeofgene, fname), 'a+') as file:
+                                                        old_headers = []
+                                                        end_file=file.tell()
+                                                        file.seek(0)
+                                                        for line in file:
+                                                            if line.startswith(">"):
+                                                                old_headers.append(line.rstrip())
+                                                        if not header in old_headers:
+                                                            file.seek(end_file)
+                                                            file.write(header+'\n')
+                                                            file.write(str(out_seq)+'\n')
+                                                        else:
+                                                            pass
+                                                else :
+                                                    with open(os.path.join(outpath+"/"+model+'_'+typeofgene, fname), 'a') as out:
+                                                        out.write(header+'\n')
+                                                        out.write(str(out_seq)+'\n')
+                                            else:
+                                                pass
+                                        else:
+                                            if os.path.isfile(os.path.join(outpath+"/"+model+'_'+typeofgene, fname)):
+                                                with open(os.path.join(outpath+"/"+model+'_'+typeofgene, fname), 'a+') as file:
+                                                    old_headers = []
+                                                    end_file=file.tell()
+                                                    file.seek(0)
+                                                    for line in file:
+                                                        if line.startswith(">"):
+                                                            old_headers.append(line.rstrip())
+                                                    if not header in old_headers:
+                                                        file.seek(end_file)
+                                                        file.write(header+'\n')
+                                                        file.write(str(out_seq)+'\n')
+                                                    else:
+                                                        pass
+                                            else :
+                                                with open(os.path.join(outpath+"/"+model+'_'+typeofgene, fname), 'a') as out:
+                                                    out.write(header+'\n')
+                                                    out.write(str(out_seq)+'\n')
+                                    else:
+                                        pass
+
+                        elif feat.type == "CDS" :
+                            if gene in [item for sublist in dict_genes.values() for item in sublist]:
+                                header = ">"+str(gene)+"_"+str(taxid)+"_"+"_".join(org)
+                                if 'translation' in feat.qualifiers:
+                                    out_seq = feat.qualifiers['translation'][0]
+                                    fname = gene+".fa"
+                                    typeofgene = "CDS"
+                                    'check for nucleotidic sequence if existing or not'
+                                    if gene in ref_seqs.keys():
+                                        if float(len(out_seq))/float(len(ref_seqs[gene])) >= thld:
+                                            if os.path.isfile(os.path.join(outpath+"/"+model+'_'+typeofgene, fname)):
+                                                with open(os.path.join(outpath+"/"+model+'_'+typeofgene, fname), 'a+') as file:
+                                                    old_headers = []
+                                                    end_file=file.tell()
+                                                    file.seek(0)
+                                                    for line in file:
+                                                        if line.startswith(">"):
+                                                            old_headers.append(line.rstrip())
+                                                    if not header in old_headers:
+                                                        file.seek(end_file)
+                                                        file.write(header+'\n')
+                                                        file.write(str(out_seq)+'\n')
+                                                    else:
+                                                        pass
+                                            else :
+                                                with open(os.path.join(outpath+"/"+model+'_'+typeofgene, fname), 'a') as out:
+                                                    out.write(header+'\n')
+                                                    out.write(str(out_seq)+'\n')
+                                        else:
+                                            pass
+                                    else:
                                         if os.path.isfile(os.path.join(outpath+"/"+model+'_'+typeofgene, fname)):
                                             with open(os.path.join(outpath+"/"+model+'_'+typeofgene, fname), 'a+') as file:
                                                 old_headers = []
@@ -209,36 +327,6 @@ if model in ("chloroplast","nucrdna","mitochondrion"):
                                             with open(os.path.join(outpath+"/"+model+'_'+typeofgene, fname), 'a') as out:
                                                 out.write(header+'\n')
                                                 out.write(str(out_seq)+'\n')
-                                    else:
-                                        pass
-
-                        elif feat.type == "CDS" :
-                            if gene in [item for sublist in dict_genes.values() for item in sublist]:
-                                header = ">"+str(gene)+"_"+str(taxid)+"_"+"_".join(org)
-                                if 'translation' in feat.qualifiers:
-                                    out_seq = feat.qualifiers['translation'][0]
-                                    fname = gene+".fa"
-                                    typeofgene = "CDS"
-
-                                    'check for nucleotidic sequence if existing or not'
-                                    if os.path.isfile(os.path.join(outpath+"/"+model+'_'+typeofgene, fname)):
-                                        with open(os.path.join(outpath+"/"+model+'_'+typeofgene, fname), 'a+') as file:
-                                            old_headers = []
-                                            end_file=file.tell()
-                                            file.seek(0)
-                                            for line in file:
-                                                if line.startswith(">"):
-                                                    old_headers.append(line.rstrip())
-                                            if not header in old_headers:
-                                                file.seek(end_file)
-                                                file.write(header+'\n')
-                                                file.write(str(out_seq)+'\n')
-                                            else:
-                                                pass
-                                    else :
-                                        with open(os.path.join(outpath+"/"+model+'_'+typeofgene, fname), 'a') as out:
-                                            out.write(header+'\n')
-                                            out.write(str(out_seq)+'\n')
                                 else:
                                     pass
 
@@ -278,24 +366,47 @@ if model in ("chloroplast","nucrdna","mitochondrion"):
                                 if 'ITS' in gene:
                                     pass
                                 else:
-                                    if os.path.isfile(os.path.join(outpath+"/"+model+'_'+typeofgene, fname)):
-                                        with open(os.path.join(outpath+"/"+model+'_'+typeofgene, fname), 'a+') as file:
-                                            old_headers = []
-                                            end_file=file.tell()
-                                            file.seek(0)
-                                            for line in file:
-                                                if line.startswith(">"):
-                                                    old_headers.append(line.rstrip())
-                                            if not header in old_headers:
-                                                file.seek(end_file)
-                                                file.write(header+'\n')
-                                                file.write(str(out_seq)+'\n')
-                                            else:
-                                                pass
-                                    else :
-                                        with open(os.path.join(outpath+"/"+model+'_'+typeofgene, fname), 'w') as out:
-                                            out.write(header+'\n')
-                                            out.write(str(out_seq)+'\n')
+                                    if gene in ref_seqs.keys():
+                                        if float(len(out_seq))/float(len(ref_seqs[gene])) >= thld:
+                                            if os.path.isfile(os.path.join(outpath+"/"+model+'_'+typeofgene, fname)):
+                                                with open(os.path.join(outpath+"/"+model+'_'+typeofgene, fname), 'a+') as file:
+                                                    old_headers = []
+                                                    end_file=file.tell()
+                                                    file.seek(0)
+                                                    for line in file:
+                                                        if line.startswith(">"):
+                                                            old_headers.append(line.rstrip())
+                                                    if not header in old_headers:
+                                                        file.seek(end_file)
+                                                        file.write(header+'\n')
+                                                        file.write(str(out_seq)+'\n')
+                                                    else:
+                                                        pass
+                                            else :
+                                                with open(os.path.join(outpath+"/"+model+'_'+typeofgene, fname), 'w') as out:
+                                                    out.write(header+'\n')
+                                                    out.write(str(out_seq)+'\n')
+                                        else:
+                                            pass
+                                    else:
+                                        if os.path.isfile(os.path.join(outpath+"/"+model+'_'+typeofgene, fname)):
+                                            with open(os.path.join(outpath+"/"+model+'_'+typeofgene, fname), 'a+') as file:
+                                                old_headers = []
+                                                end_file=file.tell()
+                                                file.seek(0)
+                                                for line in file:
+                                                    if line.startswith(">"):
+                                                        old_headers.append(line.rstrip())
+                                                if not header in old_headers:
+                                                    file.seek(end_file)
+                                                    file.write(header+'\n')
+                                                    file.write(str(out_seq)+'\n')
+                                                else:
+                                                    pass
+                                        else :
+                                            with open(os.path.join(outpath+"/"+model+'_'+typeofgene, fname), 'w') as out:
+                                                out.write(header+'\n')
+                                                out.write(str(out_seq)+'\n')
 
 
         if break_record==0:
@@ -320,8 +431,13 @@ if model in ("chloroplast","nucrdna","mitochondrion"):
         cond_size=50000
 
     if len("".join(to_annot_file['seq'])) >= cond_size:
-        newrecord=SeqRecord(seq=Seq(concat_seq), id=to_annot_file['id'], name=to_annot_file['name'],
-        description=to_annot_file['description'],dbxrefs=[],annotations={"molecule_type": "DNA"})
+        #newrecord=SeqRecord(seq=Seq(concat_seq), id=to_annot_file['id'], name=to_annot_file['name'],description=to_annot_file['description'],dbxrefs=[],annotations={"molecule_type": "DNA"})
+
+        if generic_dna:
+            newrecord=SeqRecord(seq=Seq(concat_seq, generic_dna), id=to_annot_file['id'], name=to_annot_file['name'],description=to_annot_file['description'],dbxrefs=[])
+        else:
+            newrecord=SeqRecord(seq=Seq(concat_seq), id=to_annot_file['id'], name=to_annot_file['name'],description=to_annot_file['description'],dbxrefs=[])
+        newrecord.annotations["molecule_type"] = "DNA"
         #from Bio.Alphabet import generic_dna
         #newrecord.seq.alphabet = generic_dna
 

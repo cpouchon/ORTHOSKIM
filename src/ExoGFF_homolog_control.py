@@ -8,10 +8,11 @@ import os, errno
 import argparse
 from joblib import Parallel, delayed
 import multiprocessing
+import time
 
 from Bio.Seq import Seq
 #from Bio.Alphabet import generic_dna
-
+start_time = time.time()
 
 parser = argparse.ArgumentParser(description='Export regions of query database from exonerate alignment. Filtering is made according to rawscore. Script was writen by C. Pouchon (2019).')
 parser.add_argument("-i","--infile", help="Fasta input contigs file",
@@ -800,8 +801,6 @@ for line in tab:
                 stat_stored[id]["exon"]=old_num+1
 
 
-
-
 besthits_filtered=dict()
 for g in list(besthits.keys()):
     besthits_filtered[g]=[]
@@ -809,20 +808,28 @@ for g in list(besthits.keys()):
     bhitfilt_parcount=0
     for bhits in besthits[g]:
         bhit_partcount=bhit_partcount+1
+        frame_bhits=[i["frame"] for i in stored[bhits] if "frame" in list(i.keys())][0]
         for hit in stored.keys():
             if hit[0]==bhits[0] and hit[1]==bhits[1] and hit[2]==bhits[2]:
                 if hit!=bhits:
                     #cond overlapp ratio 80%
                     minhit=hit[3]
                     maxhit=hit[4]
+                    shit=int(hit[5])
+                    sbhit=int(bhits[5])
+                    rscore=float(shit)/float(sbhit)
                     rhit=set(range(minhit,maxhit))
                     rbhit=set(range(bhits[3],bhits[4]))
                     intersection=rhit.intersection(rbhit)
                     ratio=float(len(intersection))/float(len(rbhit))
-                    if ratio>0.8:
-                        if stat_stored[hit]['intron']<stat_stored[bhits]['intron']:
-                            besthits_filtered[g].append(hit)
-                            bhitfilt_parcount=bhitfilt_parcount+1
+                    frame_hit=[i["frame"] for i in stored[hit] if "frame" in list(i.keys())][0]
+                    if ratio>0.8 and rscore>0.8:
+                        if frame_bhits!=frame_hit:
+                            if stat_stored[hit]['intron']<stat_stored[bhits]['intron']:
+                                besthits_filtered[g].append(hit)
+                                bhitfilt_parcount=bhitfilt_parcount+1
+                            else:
+                                pass
                         else:
                             pass
                     else:
@@ -1249,13 +1256,14 @@ for g in list(besthits_filtered2.keys()):
                     minhit=int(elem["min"])
                     maxhit=int(elem["max"])
                     rhit=set(range(minhit,maxhit))
+                    size=int(maxhit-minhit+1)
                     for c in contigs_homolog[seqid]:
                         cmin=c["min"]
                         cmax=c["max"]
                         rc=set(range(cmin,cmax))
                         intersection=rhit.intersection(rc)
                         cg=c["gene"]
-                        if len(intersection)>0:
+                        if len(intersection)/size>0.2:
                             if g == cg:
                                 pass
                             else:
@@ -1377,3 +1385,6 @@ else:
             outcontt.write("None")
     else:
         pass
+
+
+print("--- %s seconds ---" % (time.time() - start_time))

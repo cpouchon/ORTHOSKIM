@@ -8,6 +8,10 @@ from Bio.SeqRecord import *
 #from Bio.Alphabet.IUPAC import IUPACAmbiguousDNA;
 from Bio.Seq import *
 from Bio.SeqUtils import *
+try:
+    from Bio.Alphabet import generic_dna
+except ImportError:
+    generic_dna is None
 
 import argparse
 import sys
@@ -171,7 +175,7 @@ if args.single:
                             out.write(header+'\n')
                             out.write(str(out_seq)+'\n')
                 elif 'product' in feat.qualifiers:
-                    gene = feat.qualifiers['gene'][0].replace(" ","").replace("_","-")
+                    gene = feat.qualifiers['product'][0].replace(" ","").replace("_","-")
                     barp=barp+1
                     if feat.location_operator=="join":
                         length=0
@@ -278,7 +282,7 @@ if args.single:
                             out.write(str(out_seq)+'\n')
 
                 elif 'product' in feat.qualifiers:
-                    gene = feat.qualifiers['gene'][0].replace(" ","").replace("_","-")
+                    gene = feat.qualifiers['product'][0].replace(" ","").replace("_","-")
                     barp=barp+1
                     if feat.location_operator=="join":
                         length=0
@@ -409,7 +413,7 @@ else:
                                 out.write(header+'\n')
                                 out.write(str(out_seq)+'\n')
                     elif 'product' in feat.qualifiers:
-                        gene = feat.qualifiers['gene'][0].replace(" ","").replace("_","-")
+                        gene = feat.qualifiers['product'][0].replace(" ","").replace("_","-")
                         barp=barp+1
                         if feat.location_operator=="join":
                             length=0
@@ -516,7 +520,7 @@ else:
                                 out.write(str(out_seq)+'\n')
 
                     elif 'product' in feat.qualifiers:
-                        gene = feat.qualifiers['gene'][0].replace(" ","").replace("_","-")
+                        gene = feat.qualifiers['product'][0].replace(" ","").replace("_","-")
                         barp=barp+1
                         if feat.location_operator=="join":
                             length=0

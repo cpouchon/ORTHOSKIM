@@ -188,7 +188,7 @@ for taxa in taxa_dict:
     Ncount=int(concatenate_seq.count("N"))
     gappcount=int(concatenate_seq.count("-"))
     SeqLength=len(concatenate_seq)
-    Nratio=float(float(Ncount)/float(SeqLength))
+    Nratio=float(float(Ncount+gappcount)/float(SeqLength))
     AmbCount=Ncount+gappcount
     Ambratio=float(float(AmbCount)/float(SeqLength))
     'we add condition to check if a taxa is completly missing'

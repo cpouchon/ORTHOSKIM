@@ -99,12 +99,55 @@ for taxa in stored.keys():
                 f.write(str(catseq)+'\n')
             else:
                 pass
-
+    elif 'rrn16S' in stored[taxa].keys() and 'rrn5.8S' in stored[taxa].keys():
+        if len(str(stored[taxa]['rrn16S']))>50:
+            amorce_18S=str(stored[taxa]['rrn16S'])[-51:len(str(stored[taxa]['rrn16S']))]
+        else:
+            amorce_18S=str(stored[taxa]['rrn16S'])
+        catseq="".join((str(amorce_18S),str(stored[taxa]['rrn5.8S'])))
+        genename = "rrnITS1"
+        header=">"+genename+"_"+taxa
+        fname=taxa+".fa"
+        with open(file, 'a+') as f:
+            old_headers = []
+            end_file=f.tell()
+            f.seek(0)
+            for line in f:
+                if line.startswith(">"):
+                    old_headers.append(line.rstrip().replace(">","").split(";")[0])
+            if not str(genename+"_"+taxa) in old_headers:
+                f.seek(end_file)
+                f.write(header+'\n')
+                f.write(str(catseq)+'\n')
+            else:
+                pass
     if 'rrn28S' in stored[taxa].keys() and 'rrn5.8S' in stored[taxa].keys():
         if len(str(stored[taxa]['rrn28S']))>50:
             amorce_28S=str(stored[taxa]['rrn28S'])[0:50]
         else:
             amorce_28S=str(stored[taxa]['rrn28S'])
+        catseq="".join((str(stored[taxa]['rrn5.8S']),str(amorce_28S)))
+        genename = "rrnITS2"
+        header=">"+genename+"_"+taxa
+        fname=taxa+".fa"
+        with open(file, 'a+') as f:
+            old_headers = []
+            end_file=f.tell()
+            f.seek(0)
+            for line in f:
+                if line.startswith(">"):
+                    old_headers.append(line.rstrip().replace(">","").split(";")[0])
+            if not str(genename+"_"+taxa) in old_headers:
+                f.seek(end_file)
+                f.write(header+'\n')
+                f.write(str(catseq)+'\n')
+            else:
+                pass
+    elif 'rrn23S' in stored[taxa].keys() and 'rrn5.8S' in stored[taxa].keys():
+        if len(str(stored[taxa]['rrn23S']))>50:
+            amorce_28S=str(stored[taxa]['rrn23S'])[0:50]
+        else:
+            amorce_28S=str(stored[taxa]['rrn23S'])
         catseq="".join((str(stored[taxa]['rrn5.8S']),str(amorce_28S)))
         genename = "rrnITS2"
         header=">"+genename+"_"+taxa
