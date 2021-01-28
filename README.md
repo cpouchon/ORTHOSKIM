@@ -14,7 +14,7 @@ This software was developed under the PhyloAlps project (https://www.france-geno
 
 ## Table of contents
 
-+ [Installation](##-1.-Installation)
++ [Installation](## 1. Installation)
 + [Input files](##-2.-Input-files)
  + [Configuration file](###-2.1.-Configuration-file)
  + [Dependencies](###-2.2.-Dependencies)
