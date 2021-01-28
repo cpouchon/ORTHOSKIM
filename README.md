@@ -2,7 +2,7 @@
 
 ORTHOSKIM is a pipeline providing different tools to  capture targeted genes in genomic or transcriptomic libraries and to produce phylogenetic matrices for these genes.
 
-This software was developed under the PhyloAlps project (https://www.france-genomique.org/projet/phyloalps/).
+This software was developed under the [PhyloAlps project](https://www.france-genomique.org/projet/phyloalps/).
 
 
 > **Applications:** ORTHOSKIM can be run on genomes skims libraries to capture chloroplast (CDS+rRNA+trnL-UAA), mitochondrial (CDS+rRNA) and ribosomal (rRNA+spacers) genes thanks to specific modes of assembly and capture. In addition, we provided additional mode to capture nuclear genes and BUSCO markers in transcriptomic or target sequences capture libraries.
