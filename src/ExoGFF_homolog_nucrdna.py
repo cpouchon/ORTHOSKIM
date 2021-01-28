@@ -436,7 +436,7 @@ def GeneExtraction(genenumber):
                 else:
                     continue
 
-    newseq="".join(concat)
+    newseq="".join(concat).replace("N","")
     newlength = len(newseq)
 
     if 'rrnITS' in geneid:

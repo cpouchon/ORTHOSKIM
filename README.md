@@ -8,13 +8,50 @@ This software was developed under the PhyloAlps project (https://www.france-geno
 > **Applications:** ORTHOSKIM can be run on genomes skims libraries to capture chloroplast (CDS+rRNA+trnL-UAA), mitochondrial (CDS+rRNA) and ribosomal (rRNA+spacers) genes thanks to specific modes of assembly and capture. In addition, we provided additional mode to capture nuclear genes and BUSCO markers in transcriptomic or target sequences capture libraries.
 
 
-
 **citation:**
 + <font size="2"> Pouchon et al. *in prep.* ORTHOSKIM: in silico gene capture in genomic and transcriptomic libraries for phylogenomic and barcoding applications.   
 + <font size="2">Inger Greve Alsos, Sebastien Lavergne, Marie Kristine Føreid Merkel, Marti Boleda, Youri Lammers, Adriana Alberti, Charles Pouchon, France Denoeud, Iva Pitelkova, Mihai Pușcaș, Cristina Roquet, Bogdan-Iuliu Hurdu, Wilfried Thuiller, Niklaus E. Zimmermann, Peter M. Hollingsworth, Eric Coissac, The Treasure Vault Can be Opened: Large-Scale Genome Skimming Works Well Using Herbarium and Silica Gel Dried Material, Plants, 10.3390/plants9040432, 9, 4, (432), (2020).</font>
 
+## Table of contents
 
-## 1 . Installation
++ [Installation](##-1.-Installation)
++ [Input files](##-2.-Input-files)
+ + [Configuration file](###-2.1.-Configuration-file)
+ + [Dependencies](###-2.2.-Dependencies)
+ + [Sample file](###-2.3.-Sample-file)
+ + [References files (database)](###-2.4.-References-files-(database))
++ [Pipeline description](##-3.-Pipeline-description)
+  + [Database (optional)](###-3.1.-Database-(optional))
+  + [Global assemblies and cleaning](###-3.2.-Global-assemblies-and-cleaning)
+   + [genomic/transcriptomic assembly](####-3.2.1.-genomic/transcriptomic-assembly)
+   + [assemblies cleaning](####-3.2.2.-assemblies-cleaning)
+  + [Gene capture](###-3.3.-Gene-capture)
+   + [Selection](####-3.3.1.-Selection)
+     + [gene selection](####-3.3.1.a.-gene-selection)
+     + [contig selection](####-3.3.1.b.-contig-selection)
+   + [Exon/intron gene prediction](####-3.3.2.-Exon/intron-gene-prediction)
+   + [gene extraction](####-3.3.3.-gene-extraction)
+  + [Summary statistics](###-3.4.-Summary-statistics)
+  + [Alignment of taxa](###-3.5.-Alignment-of-taxa)
++ [Running ORTHOSKIM](##-4.-Running-ORTHOSKIM)
+ + [ORTHOSKIM arguments](###-4.1.-ORTHOSKIM-arguments)
+ + [ORTHOSKIM tutorials](###-4.2.-ORTHOSKIM-tutorials)
+  + [databases](####-4.2.1.-databases)
+  + [assemblies and filtering](####-4.2.2.-assemblies-and-filtering)
+  + [gene capture](####-4.2.3.-gene-capture)
+  + [alignments](####-4.2.4.-alignments)
++ [Additional modes for PhyloDB users](##-5.-Additional-modes-for-PhyloDB-users)
+  + [Sample file](###-5.1.-Sample-file)
+  + [List of genes files](###-5.2.-List-of-genes-files)
+  + [phyloDB database of references](###-5.3.-phyloDB-database-of-references)
+  + [phyloDB extraction from annotations](###-5.4.-phyloDB-extraction from-annotations)
++ [Funding](##-6.-Funding)  
++ [Support](##-Support)
+
+
+
+
+## 1. Installation
 --------------------
 
 ORTHOSKIM is tested on Unix environment and requires:
@@ -216,14 +253,6 @@ MILKSLFQVVYCDAAEPWQLGFQDAATPMMQGIIDLHHDIMFFITIIITFVLWMLVRVLWHFHYKKNPIPQRFVHGTTIE
 MKNFSFSYCILITLFNISVISSCDAPLSATSAMLDRFGFQEPASPLMEGLIALHSDIWAIMLFVAGFVLYMMCAILYNFSASSSEISYKVHHHSLIEIVWTTIPALILCVIAIPSFTLLYSLDEVIEPSLTIKAIGRQWYWSYEYGDYEVHDGLITNGITFDSNVLQDDDLEQGQLRLLDVDNRLVLPVNRHIRLLTSGGDVIHSFAVPSLGVKLDAIPGRLNQTMVFIKRQGVFYGQCSELCGSSHGMMPIALEAVREQDYVDWVNIKLQEM
 >cox1_112509_Hordeum_vulgare_subsp._vulgare
 MTNLVRWLFSTNHKDIGTLYFIFGAIAGVMGTCFSVLIRMELARPGDQILGGNHQLYNVLITAHAFLMIFFMVMPAMIGGFGNWFVPILIGAPDMAFPRLNNISFWLLPPSLLLLLSSALVEVGSGTGWTVYPPLSGITSHSGGAVDLAIFSLHLSGISSILGSINFITTIFNMRGPGMTMHRLPLFVWSVLVTAFLLLLSLPVLAGAITMLLTDRNFNTTFFDPAGGGDPILYQHLFWFFGHPEVYILILPGFGIISHIVSTFSRKPVFGYLGMVYAMISIGVLGFLVWAHHMFTVGLDVDTRAYFTAATMIIAVPTGIKIFSWIATMWGGSIQYKTPMLFAVGFIFLFTIGGLTGIVLANSGLDIALHDTYYVVAHFHYVLSMGAVFALFAGFYYWVGKIFGRTYPETLGQIHFWITFFGVNLTFFPMHFLGLSGMPRRIPDYPDAYAGWNALSSFGSYISVVGIRRFFVVVAITSSSGKNKKCAESPWAVEQNPTTLEWLVQSPPAFHTFGELPAVKETKNLS
->cox1_113636_Populus_tremula
-MINLVRWLFSTNHKDIGTLYFIFGAIAGVMGTCFSVLIRMELARPGDQILGGNHQLYNVLITAHAFLMIFFMVMPAMIGGFGNWFVPILIGAPDMAFPRLNNISFWLLPPSLLLLLSSALVEVGSGTGWTVYPPLSGITSHSGGAVDLAIFSLHLSGVSSILGSINFITTIFNMRGPGMTMHRLPLFVWSVLVTAFLLLLSLPVLAGAITMLLTDRNFNTTFFDPAGGGDPILYQHLFWFFGHPEVYILILPGFGIISHIVSTFSGKPVFGYLGMVYAMISIGVLGFLVWAHHMFTVGLDVDTRAYFTAATMIIAVPTGIKIFSWIATMWGGSIQYKTPMLFAVGFIFLFTIGGLTGIVLANSGLDIALHDTYYVVAHFHYVLSMGAVFALFAGFYYWVGKITGRTYPETLGKIHFWITFFGVNLTFFPMHFLGLSGMPRRIPDYPDAYAGWNALSSFGSYISVVGICCFFVVVTITLSSGNQNKCAPSPWALEQNSTTLEWMVQSPPAFHTFGELPAIKETKSYVK
-MKNLVRWLFSTNHKDIGTLYFIFGAIAGVMGTCFSVLIRMELARPGDQILGGNHQLYNVLITAHAFLMIFFMVMPAMIGGFGNWFVPILIGAPDMAFPRLNNISFWLLPPSLLLLLSSALVEVGSGTGWTVYPPLSGITSHSGGAVDLAIFSLHLSGVSSILGSINFITTIFNMRGPGMTMHRLPLFVWSVLVTAFLLLLSLPVLAGAITMLLTDRNFNTTFFDPAGGGDPILYQHLFWFFGHPEVYILILPGFGIISHIVSTFSGKPVFGYLGMVYAMISIGVLGFLVWAHHMFTVGLDVDTRAYFTAATMIIAVPTGIKIFSWIATMWGGSIQYKTPMLFAVGFIFLFTIGGLTGIVLANSGLDIALHDTYYVVAHFHYVLSMGAVFALFAGFYYWVGKIFGRTYPETLGQIHFWITFFGVNLTFFPMHFLGLSGMPRRIPDYPDAYAGWNALSSFGSYISVVGICCFFVVVTITLSSGNNKRCAPSPWALELNSTTLEWMVQSPPAFHTFGELPAIKETKSYVK
->cox1_Beta_macrocarpa_343494_genbank
-MTNLVRWLFSTNHKDIGTLYFIFGAIAGVMGTCFSVLIRMELARPGDQILGGNHQLYNVLITAHAFLMIFFMVMPAMIGGFGNWFVPILIGAPDMAFPRLNNISFWLLPPSLLLLLSSALVEVGSGTGWTVYPPLSGITSHSGGAVDLAIFSLHLSGV
-SSILGSINFITTIFNMRGPGMTMHRLPLFVWSVLVTAFLLLLSLPVLAGAITMLLTDRNFNTTFFDPAGGGDPILYQHLFWFFGHPEVYILILPGFGIISHIVSTFSGKPVFGYLGMVYAMISIGVLGFLVWAHHMFTVGLDVDTRAYFTAATMIIAV
-PTGIKIFSWIATMWGGSIQYKTPMLFAVGFIFLFTVGGLTGIVLANSGLDIALHDTYYVVAHFHYVLSMGAVFALFAGFYYWVGKIFGRTYPETLGQIHFWITFFGVNLTFFPMHFLGLSGMPRRIPDYPDAYAGWNALSSFGSYISVVGICCFFVVV
-TITLSSGKNKRCAPSPWAVEENSTTLEWMVQSPPAFHTFGELPAIKETKSXXX
 >nad1_119543_Anomodon_attenuatus
 MRLYIIGILAKILGIIIPLLLGVAFLVLAERKIMASMQRRKGPNVVGLFGLLQPLADGLKLMIKEPILPSSANLFIFLMAPVMTFMLSLVAWAVIPFDYGMVLSDLNVGILYLFAISSLGVYGIITAGWSSNSKYAFLGALRSAAQMVSYEVSIGLIIITVLICVGSRNFSEIVIAQKQIWFAAPLFPVFIMFFISCLAETNRAPFDLPEAEAESVAGYNVEYSSMGFALFFLGEYANMILMSSLCTLLFLGGWLPILDIPIFYVIPGSIRFSIKVLFFLFVYIWVRAAFPRYRYDQLMRLGWKVFLPLSLAWVVFVSGVLVAFDWLP
 ```
@@ -725,3 +754,6 @@ ls -l ~/RES/chloroplast_CDS/
 ## 6. Funding
 
 The PhyloAlps data collection was largely funded from the European Research Council under the European Community’s Seventh Framework Programme FP7/2007-2013 grant agreement 281422 (TEEMBIO), the Sixth European Framework Programme (GOCE-CT-2007-036866), the Swiss SNF (Grant 31003A_149508/1), the ANR DIVERSITALP Project (ANR-07-BDIV-014), ANR project Origin-Alps (ANR-16-CE93-0004), France Génomique (ANR-10-INBS-09-08) and the NextBarcode project (Institut Français de Bioinformatique).
+
+## 7. Support
+For questions and comments, please contact: [contact@orthoskim.org](mailto:contact@orthoskim.org?subject=[GitHub]%20Source%20Han%20Sans)
