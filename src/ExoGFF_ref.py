@@ -70,17 +70,17 @@ class ProgressBar:
 
 def GeneExtraction(genenumber):
     contpart=[]
-    geneid=list(besthits.keys())[genenumber]
+    geneid=list(besthits_filtered.keys())[genenumber]
 
     if 'rrnITS' not in geneid:
-        if len(besthits[geneid])==1:
-            seqid = besthits[geneid][0][1]
+        if len(besthits_filtered[geneid])==1:
+            seqid = besthits_filtered[geneid][0][1]
             dna=str(seqs[seqid][0])
             newid = str(geneid)+"_"+"_".join(seqid.split("_")[1:len(seqid.split("_"))])
         else:
             hitparts={}
             hitlen={}
-            for hits in besthits[geneid]:
+            for hits in besthits_filtered[geneid]:
                 if hits[1] in list(hitparts.keys()):
                     hitparts[hits[1]]=hitparts[hits[1]]+1
                 else:
@@ -94,7 +94,7 @@ def GeneExtraction(genenumber):
 
             if len(list(hitparts.keys())) ==1:
                 'sequence unique donc on recupere le bon id'
-                seqid = besthits[geneid][0][1]
+                seqid = besthits_filtered[geneid][0][1]
                 dna=str(seqs[seqid][0])
                 newid = str(geneid)+"_"+"_".join(seqid.split("_")[1:len(seqid.split("_"))])
 
@@ -155,6 +155,8 @@ besthits={}
 groups={}
 seqs={}
 counthits={}
+contigs_homolog=dict()
+
 
 if model =="nucrdna_rRNA":
     mkdir(str(outpath+"/"+model))
@@ -302,7 +304,26 @@ for line in tab:
 
             score = l[5]
             frame = l[6]
-            id=(genename,seqid,refid,refposmin,refposmax)
+            cont_min=l[3]
+            cont_max=l[4]
+            id=(genename,seqid,refid,refposmin,refposmax,score)
+
+            if seqid in contigs_homolog.keys():
+                toappend=dict()
+                toappend["min"]=int(cont_min)
+                toappend["max"]=int(cont_max)
+                toappend["gene"]=genename
+                toappend["score"]=score
+                contigs_homolog[seqid].append(toappend)
+            else:
+                contigs_homolog[seqid]=[]
+                toappend=dict()
+                toappend["min"]=int(cont_min)
+                toappend["max"]=int(cont_max)
+                toappend["gene"]=genename
+                toappend["score"]=score
+                contigs_homolog[seqid].append(toappend)
+
             if genename not in list(dicscore.keys()):
                 dicscore.setdefault(genename, []).append(int(score))
                 #besthits.setdefault(genename, []).append(dicinfo)
@@ -363,7 +384,50 @@ for line in tab:
             dicinfo['max']=str(maxpos)
             stored.setdefault(id, []).append(dicinfo)
 
+besthits_filtered=dict()
+for g in list(besthits.keys()):
+    subpart=[]
+    for bhits in besthits[g]:
+        seqid=bhits[1]
+        bscore=int(bhits[5])
+        control_pass=0
+        if seqid in list(contigs_homolog.keys()):
+            for elem in stored[bhits]:
+                if "frame" in elem:
+                    pass
+                else:
+                    minhit=int(elem["min"])
+                    maxhit=int(elem["max"])
+                    rhit=set(range(minhit,maxhit))
+                    size=int(maxhit-minhit+1)
+                    for c in contigs_homolog[seqid]:
+                        cmin=c["min"]
+                        cmax=c["max"]
+                        rc=set(range(cmin,cmax))
+                        intersection=rhit.intersection(rc)
+                        cg=c["gene"]
+                        if len(intersection)/size>0.2:
+                            if g == cg:
+                                pass
+                            else:
+                                if bscore>=int(c["score"]):
+                                    pass
+                                else:
+                                    control_pass=control_pass+1
+                        else:
+                            pass
+        else:
+            pass
+        if control_pass==0:
+            subpart.append(bhits)
+        else:
+            pass
+
+    if len(subpart)>0:
+        besthits_filtered[g]=subpart
+    else:
+        pass
 
 print ("clean sequences for %s" % input_file)
-inputs=range(len(list(besthits.keys())))
+inputs=range(len(list(besthits_filtered.keys())))
 Parallel(n_jobs=num_cores)(delayed(GeneExtraction)(i) for i in inputs)

@@ -449,8 +449,8 @@ mkdir -p ${RES}/Extraction
 		do
       echo "CMD: ${EXONERATE} -s ${EXO_SCORE} -q ${SEEDS_MITO_CDS} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print \$0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=\$0;next;}{entry = entry \"\n\" \$0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/references/tmp.exonerate"
 			${EXONERATE} -s ${EXO_SCORE} -q ${SEEDS_MITO_CDS} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=$0;next;}{entry = entry "\n" $0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/references/tmp.exonerate
-      echo "CMD: `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_MITO_CDS} -g ${RES}/references/tmp.exonerate -m mitochondrion_CDS -o ${RES}/references/clean --threads 1 -t ${SEEDS_THRESHOLD}"
-      `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_MITO_CDS} -g ${RES}/references/tmp.exonerate -m mitochondrion_CDS -o ${RES}/references/clean --threads 1 -t ${SEEDS_THRESHOLD}
+      echo "CMD: `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_MITO_CDS} -g ${RES}/references/tmp.exonerate -m mitochondrion_CDS -o ${RES}/references/clean --threads ${THREADS} -t ${SEEDS_THRESHOLD}"
+      `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_MITO_CDS} -g ${RES}/references/tmp.exonerate -m mitochondrion_CDS -o ${RES}/references/clean --threads ${THREADS} -t ${SEEDS_THRESHOLD}
 		done
 		cat ${RES}/references/clean/mitochondrion_CDS/*.fa > ${MITO_REF_CDS}
     rm -rf ${RES}/references/unclean/mitochondrion_CDS/
@@ -461,8 +461,8 @@ mkdir -p ${RES}/Extraction
 		do
       echo "CMD: ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${SEEDS_MITO_rRNA} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print \$0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=\$0;next;}{entry = entry \"\n\" \$0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/references/tmp.exonerate"
 			${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${SEEDS_MITO_rRNA} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=$0;next;}{entry = entry "\n" $0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/references/tmp.exonerate
-      echo "CMD: `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_MITO_rRNA} -g ${RES}/references/tmp.exonerate -m mitochondrion_rRNA -o ${RES}/references/clean --threads 1 -t ${SEEDS_THRESHOLD}"
-      `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_MITO_rRNA} -g ${RES}/references/tmp.exonerate -m mitochondrion_rRNA -o ${RES}/references/clean --threads 1 -t ${SEEDS_THRESHOLD}
+      echo "CMD: `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_MITO_rRNA} -g ${RES}/references/tmp.exonerate -m mitochondrion_rRNA -o ${RES}/references/clean --threads ${THREADS} -t ${SEEDS_THRESHOLD}"
+      `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_MITO_rRNA} -g ${RES}/references/tmp.exonerate -m mitochondrion_rRNA -o ${RES}/references/clean --threads ${THREADS} -t ${SEEDS_THRESHOLD}
 		done
 		cat ${RES}/references/clean/mitochondrion_rRNA/*.fa > ${MITO_REF_rRNA}
     rm -rf ${RES}/references/unclean/mitochondrion_rRNA/
@@ -494,8 +494,8 @@ mkdir -p ${RES}/Extraction
     do
       echo "CMD: ${EXONERATE} --model genome2genome -q ${SEEDS_NRDNA} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print \$0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=\$0;next;}{entry = entry \"\n\" \$0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/references/tmp.exonerate"
       ${EXONERATE} --model genome2genome -q ${SEEDS_NRDNA} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=$0;next;}{entry = entry "\n" $0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/references/tmp.exonerate
-      echo "CMD: `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_NRDNA} -g ${RES}/references/tmp.exonerate -m nucrdna_rRNA -o ${RES}/references/clean --threads 1 -t ${SEEDS_THRESHOLD}"
-      `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_NRDNA} -g ${RES}/references/tmp.exonerate -m nucrdna_rRNA -o ${RES}/references/clean --threads 1 -t ${SEEDS_THRESHOLD}
+      echo "CMD: `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_NRDNA} -g ${RES}/references/tmp.exonerate -m nucrdna_rRNA -o ${RES}/references/clean --threads ${THREADS} -t ${SEEDS_THRESHOLD}"
+      `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_NRDNA} -g ${RES}/references/tmp.exonerate -m nucrdna_rRNA -o ${RES}/references/clean --threads ${THREADS} -t ${SEEDS_THRESHOLD}
     done
 
     `dirname $0`/src/rrnITS.py -p ${RES}/references/clean/nucrdna_rRNA -o ${RES}/references/clean/nucrdna_misc_RNA
@@ -521,8 +521,8 @@ mkdir -p ${RES}/Extraction
 		do
       echo "CMD: ${EXONERATE} -s ${EXO_SCORE} -q ${SEEDS_CHLORO_CDS} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print \$0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=\$0;next;}{entry = entry \"\n\" \$0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/references/tmp.exonerate"
 			${EXONERATE} -s ${EXO_SCORE} -q ${SEEDS_CHLORO_CDS} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=$0;next;}{entry = entry "\n" $0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/references/tmp.exonerate
-      echo "CMD: `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_CHLORO_CDS} -g ${RES}/references/tmp.exonerate -m chloroplast_CDS -o ${RES}/references/clean --threads 1 -t ${SEEDS_THRESHOLD}"
-      `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_CHLORO_CDS} -g ${RES}/references/tmp.exonerate -m chloroplast_CDS -o ${RES}/references/clean --threads 1 -t ${SEEDS_THRESHOLD}
+      echo "CMD: `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_CHLORO_CDS} -g ${RES}/references/tmp.exonerate -m chloroplast_CDS -o ${RES}/references/clean --threads ${THREADS} -t ${SEEDS_THRESHOLD}"
+      `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_CHLORO_CDS} -g ${RES}/references/tmp.exonerate -m chloroplast_CDS -o ${RES}/references/clean --threads ${THREADS} -t ${SEEDS_THRESHOLD}
 		done
 		cat ${RES}/references/clean/chloroplast_CDS/*.fa > ${CHLORO_REF_CDS}
     rm -rf ${RES}/references/unclean/chloroplast_CDS/
@@ -533,8 +533,8 @@ mkdir -p ${RES}/Extraction
 		do
       echo "CMD: ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${SEEDS_CHLORO_rRNA} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print \$0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=\$0;next;}{entry = entry \"\n\" \$0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/references/tmp.exonerate"
 			${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${SEEDS_CHLORO_rRNA} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=$0;next;}{entry = entry "\n" $0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/references/tmp.exonerate
-      echo "CMD: `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_CHLORO_rRNA} -g ${RES}/references/tmp.exonerate -m chloroplast_rRNA -o ${RES}/references/clean --threads 1 -t ${SEEDS_THRESHOLD}"
-      `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_CHLORO_rRNA} -g ${RES}/references/tmp.exonerate -m chloroplast_rRNA -o ${RES}/references/clean --threads 1 -t ${SEEDS_THRESHOLD}
+      echo "CMD: `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_CHLORO_rRNA} -g ${RES}/references/tmp.exonerate -m chloroplast_rRNA -o ${RES}/references/clean --threads ${THREADS} -t ${SEEDS_THRESHOLD}"
+      `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_CHLORO_rRNA} -g ${RES}/references/tmp.exonerate -m chloroplast_rRNA -o ${RES}/references/clean --threads ${THREADS} -t ${SEEDS_THRESHOLD}
 		done
 		cat ${RES}/references/clean/chloroplast_rRNA/*.fa > ${CHLORO_REF_rRNA}
     rm -rf ${RES}/references/unclean/chloroplast_rRNA/
@@ -545,8 +545,8 @@ mkdir -p ${RES}/Extraction
 		do
       echo "CMD: ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${SEEDS_CHLORO_tRNA} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print \$0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=\$0;next;}{entry = entry \"\n\" \$0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/references/tmp.exonerate"
 			${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${SEEDS_CHLORO_tRNA} -t ${file} --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=$0;next;}{entry = entry "\n" $0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/references/tmp.exonerate
-      echo "CMD: `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_CHLORO_tRNA} -g ${RES}/references/tmp.exonerate -m chloroplast_tRNA -o ${RES}/references/clean --threads 1 -t ${SEEDS_THRESHOLD}"
-      `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_CHLORO_tRNA} -g ${RES}/references/tmp.exonerate -m chloroplast_tRNA -o ${RES}/references/clean --threads 1 -t ${SEEDS_THRESHOLD}
+      echo "CMD: `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_CHLORO_tRNA} -g ${RES}/references/tmp.exonerate -m chloroplast_tRNA -o ${RES}/references/clean --threads ${THREADS} -t ${SEEDS_THRESHOLD}"
+      `dirname $0`/src/ExoGFF_ref.py -i ${file} -s ${SEEDS_CHLORO_tRNA} -g ${RES}/references/tmp.exonerate -m chloroplast_tRNA -o ${RES}/references/clean --threads ${THREADS} -t ${SEEDS_THRESHOLD}
 		done
 		cat ${RES}/references/clean/chloroplast_tRNA/*.fa > ${CHLORO_REF_tRNA}
     rm -rf ${RES}/references/unclean/chloroplast_tRNA/
