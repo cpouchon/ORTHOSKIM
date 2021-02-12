@@ -1,16 +1,18 @@
-# ORTHOSKIM: *in silico* gene capture in genomic and transcriptomic libraries
+# ORTHOSKIM: *in silico* gene capture from genomic and transcriptomic libraries
 
-ORTHOSKIM is a pipeline providing different tools to  capture targeted genes in genomic or transcriptomic libraries and to produce phylogenetic matrices for these genes.
+ORTHOSKIM is a pipeline providing different tools to  capture targeted genes from genomic and transcriptomic libraries, and to produce phylogenetic matrices for these genes.
 
 This software was developed under the [PhyloAlps project](https://www.france-genomique.org/projet/phyloalps/).
 
 
-> **Applications:** ORTHOSKIM can be run on genomes skims libraries to capture chloroplast (CDS+rRNA+trnL-UAA), mitochondrial (CDS+rRNA) and ribosomal (rRNA+spacers) genes thanks to specific modes of assembly and capture. In addition, we provided additional mode to capture nuclear genes and BUSCO markers in transcriptomic or target sequences capture libraries.
+**Applications:** ORTHOSKIM can be run on genomes skims libraries to capture chloroplast, mitochondrial and ribosomal genes thanks to specific modes of assembly and capture. In addition, we provided additional mode to capture nuclear genes and BUSCO markers as well as in transcriptomic or target sequences capture libraries.
 
 
-**citation:**
-+ <font size="2"> Pouchon et al. *in prep.* ORTHOSKIM: in silico gene capture in genomic and transcriptomic libraries for phylogenomic and barcoding applications.   
-+ <font size="2">Inger Greve Alsos, Sebastien Lavergne, Marie Kristine Føreid Merkel, Marti Boleda, Youri Lammers, Adriana Alberti, Charles Pouchon, France Denoeud, Iva Pitelkova, Mihai Pușcaș, Cristina Roquet, Bogdan-Iuliu Hurdu, Wilfried Thuiller, Niklaus E. Zimmermann, Peter M. Hollingsworth, Eric Coissac, The Treasure Vault Can be Opened: Large-Scale Genome Skimming Works Well Using Herbarium and Silica Gel Dried Material, Plants, 10.3390/plants9040432, 9, 4, (432), (2020).</font>
+**Citation:**
++ Pouchon et al. *in prep.* ORTHOSKIM: in silico gene capture from genomic and transcriptomic libraries for phylogenomic and barcoding applications.   
++ Inger Greve Alsos, Sebastien Lavergne, Marie Kristine Føreid Merkel, Marti Boleda, Youri Lammers, Adriana Alberti, Charles Pouchon, France Denoeud, Iva Pitelkova, Mihai Pușcaș, Cristina Roquet, Bogdan-Iuliu Hurdu, Wilfried Thuiller, Niklaus E. Zimmermann, Peter M. Hollingsworth, Eric Coissac, The Treasure Vault Can be Opened: Large-Scale Genome Skimming Works Well Using Herbarium and Silica Gel Dried Material, Plants, 10.3390/plants9040432, 9, 4, (432), (2020).</font>
+
+License: GPL https://www.gnu.org/licenses/gpl-3.0.html
 
 ## Table of contents
 
@@ -56,7 +58,6 @@ This software was developed under the [PhyloAlps project](https://www.france-gen
 ORTHOSKIM is tested on Unix environment and requires:
 + [Exonerate](https://www.ebi.ac.uk/about/vertebrate-genomics/software/exonerate)
 + [SPAdes](http://cab.spbu.ru/software/spades/)
-+ [QUAST](https://github.com/ablab/quast) (optional)
 + [Diamond](https://github.com/bbuchfink/diamond)
 + [Blast](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download)
 + [MAFFT](https://mafft.cbrc.jp/alignment/software/)
@@ -203,7 +204,6 @@ nano tools.sh
 SPADES=/Users/pouchonc/PhyloAlps/OrthoSkim/TOOLS/SPAdes-3.13.0-Darwin/bin/spades.py
 DIAMOND=/Users/pouchonc/miniconda2/bin/diamond
 EXONERATE=/usr/local/bin/exonerate
-QUAST=/Users/pouchonc/miniconda2/bin/quast.py
 BLASTDB=/Users/pouchonc/miniconda2/bin/makeblastdb
 BLASTN=/Users/pouchonc/miniconda2/bin/blastn
 MAFFT=/path/to/mafft
@@ -282,7 +282,7 @@ The gene capture is driven on genomic or transcriptomic global assemblies. This 
 
 ORTHOSKIM pipeline uses different mode to compute the databases, capture targeted regions, align them between taxa, or to check assemblies.
 
-> **Note**: A *mode_done.log* file is created containing samples that were correctly processed, whereas unprocessed samples were added into *mode_error.log* file. This file could be used to remove processed samples from the initial sample file if the script has to be rerun. Command lines are also print if users want to rerun specific commands on samples.
+> **NOTE**: A *mode_done.log* file is created containing samples that were correctly processed, whereas unprocessed samples were added into *mode_error.log* file. This file could be used to remove processed samples from the initial sample file if the script has to be rerun. Command lines are also print if users want to rerun specific commands on samples.
 
 
 ### 3.1. Database (optional)
@@ -291,8 +291,9 @@ ORTHOSKIM provides a mode to create gene database for the mitochondrial, chlorop
 
 ORTHOSKIM will then extract all notified CDS, rRNA and tRNA genes and align them into given seeds thanks to *exonerate* to keep a standard gene name. Output files (l. 38-39, 44-46 and 48) are created containing a bank of genes, all well identified. Only genes given for the seeds will be included.
 
-> **NOTE**: Users have to collect all three genomes and corresponding seeds to run ORTHOSKIM (or two for non plant model). If users want to capture nuclear or busco markers, this step is skipped. In such case, users have to collected genes of reference for these markers into the *config_orthoskim.txt* file, by following instructions for the sequence header.
+> **NOTE**: Users have to collect all three genomes and corresponding seeds to run ORTHOSKIM (or two for non plant model) as a selection is done on contigs thanks to the different genomes (see 3.3.1.b. section). If users want to capture nuclear or busco markers, this step is skipped. In such case, users have to collected genes of reference for these markers into the *config_orthoskim.txt* file, by following instructions for the sequence header.
 
+We also supplied with ORTHOSKIM a function, *SortDB.py*, to reduce the reference datasets of genes and genomes by family (as whole genomes are mapped during the contigs selection step), in order to reduce the computational time of capture (see section 4.2.1).  
 
 
 ### 3.2. Global assemblies and cleaning
@@ -387,77 +388,41 @@ Abies_sibirica_97169_TROM_V_97238_CDM_AVE	TRUE	TRUE
 ```
 > If users want to combine chloroplast_tRNA (e.g. trnL-UAA) and CDS genes (e.g. matK and rbcL), a new directory must be created in the <font size="2">**${RES}/Extraction/**</font> subdirectory with gene files inside; users have next to set the name of this directory in the config file (l. 56).
 
+We also recommend to investigate as well as the reconstructed size and the number of contigs for which targeted genes were extracted to identify spurious taxa (see following section 3.4.b).
+
 
 
 ### 3.4. Summary statistics
 
 **a. on assemblies**
 
-ORTHOSKIM allows to output summary statistic on contigs assemblies thanks to [QUAST](https://github.com/ablab/quast) by specifying the `-m stat_assembly` mode.
+ORTHOSKIM allows to output summary statistic on cleaned assemblies by using the `-m statistic_assembly` mode.
 
-The output *transposed_report.txt* tab file will be in <font size="2">**${RES}/report_SPAdes_assemblies/**</font> directories given indication on the assembly.
+The output *assemblies_statistics.txt* tab is generated in <font size="2">**${RES}/Statistics/**</font> folder, giving  details on the assembly over:
++ the taxa name
++ the number of cleaned contigs
++ the total reconstructed size
++ the N50 (*i.e.* the sequence length of the shortest contig at 50% of the total genome length)
++ the L50 (*i.e.* the smallest number of contigs whose length sum makes up half of genome size)
++ the GC content
+
 
 ```
-head ~/RES/report_chloro_assemblies/transposed_report.txt
+head ~/RES/Statistics/assemblies_statistics.txt
+Actinidia_sp_1927898_FAM000131_BGN_MGF  14691   4768612 600.0   14691   38.05
+Adenophora_liliifolia_361368_PHA000132_BGN_NR   106586  17274304        231.0   106586  41.05
+Agrostis_canina_218142_TROM_V_92449_BXA_ASB     672     197898  2941.0  672     44.07
+Agrostis_vinealis_247443_TROM_V_47532_BXA_ARG   24475   6458884 278.0   24475   36.29
 
-All statistics are based on contigs of size >= 500 bp, unless otherwise noted (e.g., "# contigs (>= 0 bp)" and "Total length (>= 0 bp)" include all contigs).
-
-Assembly                                              # contigs (>= 0 bp)  # contigs (>= 1000 bp)  # contigs (>= 5000 bp)  # contigs (>= 10000 bp)  # contigs (>= 25000 bp)  # contigs (>= 50000 bp)  Total length (>= 0 bp)  Total length (>= 1000 bp)  Total length (>= 5000 bp)  Total length (>= 10000 bp)  Total length (>= 25000 bp)  Total length (>= 50000 bp)  # contigs  Largest contig  Total length  GC (%)  N50     N75     L50  L75  # N's per 100 kbp
-Veronica_crassifolia_996476.CAR009639.BGN_NFI.chloro  1                    1                       1                       1                        1                        1                        152361                  152361                     152361                     152361                      152361                      152361                      1          152361          152361        38.03   152361  152361  1    1    0.00             
-Androsace_helvetica_199610.CLA000520.BGN_ETA.chloro   1                    1                       1                       1                        1                        1                        147550                  147550                     147550                     147550                      147550                      147550                      1          147550          147550        37.06   147550  147550  1    1    0.00             
-Doronicum_columnae_118758.PHA003018.BGN_EEH.chloro    1                    1                       1                       1                        1                        1                        152623                  152623                     152623                     152623                      152623                      152623                      1          152623          152623        37.60   152623  152623  1    1    0.00             
 ```
 
-ORTHOSKIM will also output the *report.pdf* file generated with [QUAST](https://github.com/ablab/quast) containing:
+Moreover, statistics over contaminant contig identified and removed from assemblies are given in the  
 
-<figure align="center">
-  <img height="240" src="img/Nx.jpeg" title="Nx values varying from 0 to 100%" />
-  <figcaption>Nx values varying from 0 to 100%</figcaption>
-</figure>
-<br>
-<figure align="center">
-  <img height="240" src="img/GCall.jpeg"/>
-  <figcaption>*GC content in the contigs for all samples*</figcaption>
-</figure>
-<figure align="center">
-  <img height="240" src="img/GCsamp1.jpeg"/>
-  <figcaption>*GC content in the contigs for sample1*</figcaption>
-</figure>
-<figure align="center">
-  <img height="240" src="img/GCsamp2.jpeg"/>
-  <figcaption>*GC content in the contigs for sample2*</figcaption>
-</figure>
-<figure align="center">
-  <img height="240" src="img/GCsamp3.jpeg"/>
-  <figcaption>*GC content in the contigs for sample3*</figcaption>
-</figure>
-<br>
-<figure align="center">
-  <img height="240" src="img/Covall.jpeg"/>
-  <figcaption>*distribution of total contig lengths at different*</figcaption>
-  <figcaption>*read coverage (only for SPAdes mode)*<figcaption>         
-</figure>
-<figure align="center">
-  <img height="240" src="img/Covsamp1.jpeg"/>
-  <figcaption>*coverage distribution for sample1*</figcaption>
-</figure>
-<figure align="center">
-  <img height="240" src="img/Covsamp2.jpeg"/>
-  <figcaption>*coverage distribution for sample2*</figcaption>
-</figure>
-<figure align="center">
-  <img height="240" src="img/Covsamp3.jpeg"/>
-  <figcaption>*coverage distribution for sample3*</figcaption>
-</figure>
-<br>
-
-
-> **Note**: see QUAST [manual](http://quast.bioinf.spbau.ru/manual.html) for more details. Outputs for [icarus](http://bioinf.spbau.ru/icarus) genome visualizer were also kept in the directory to visualize assemblies.
 
 
 **b. on capture**
 
-ORTHOSKIM allows to get statistic from the gene capture by using the `-m stat_capture` mode for sequences for the different targets (multiple targets can be supplied). The pipeline output a *report.tab* into this path containing:
+ORTHOSKIM allows to get statistic from the gene capture by using the `-m statistic_capture` mode for sequences for the different targets (multiple targets can be supplied, *e.g.* `-t mitochondrion_CDS`). The pipeline output a *report.tab* into <font size="2">**${RES}/Statistics/**</font> containing:
 + the gene name (gene_name)
 + the taxa coverage (taxa)
 + the mean length (mean)
@@ -469,7 +434,7 @@ ORTHOSKIM allows to get statistic from the gene capture by using the `-m stat_ca
 + the 75th percentil (pct75)
 
 ```
-head ~/RES/chloroplast_CDS_report.log
+head ~/RES/Statistics/chloroplast_CDS_report.log
 gene	taxa  mean  min   max   std   pct25   pct50   pct75
 rpoC2	7	3316  1831  4152  880   2743	3561	4093
 rps19	7	280   273   309   11	276     276     276
@@ -490,6 +455,27 @@ rbcL	 7	1425  1425  1425  0     1425	1425	1425
 with -p: path where genes are extracted and -t: list of taxa to compute statistics
 
 <br>
+
+
+Moreover, when analyzing genome skims (*i.e.* by targeting chloroplast, mitochondrion or ribosomal genes), we also strongly recommend to investigate the summary statistics of contigs for which genes were captured once the capture is done, by using the function *StatContigs.py* as following:
+```
+StatContigs.py --path ${RES}/Mapping/ --taxa taxalist --mode [all,chloroplast,mitochondrion,nucrdna] > statistics_captured_contigs.log
+```
+This function outputs for each taxa and each genomic compartment (according to the `--mode`) the number of contigs assembled along with the total reconstructed size and the mean coverage. By using the `--mode all`, the first three columns of the output table correspond to the chloroplast, the next three to the mitochondrion and the last three to the nucrdna.
+
+```
+head statistics_captured_contigs.log
+Primula_acaulis_175104_PHA007169_RSZ_RSZAXPI000864-106	26	141628	614.67
+Primula_integrifolia_175074_PHA007216_BGN_LG	6	125017	125.8
+Primula_kitaibeliana_184184_CLA007221_BGN_MQI	6	126871	309.78
+Primula_kitaibeliana_184184_CLA007222_BGN_NND	5	126339	117.18
+Primula_latifolia_152139_PHA007223_BGN_LS	5	125006	139.46
+Primula_magellanica_175079_CLA010550_GWM_1236	5	126155	172.52
+Primula_marginata_175080_PHA007227_BGN_ID	5	124986	192.91
+```
+
+This can provides an indication about contaminant that can not be identified during the assembly cleaning (*e.g.* plant-plant contaminant, or host-parasite DNA contaminant). Indeed, for a 150kb chloroplast genome, we except to have a reconstructed size over 125Kb (i.e. with only one inverted repeat) as following. In the above example, `Primula_acaulis_175104_PHA007169_RSZ_RSZAXPI000864-106` is doutbut as it shows an higher reconstructed size and number of chloroplast contigs thant what expected. In such case, user can check all genes captured for this sample before to include it on the alignment procedure.
+
 
 ### 3.5. Alignment of taxa
 
@@ -566,9 +552,9 @@ Annotation needs to be collected in a single file in genbank/embl format. Seeds 
 
 > * **reformate:** Extract and reformate the scaffold fasta file for each taxa. A Samples/ subdirectory is generated containing all taxa contig files.
 
-> * **stat_assembly:** Compute summary statistics of assemblies using QUAST. Graphs and a table with information over the contigs number, the contigs size, the GC content, the N50 value are generated.
+> * **statistic_assembly:** Compute summary statistics of cleaned assemblies. Informations over the contigs number, the contigs size, the GC content, the N50 value are generated.
 
-> * **stat_capture:** Compute summary statistics of extraction. A file (target_report.log) is generated including the taxa recovery, the mean size and the range size by gene. Multiple targets (-t) can be set.
+> * **statistic_capture:** Compute summary statistics of extraction. A file (target_report.log) is generated including the taxa recovery, the mean size and the range size by gene. Multiple targets (-t) can be set.
 
 
 **-t (targets):** targeted regions by the mode (-m) used.
@@ -613,7 +599,7 @@ rm *.genomic.gbff
 We supplied with ORTHOSKIM a function *AnnotFilter.py* to filter annotations according to taxonomy (e.g. viridiplantae). Here, we collected all annotations of viridiplantae.
 
 ```
-~/OrthoSkim-master/AnnotFilter.py -i plastid.genomic.gb -f genbank -l viridiplantae -o ~/OrthoSkim-master/data/chloroplast_plants.gb
+~/OrthoSkim-master/src/AnnotFilter.py -i plastid.genomic.gb -f genbank -l viridiplantae -o ~/OrthoSkim-master/data/chloroplast_plants.gb
 Filtering annotations on taxonomy
 1 level(s) of taxonomy set: viridiplantae
  	 parsing annotations [............................................................] 100 %
@@ -654,7 +640,7 @@ We next perform global assemblies of our samples and reformate the outputs. Afte
 If you want to get summary statistics of assemblies, users can run the following command:
 
 ```
-./orthoskim -m stat_assembly -c config_orthoskim.txt
+./orthoskim -m statistic_assembly -c config_orthoskim.txt
 ```
 
 #### 4.2.3. gene capture
@@ -675,13 +661,13 @@ The next step consists on capture all targeted genes into these assemblies. To d
 Summary statistics about the capture can be obtained by using the following mode:
 
 ```
-./orthoskim -m stat_capture -t chloroplast_CDS -t chloroplast_rRNA -t chloroplast_tRNA -t mitochondrion_CDS -t mitochondrion_rRNA -t nucrdna -c config_orthoskim.txt
+./orthoskim -m statistic_capture -t chloroplast_CDS -t chloroplast_rRNA -t chloroplast_tRNA -t mitochondrion_CDS -t mitochondrion_rRNA -t nucrdna -c config_orthoskim.txt
 ```
 > **NOTE:** Here, multiple targets (-t) are given in the command same line.
 
 #### 4.2.4. alignments
 
-Finally, we compute a supermatrix by aligning captured genes (here on chloroplast data) that can be used for phylogenetic inferences.
+Finally, we compute a supermatrix by aligning captured genes (here on chloroplast CDS and rRNA) useful for phylogenetic inferences.
 
 ```
 ./orthoskim -m alignment -t chloroplast_CDS -t chloroplast_rRNA -c config_orthoskim

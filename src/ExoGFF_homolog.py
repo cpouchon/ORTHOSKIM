@@ -395,6 +395,11 @@ mkdir(str(outpath+"/"+model))
 with open(file) as f:
     tab = f.readlines()
 
+if len(tab)<2:
+    print(str("WARN: "+model+" - no contigs mapped on references for "+nameofsample))
+else:
+    pass
+
 with open(tabseeds) as f:
     reftab = f.readlines()
 
@@ -921,6 +926,10 @@ if len(list(besthits_filtered3.keys()))>0:
     l = [i for i in x if i is not None]
 
     outcontp=os.path.dirname(os.path.abspath(file))
+    if len(l)==0:
+        print("WARN: "+model+" - no genes following capture restrictions were extracted for %s" % nameofsample)
+    else:
+        pass
     if 'chloroplast' in model:
         if os.path.join(outcontp, str(nameofsample+".cont_cpdna.log")):
             with open(os.path.join(outcontp, str(nameofsample+".cont_cpdna.log")), 'a+') as outcontt:
@@ -929,16 +938,23 @@ if len(list(besthits_filtered3.keys()))>0:
                 outcontt.seek(0)
                 for line in outcontt:
                     old_cont.append(line.rstrip())
-                for line in set(l):
-                    if not line in old_cont:
-                        outcontt.seek(end_file)
-                        outcontt.write(str(line)+'\n')
-                    else:
-                        pass
+                if len(l)>0:
+                    for line in set(l):
+                        if not line in old_cont:
+                            outcontt.seek(end_file)
+                            outcontt.write(str(line)+'\n')
+                        else:
+                            pass
+                else:
+                    outcontt.seek(end_file)
+                    outcontt.write(str("None")+'\n')
         else :
             with open(os.path.join(outcontp, str(nameofsample+".cont_cpdna.log")), 'w') as outcontt:
-                for line in set(l):
-                    outcontt.write(str(line)+'\n')
+                if len(l)>0:
+                    for line in set(l):
+                        outcontt.write(str(line)+'\n')
+                else:
+                    outcontt.write(str("None")+'\n')
     elif 'mitochondrion' in model:
         if os.path.join(outcontp, str(nameofsample+".cont_mtdna.log")):
             with open(os.path.join(outcontp, str(nameofsample+".cont_mtdna.log")), 'a+') as outcontt:
@@ -947,26 +963,102 @@ if len(list(besthits_filtered3.keys()))>0:
                 outcontt.seek(0)
                 for line in outcontt:
                     old_cont.append(line.rstrip())
-                for line in set(l):
-                    if not line in old_cont:
-                        outcontt.seek(end_file)
-                        outcontt.write(str(line)+'\n')
-                    else:
-                        pass
+                if len(l)>0:
+                    for line in set(l):
+                        if not line in old_cont:
+                            outcontt.seek(end_file)
+                            outcontt.write(str(line)+'\n')
+                        else:
+                            pass
+                else:
+                    outcontt.seek(end_file)
+                    outcontt.write(str("None")+'\n')
         else :
             with open(os.path.join(outcontp, str(nameofsample+".cont_mtdna.log")), 'w') as outcontt:
-                for line in set(l):
-                    outcontt.write(str(line)+'\n')
+                if len(l)>0:
+                    for line in set(l):
+                        outcontt.write(str(line)+'\n')
+                else:
+                    outcontt.write(str("None")+'\n')
+    elif 'busco' in model:
+        if os.path.join(outcontp, str(nameofsample+".cont_busco.log")):
+            with open(os.path.join(outcontp, str(nameofsample+".cont_busco.log")), 'a+') as outcontt:
+                old_cont = []
+                end_file=outcontt.tell()
+                outcontt.seek(0)
+                for line in outcontt:
+                    old_cont.append(line.rstrip())
+                if len(l)>0:
+                    for line in set(l):
+                        if not line in old_cont:
+                            outcontt.seek(end_file)
+                            outcontt.write(str(line)+'\n')
+                        else:
+                            pass
+                else:
+                    outcontt.seek(end_file)
+                    outcontt.write(str("None")+'\n')
+        else :
+            with open(os.path.join(outcontp, str(nameofsample+".cont_busco.log")), 'w') as outcontt:
+                if len(l)>0:
+                    for line in set(l):
+                        outcontt.write(str(line)+'\n')
+                else:
+                    outcontt.write(str("None")+'\n')
+    elif 'nucleus' in model:
+        if os.path.join(outcontp, str(nameofsample+".cont_nucleus.log")):
+            with open(os.path.join(outcontp, str(nameofsample+".cont_nucleus.log")), 'a+') as outcontt:
+                old_cont = []
+                end_file=outcontt.tell()
+                outcontt.seek(0)
+                for line in outcontt:
+                    old_cont.append(line.rstrip())
+                if len(l)>0:
+                    for line in set(l):
+                        if not line in old_cont:
+                            outcontt.seek(end_file)
+                            outcontt.write(str(line)+'\n')
+                        else:
+                            pass
+                else:
+                    outcontt.seek(end_file)
+                    outcontt.write(str("None")+'\n')
+        else :
+            with open(os.path.join(outcontp, str(nameofsample+".cont_nucleus.log")), 'w') as outcontt:
+                if len(l)>0:
+                    for line in set(l):
+                        outcontt.write(str(line)+'\n')
+                else:
+                    outcontt.write(str("None")+'\n')
     else:
         pass
 else:
+    print("WARN: "+model+" - no genes following capture restrictions were extracted for %s" % nameofsample)
     outcontp=os.path.dirname(os.path.abspath(file))
     if 'chloroplast' in model:
-        with open(os.path.join(outcontp, str(nameofsample+".cont_cpdna.log")), 'w') as outcontt:
-            outcontt.write("None")
+        if os.path.join(outcontp, str(nameofsample+".cont_cpdna.log")):
+            pass
+        else:
+            with open(os.path.join(outcontp, str(nameofsample+".cont_cpdna.log")), 'w') as outcontt:
+                outcontt.write("None")
     elif 'mitochondrion' in model:
-        with open(os.path.join(outcontp, str(nameofsample+".cont_mtdna.log")), 'w') as outcontt:
-            outcontt.write("None")
+        if os.path.join(outcontp, str(nameofsample+".cont_mtdna.log")):
+            pass
+        else:
+            with open(os.path.join(outcontp, str(nameofsample+".cont_mtdna.log")), 'w') as outcontt:
+                outcontt.write("None")
+    elif 'busco' in model:
+        if os.path.join(outcontp, str(nameofsample+".cont_busco.log")):
+            pass
+        else:
+            with open(os.path.join(outcontp, str(nameofsample+".cont_busco.log")), 'w') as outcontt:
+                outcontt.write("None")
+    elif 'nucleus' in model:
+        if os.path.join(outcontp, str(nameofsample+".cont_nucleus.log")):
+            pass
+        else:
+            with open(os.path.join(outcontp, str(nameofsample+".cont_nucleus.log")), 'w') as outcontt:
+                outcontt.write("None")
     else:
         pass
 

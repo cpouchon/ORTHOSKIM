@@ -594,6 +594,11 @@ mkdir(str(outpath+"/"+model))
 with open(file) as f:
     tab = f.readlines()
 
+if len(tab)<2:
+    print(str("WARN: "+model+" - no contigs mapped on references for "+nameofsample))
+else:
+    pass
+
 with open(tabseeds) as f:
     reftab = f.readlines()
 
@@ -1286,6 +1291,10 @@ if len(list(besthits_filtered2.keys()))>0:
 
     l = [i for i in x if i is not None]
     outcontp=os.path.dirname(os.path.abspath(file))
+    if len(l)==0:
+        print("WARN: "+model+" - no genes following capture restrictions were extracted for %s" % nameofsample)
+    else:
+        pass
     if 'nucrdna' in model:
         if os.path.join(outcontp, str(nameofsample+".cont_nucrdna.log")):
             with open(os.path.join(outcontp, str(nameofsample+".cont_nucrdna.log")), 'a+') as outcontt:
@@ -1294,22 +1303,32 @@ if len(list(besthits_filtered2.keys()))>0:
                 outcontt.seek(0)
                 for line in outcontt:
                     old_cont.append(line.rstrip())
-                for line in set(l):
-                    if not line in old_cont:
-                        outcontt.seek(end_file)
-                        outcontt.write(str(line)+'\n')
-                    else:
-                        pass
+                if len(l)>0:
+                    for line in set(l):
+                        if not line in old_cont:
+                            outcontt.seek(end_file)
+                            outcontt.write(str(line)+'\n')
+                        else:
+                            pass
+                else:
+                    outcontt.seek(end_file)
+                    outcontt.write(str("None")+'\n')
         else :
             with open(os.path.join(outcontp, str(nameofsample+".cont_nucrdna.log")), 'w') as outcontt:
-                for line in set(l):
-                    outcontt.write(str(line)+'\n')
+                if len(l)>0:
+                    for line in set(l):
+                        outcontt.write(str(line)+'\n')
+                else:
+                    outcontt.write(str("None")+'\n')
     else:
         pass
 else:
-    print ("WARN: no genes following capture restrictions were extracted for %s" % nameofsample)
+    print("WARN: "+model+" - no genes following capture restrictions were extracted for %s" % nameofsample)
     outcontp=os.path.dirname(os.path.abspath(file))
-    with open(os.path.join(outcontp, str(nameofsample+".cont_nucrdna.log")), 'w') as outcontt:
-        outcontt.write("None")
+    if os.path.join(outcontp, str(nameofsample+".cont_nucrdna.log")):
+        pass
+    else:
+        with open(os.path.join(outcontp, str(nameofsample+".cont_nucrdna.log")), 'w') as outcontt:
+            outcontt.write("None")
 
 print("--- %s seconds ---" % (time.time() - start_time))

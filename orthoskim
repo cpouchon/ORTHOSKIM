@@ -26,10 +26,11 @@ if [ "$1" == "-h" ]; then
   o       O o       O o       O
 
 
-OrthoSkim: in silico gene-capture from whole genome shotgun sequencing
+OrthoSkim: in silico gene capture from genomic and transcriptomic libraries
            where:
             -m (mode) perform pipeline according to the chosen mode:
-                  - [alignment]
+                  - [alignment] (gene alignment between taxa and phylogenetic matrix inference)
+                  - [assembly] (de novo assembly for each sample)
                   - [database] (make a database bank of mitochondrial/chloroplast/nucrdna genes from annotations)
                   - [capture] (capture of genes from non-targeted assemblies directly
                                             with mapping into references using targets (-t)
@@ -37,27 +38,23 @@ OrthoSkim: in silico gene-capture from whole genome shotgun sequencing
                   - [cleaning] (identification and filtering of contaminants in assemblies)
                   - [phyloskim_indexing] (make paramfile files)
                   - [phyloskim_database] (make a database bank of mitochondrial/chloroplast/nucrdna genes from phyloskims annotations)
-                  - [phyloskim_stat_chloro] (output summary statistic for chloroplast assemblies)
-                  - [phyloskim_stat_rdna] (output summary statistic for rdna assemblies)
                   - [phyloskim_extraction_targeted] (extraction of genes from targeted assemblies directly with
                                           annotations; target: chloroplast,nucrdna)
-                  - [assembly] (run de novo assembly for each samples)
                   - [reformate] (reformates assemblies output)
-                  - [stat_assembly] (check assemblies by generating summary statistics)
-                  - [stat_capture] (get statistics of gene extraction for targets (-t), possibily to give multiple targets)
+                  - [statistic_assembly,capture] (summary statistics on assemblies and gene capture)
             -c (config) set the config file
             -t (target) gene type targeted:
                   - [chloroplast] (for [*database*, *phyloskim_extraction_targeted*, *phyloskim_database*] modes. Extract all CDS+tRNA+rRNA genes)
                   - [nucrdna] (for [*database*, *capture*, *phyloskim_extraction_targeted*,*phyloskim_database*] modes. Extract all rRNA and Internal Transcribed Spacer)
                   - [mitochondrion] (for *database* mode)
-                  - [nucleus_aa] (*capture*,*stat_capture*)
-                  - [nucleus_nt] (*capture*,*stat_capture*)
-                  - [busco] (*capture*,*stat_capture*)
-                  - [chloroplast_CDS] (*capture*,*stat_capture*)
-                  - [chloroplast_tRNA] (*capture*,*stat_capture*)
-                  - [chloroplast_rRNA] (*capture*,*stat_capture*)
-                  - [mitochondrion_CDS] (*capture*,*stat_capture*)
-                  - [mitochondrion_rRNA] (*capture*,*stat_capture*)
+                  - [nucleus_aa] (*capture*,*statistic_capture*)
+                  - [nucleus_nt] (*capture*,*statistic_capture*)
+                  - [busco] (*capture*,*statistic_capture*)
+                  - [chloroplast_CDS] (*capture*,*statistic_capture*)
+                  - [chloroplast_tRNA] (*capture*,*statistic_capture*)
+                  - [chloroplast_rRNA] (*capture*,*statistic_capture*)
+                  - [mitochondrion_CDS] (*capture*,*statistic_capture*)
+                  - [mitochondrion_rRNA] (*capture*,*statistic_capture*)
                   - [spades] (*assembly*,*reformate*)
                   - [rnaspades] (*assembly*,*reformate*)
             -p  (path) [only for phyloskims users] give path to indexing file
@@ -99,6 +96,7 @@ mkdir -p ${RES}/Extraction
 
   elif [ $mode == 'reformate' ] && [ $target == 'spades' ]; then
 		echo "INFO: mode=$mode - preprocessing of assemblies files from SPAdes"
+    start=$(date +%s)
     mkdir -p ${RES}/Assembly/Samples/unfiltered/
 		while read f;
 		do
@@ -110,12 +108,19 @@ mkdir -p ${RES}/Extraction
         continue
       fi
     done <${LIST_FILES}
+    end=`date +%s`
+    runtime=$( echo "$end - $start" | bc -l )
+    hours=$((runtime / 3600))
+    minutes=$(( (runtime % 3600) / 60 ))
+    seconds=$(( (runtime % 3600) % 60 ))
+    echo "INFO: time ellapsed for $mode step: $hours:$minutes:$seconds (hh:mm:ss)"
 		echo "STATUS: done"
     echo ""
 		exit 0
 
   elif [ $mode == 'reformate' ] && [ $target == 'rnaspades' ]; then
-    echo "INFO: mode=$mode - preprocessing of assemblies files from SPAdes"
+    echo "INFO: mode=$mode - preprocessing of assemblies files from RNASPAdes"
+    start=$(date +%s)
     mkdir -p ${RES}/Assembly/Samples/unfiltered/
     while read f;
 		do
@@ -129,6 +134,12 @@ mkdir -p ${RES}/Extraction
         #continue
       fi
     done <${LIST_FILES}
+    end=`date +%s`
+    runtime=$( echo "$end - $start" | bc -l )
+    hours=$((runtime / 3600))
+    minutes=$(( (runtime % 3600) / 60 ))
+    seconds=$(( (runtime % 3600) % 60 ))
+    echo "INFO: time ellapsed for $mode step: $hours:$minutes:$seconds (hh:mm:ss)"
 		echo "STATUS: done"
     echo ""
 		exit 0
@@ -137,6 +148,7 @@ mkdir -p ${RES}/Extraction
     echo "INFO: mode=$mode - identification and filtering of contaminants in assemblies from rRNA database"
     mkdir -p ${RES}/Assembly/Samples/filtered/
     mkdir -p ${RES}/Assembly/Samples/log/
+    start=$(date +%s)
     echo "*** make BLAST formatted reference database for rRNA sequences ***"
     for seq in `dirname $0`/ressources/rRNA_database/*.fasta;
     do
@@ -179,6 +191,12 @@ mkdir -p ${RES}/Extraction
         continue
       fi
     done <${LIST_FILES}
+    end=`date +%s`
+    runtime=$( echo "$end - $start" | bc -l )
+    hours=$((runtime / 3600))
+    minutes=$(( (runtime % 3600) / 60 ))
+    seconds=$(( (runtime % 3600) % 60 ))
+    echo "INFO: time ellapsed for $mode step: $hours:$minutes:$seconds (hh:mm:ss)"
     echo "STATUS: done"
     echo ""
     exit 0
@@ -186,6 +204,7 @@ mkdir -p ${RES}/Extraction
 	elif [ $mode == 'assembly' ] && [ $target == 'spades' ]; then
 		echo "INFO: mode=$mode - SPAdes assembly run"
     mkdir -p ${RES}/Assembly/SPADES
+    start=$(date +%s)
 		while read f;
 		do
 			samplename=`echo ${f} | awk '{print $1}'`
@@ -216,6 +235,12 @@ mkdir -p ${RES}/Extraction
         fi
       fi
 		done <${LIST_FILES}
+    end=`date +%s`
+    runtime=$( echo "$end - $start" | bc -l )
+    hours=$((runtime / 3600))
+    minutes=$(( (runtime % 3600) / 60 ))
+    seconds=$(( (runtime % 3600) % 60 ))
+    echo "INFO: time ellapsed for $mode step: $hours:$minutes:$seconds (hh:mm:ss)"
 		echo "STATUS: done"
     echo ""
 		exit 0
@@ -223,6 +248,7 @@ mkdir -p ${RES}/Extraction
   elif [ $mode == 'assembly' ] && [ $target == 'rnaspades' ]; then
     echo "INFO: mode=$mode - RNASPAdes assembly run"
     mkdir -p ${RES}/Assembly/RNASPADES
+    start=$(date +%s)
     while read f;
     do
       samplename=`echo ${f} | awk '{print $1}'`
@@ -253,12 +279,19 @@ mkdir -p ${RES}/Extraction
         fi
       fi
     done <${LIST_FILES}
+    end=`date +%s`
+    runtime=$( echo "$end - $start" | bc -l )
+    hours=$((runtime / 3600))
+    minutes=$(( (runtime % 3600) / 60 ))
+    seconds=$(( (runtime % 3600) % 60 ))
+    echo "INFO: time ellapsed for $mode step: $hours:$minutes:$seconds (hh:mm:ss)"
     echo "STATUS: done"
     echo ""
     exit 0
 
 	elif [ $mode == 'capture' ] && [ $target == 'busco' ]; then
 		echo "INFO: mode=$mode - Extraction of BUSCO from assemblies"
+    start=$(date +%s)
 		mkdir -p ${RES}/Mapping/busco
 		echo "*** make DIAMOND formatted reference database ***"
 		refdb=${BUSCO_REF/.fasta/}
@@ -323,6 +356,12 @@ mkdir -p ${RES}/Extraction
         echo ${lib} >> ${RES}/busco_error.log
       fi
 		done <${LIST_FILES}
+    end=`date +%s`
+    runtime=$( echo "$end - $start" | bc -l )
+    hours=$((runtime / 3600))
+    minutes=$(( (runtime % 3600) / 60 ))
+    seconds=$(( (runtime % 3600) % 60 ))
+    echo "INFO: time ellapsed for $mode step: $hours:$minutes:$seconds (hh:mm:ss)"
 		echo "STATUS: done"
     echo ""
 		exit 0
@@ -440,6 +479,7 @@ mkdir -p ${RES}/Extraction
 	elif [ $mode == 'database' ] && [ $target == 'mitochondrion' ]; then
 		echo "INFO: mode=$mode - Creation of mitochondrial database from annotations for CDS, tRNA and rRNA features"
 		mkdir -p ${RES}/references/unclean
+    start=$(date +%s)
     echo '*** extraction of all genes from annotations ***'
     echo "CMD: `dirname $0`/src/AnoRef_extraction.py --single -in ${MITO_ANNOTATIONS} -o ${RES}/references/unclean -m mitochondrion -fmt ${MITO_DB_FMT} --codon `dirname $0`/ressources/tRNA_codons.tab"
 		`dirname $0`/src/AnoRef_extraction.py --single -in ${MITO_ANNOTATIONS} -o ${RES}/references/unclean -m mitochondrion -fmt ${MITO_DB_FMT} --codon `dirname $0`/ressources/tRNA_codons.tab
@@ -454,7 +494,7 @@ mkdir -p ${RES}/Extraction
 		done
 		cat ${RES}/references/clean/mitochondrion_CDS/*.fa > ${MITO_REF_CDS}
     rm -rf ${RES}/references/unclean/mitochondrion_CDS/
-		echo "STATUS: done"
+		#echo "STATUS: done"
 
     echo '*** alignment of rRNA into mito seeds, and extraction of final rRNA of reference ***'
 		for file in `find ${RES}/references/unclean/mitochondrion_rRNA/ -type f -name \*.fa`;
@@ -466,6 +506,13 @@ mkdir -p ${RES}/Extraction
 		done
 		cat ${RES}/references/clean/mitochondrion_rRNA/*.fa > ${MITO_REF_rRNA}
     rm -rf ${RES}/references/unclean/mitochondrion_rRNA/
+
+    end=`date +%s`
+    runtime=$( echo "$end - $start" | bc -l )
+    hours=$((runtime / 3600))
+    minutes=$(( (runtime % 3600) / 60 ))
+    seconds=$(( (runtime % 3600) % 60 ))
+    echo "INFO: time ellapsed for $mode step: $hours:$minutes:$seconds (hh:mm:ss)"
 		echo "STATUS: done"
     echo ""
 
@@ -485,6 +532,7 @@ mkdir -p ${RES}/Extraction
   elif [ $mode == 'database' ] && [ $target == 'nucrdna' ]; then
     echo "INFO: mode=$mode - Creation of nucrdna database from  annotations for rRNA features"
     mkdir -p ${RES}/references/unclean
+    start=$(date +%s)
     echo '*** extraction of all genes from annotations ***'
     echo "CMD: `dirname $0`/src/AnoRef_nucrdna.py --single -in ${NRDNA_ANNOTATIONS} -o ${RES}/references/unclean -m nucrdna -fmt ${NRDNA_DB_FMT}"
     `dirname $0`/src/AnoRef_nucrdna.py --single -in ${NRDNA_ANNOTATIONS} -o ${RES}/references/unclean -m nucrdna -fmt ${NRDNA_DB_FMT}
@@ -504,6 +552,12 @@ mkdir -p ${RES}/Extraction
     cat ${RES}/references/clean/nucrdna_rRNA/*.fa > ${NRDNA_REF}
     cat ${RES}/references/clean/nucrdna_misc_RNA/*.fa >> ${NRDNA_REF}
     rm -rf ${RES}/references/unclean/nucrdna_rRNA/
+    end=`date +%s`
+    runtime=$( echo "$end - $start" | bc -l )
+    hours=$((runtime / 3600))
+    minutes=$(( (runtime % 3600) / 60 ))
+    seconds=$(( (runtime % 3600) % 60 ))
+    echo "INFO: time ellapsed for $mode step: $hours:$minutes:$seconds (hh:mm:ss)"
     echo "STATUS: done"
     echo ""
 
@@ -512,6 +566,7 @@ mkdir -p ${RES}/Extraction
   elif [ $mode == 'database' ] && [ $target == 'chloroplast' ]; then
 		echo "INFO: mode=$mode - Creation of chloroplast database from annotations for CDS, tRNA and rRNA features"
 		mkdir -p ${RES}/references/unclean
+    start=$(date +%s)
     echo '*** extraction of all genes from annotations ***'
     echo "CMD: `dirname $0`/src/AnoRef_extraction.py --single -in ${CHLORO_ANNOTATIONS} -o ${RES}/references/unclean -m chloroplast -fmt ${CHLORO_DB_FMT} --codon `dirname $0`/ressources/tRNA_codons.tab"
 		`dirname $0`/src/AnoRef_extraction.py --single -in ${CHLORO_ANNOTATIONS} -o ${RES}/references/unclean -m chloroplast -fmt ${CHLORO_DB_FMT} --codon `dirname $0`/ressources/tRNA_codons.tab
@@ -526,7 +581,7 @@ mkdir -p ${RES}/Extraction
 		done
 		cat ${RES}/references/clean/chloroplast_CDS/*.fa > ${CHLORO_REF_CDS}
     rm -rf ${RES}/references/unclean/chloroplast_CDS/
-		echo "STATUS: done"
+		#echo "STATUS: done"
 
     echo '*** alignment of rRNA into seeds, and extraction of final rRNA of reference ***'
 		for file in `find ${RES}/references/unclean/chloroplast_rRNA/ -type f -name \*.fa`;
@@ -538,7 +593,7 @@ mkdir -p ${RES}/Extraction
 		done
 		cat ${RES}/references/clean/chloroplast_rRNA/*.fa > ${CHLORO_REF_rRNA}
     rm -rf ${RES}/references/unclean/chloroplast_rRNA/
-		echo "STATUS: done"
+		#echo "STATUS: done"
 
     echo '*** alignment of tRNA into seeds, and extraction of final tRNA of reference ***'
 		for file in `find ${RES}/references/unclean/chloroplast_tRNA/ -type f -name \*.fa`;
@@ -550,6 +605,12 @@ mkdir -p ${RES}/Extraction
 		done
 		cat ${RES}/references/clean/chloroplast_tRNA/*.fa > ${CHLORO_REF_tRNA}
     rm -rf ${RES}/references/unclean/chloroplast_tRNA/
+    end=`date +%s`
+    runtime=$( echo "$end - $start" | bc -l )
+    hours=$((runtime / 3600))
+    minutes=$(( (runtime % 3600) / 60 ))
+    seconds=$(( (runtime % 3600) % 60 ))
+    echo "INFO: time ellapsed for $mode step: $hours:$minutes:$seconds (hh:mm:ss)"
 		echo "STATUS: done"
     echo ""
 		exit 0
@@ -695,6 +756,7 @@ mkdir -p ${RES}/Extraction
     echo 'INFO: mode=$mode - Extraction of mitchondrial rRNA from non targeted assemblies (SPADes assembly)'
     mkdir -p ${RES}/Mapping/mitochondrion
     mkdir -p ${RES}/references
+    start=$(date +%s)
     #for f in `find ${RES}/Assembly/Samples/ -type f -name \*.fa`;
     while read f;
     do
@@ -1366,6 +1428,12 @@ mkdir -p ${RES}/Extraction
         echo ${lib} >> ${RES}/mitochondrion_rRNA_error.log
       fi
 		done <${LIST_FILES}
+    end=`date +%s`
+    runtime=$( echo "$end - $start" | bc -l )
+    hours=$((runtime / 3600))
+    minutes=$(( (runtime % 3600) / 60 ))
+    seconds=$(( (runtime % 3600) % 60 ))
+    echo "INFO: time ellapsed for $mode step: $hours:$minutes:$seconds (hh:mm:ss)"
 		echo "STATUS: done"
     echo ""
 		exit 0
@@ -1374,6 +1442,7 @@ mkdir -p ${RES}/Extraction
     echo 'INFO: mode=$mode - Extraction of mitchondrial CDS from non targeted assemblies (SPADes assembly)'
     mkdir -p ${RES}/Mapping/mitochondrion
     mkdir -p ${RES}/references
+    start=$(date +%s)
     #for f in `find ${RES}/Assembly/Samples/ -type f -name \*.fa`;
     while read f;
 		do
@@ -2044,6 +2113,12 @@ mkdir -p ${RES}/Extraction
         echo ${lib} >> ${RES}/mitochondrion_CDS_error.log
       fi
 		done <${LIST_FILES}
+    end=`date +%s`
+    runtime=$( echo "$end - $start" | bc -l )
+    hours=$((runtime / 3600))
+    minutes=$(( (runtime % 3600) / 60 ))
+    seconds=$(( (runtime % 3600) % 60 ))
+    echo "INFO: time ellapsed for $mode step: $hours:$minutes:$seconds (hh:mm:ss)"
     echo "STATUS: done"
     echo ""
 		exit 0
@@ -2052,6 +2127,7 @@ mkdir -p ${RES}/Extraction
     echo 'INFO: mode=$mode - Extraction of nuclear loci from assemblies'
     mkdir -p ${RES}/Mapping/nucleus
     mkdir -p ${RES}/references
+    start=$(date +%s)
     #for f in `find ${RES}/Assembly/Samples/ -type f -name \*.fa`;
     while read f;
 		do
@@ -2136,6 +2212,12 @@ mkdir -p ${RES}/Extraction
         echo ${lib} >> ${RES}/nucleus_nt_error.log
       fi
 		done <${LIST_FILES}
+    end=`date +%s`
+    runtime=$( echo "$end - $start" | bc -l )
+    hours=$((runtime / 3600))
+    minutes=$(( (runtime % 3600) / 60 ))
+    seconds=$(( (runtime % 3600) % 60 ))
+    echo "INFO: time ellapsed for $mode step: $hours:$minutes:$seconds (hh:mm:ss)"
 		echo "STATUS: done"
     echo ""
 		exit 0
@@ -2144,6 +2226,7 @@ mkdir -p ${RES}/Extraction
     echo 'INFO: mode=$mode - Extraction of nuclear loci from assemblies'
     mkdir -p ${RES}/Mapping/nucleus
     mkdir -p ${RES}/references
+    start=$(date +%s)
     #for f in `find ${RES}/Assembly/Samples/ -type f -name \*.fa`;
     while read f;
 		do
@@ -2230,50 +2313,79 @@ mkdir -p ${RES}/Extraction
         echo ${lib} >> ${RES}/nucleus_aa_error.log
       fi
 		done <${LIST_FILES}
+    end=`date +%s`
+    runtime=$( echo "$end - $start" | bc -l )
+    hours=$((runtime / 3600))
+    minutes=$(( (runtime % 3600) / 60 ))
+    seconds=$(( (runtime % 3600) % 60 ))
+    echo "INFO: time ellapsed for $mode step: $hours:$minutes:$seconds (hh:mm:ss)"
 		echo "STATUS: done"
     echo ""
 		exit 0
 
-  elif [ $mode == 'phyloskim_stat_chloro' ]; then
-		echo "INFO: mode=$mode - Summary statistics of chloroplast assemblies"
-		${QUAST} `awk '{print $4}' ${LIST_FILES} | perl -pe 's/\.embl/.fasta/'  | perl -pe 's/\n/ /'` -o ${RES}/report_chloro_assemblies
-		rm -rf ${RES}/report_chloro_assemblies/basic_stats/
-		#rm -rf ${RES}/report_chloro_assemblies/icarus_viewers/
-		rm ${RES}/report_chloro_assemblies/report.tex ${RES}/report_chloro_assemblies/report.tsv ${RES}/report_chloro_assemblies/report.txt ${RES}/report_chloro_assemblies/transposed_report.tex ${RES}/report_chloro_assemblies/transposed_report.tsv
-		echo "STATUS: done"
-    echo ""
-		exit 0
+	elif [ $mode == 'statistic_assembly' ]; then
+		echo "INFO: mode=$mode - Summary statistics of cleaned assemblies"
+    start=$(date +%s)
 
-	elif [ $mode == 'phyloskim_stat_rdna' ]; then
-		echo "INFO: mode=$mode - Summary statistics of rdna assemblies"
-		${QUAST} `awk '{print $4}' ${LIST_FILES} | perl -pe 's/\.chloro.embl/.rdnanuc.fasta/'  | perl -pe 's/\n/ /'` -o ${RES}/report_rdnanuc_assemblies
-		rm -rf ${RES}/report_rdnanuc_assemblies/basic_stats/
-		#rm -rf ${RES}/report_rdnanuc_assemblies/icarus_viewers/
-		rm ${RES}/report_rdnanuc_assemblies/report.tex ${RES}/report_rdnanuc_assemblies/report.tsv ${RES}/report_rdnanuc_assemblies/report.txt ${RES}/report_rdnanuc_assemblies/transposed_report.tex ${RES}/report_rdnanuc_assemblies/transposed_report.tsv
-		echo "STATUS: done"
-		exit 0
+    if [ ! -d "${RES}/Statistics" ]; then
+      mkdir ${RES}/Statistics
+    else
+      echo "Directory ${RES}/Statistics exists."
+    fi
 
-	elif [ $mode == 'stat_assembly' ]; then
-		echo "INFO: mode=$mode - Summary statistics of nuclear assemblies"
-		${QUAST} ${RES}/Assembly/Samples/filtered/*.fa -o ${RES}/report_SPAdes_assemblies
-		rm -rf ${RES}/report_SPAdes_assemblies/basic_stats/
+    while read f;
+		do
+			lib=`echo ${f} | awk '{print $1}'`
+      echo $lib >> ${RES}/Statistics/samples.tmp
+    done<${LIST_FILES}
+
+    taxalist=${RES}/Statistics/samples.tmp
+
+    echo "CMD: `dirname $0`/src/StatAssemblies.py -p ${RES}/Assembly/Samples/filtered/ -t $taxalist -o ${RES}/Statistics/"
+    `dirname $0`/src/StatAssemblies.py -p ${RES}/Assembly/Samples/filtered/ -t $taxalist -o ${RES}/Statistics/
+    echo "CMD: `dirname $0`/src/StatConta.py -p ${RES}/Assembly/Samples/log/ -t $taxalist -d `dirname $0`/ressources/rRNA_database/ -o ${RES}/Statistics/"
+    `dirname $0`/src/StatConta.py -p ${RES}/Assembly/Samples/log/ -t $taxalist -d `dirname $0`/ressources/rRNA_database/ -o ${RES}/Statistics/
+
+    rm ${RES}/Statistics/samples.tmp
+
+		#${QUAST} ${RES}/Assembly/Samples/filtered/*.fa -o ${RES}/report_SPAdes_assemblies
+		#rm -rf ${RES}/report_SPAdes_assemblies/basic_stats/
 		#rm -rf ${RES}/report_SPAdes_assemblies/icarus_viewers/
-		rm ${RES}/report_SPAdes_assemblies/report.tex ${RES}/report_SPAdes_assemblies/report.tsv ${RES}/report_SPAdes_assemblies/report.txt ${RES}/report_SPAdes_assemblies/transposed_report.tex ${RES}/report_SPAdes_assemblies/transposed_report.tsv
+		#rm ${RES}/report_SPAdes_assemblies/report.tex ${RES}/report_SPAdes_assemblies/report.tsv ${RES}/report_SPAdes_assemblies/report.txt ${RES}/report_SPAdes_assemblies/transposed_report.tex ${RES}/report_SPAdes_assemblies/transposed_report.tsv
+    end=`date +%s`
+    runtime=$( echo "$end - $start" | bc -l )
+    hours=$((runtime / 3600))
+    minutes=$(( (runtime % 3600) / 60 ))
+    seconds=$(( (runtime % 3600) % 60 ))
+    echo "INFO: time ellapsed for $mode step: $hours:$minutes:$seconds (hh:mm:ss)"
 		echo "STATUS: done"
 		exit 0
 
-  elif [ $mode == 'stat_capture' ]; then
+  elif [ $mode == 'statistic_capture' ]; then
     echo "INFO: mode=$mode - Summary statistics of genes extraction"
+    start=$(date +%s)
+    if [ ! -d "${RES}/Statistics" ]; then
+      mkdir ${RES}/Statistics
+    else
+      echo "Directory ${RES}/Statistics exists."
+    fi
     for element in "${target[@]}";
     do
-      echo "CMD: `dirname $0`/src/ExoStat.py -p ${RES}/Extraction/${element} -pfind > ${RES}/${element}_report.log"
-      `dirname $0`/src/ExoStat.py -p ${RES}/Extraction/${element} -pfind > ${RES}/${element}_report.log
+      echo "CMD: `dirname $0`/src/ExoStat.py -p ${RES}/Extraction/${element} -pfind > ${RES}/Statistics/${element}_report.log"
+      `dirname $0`/src/ExoStat.py -p ${RES}/Extraction/${element} -pfind > ${RES}/Statistics/${element}_report.log
     done
+    end=`date +%s`
+    runtime=$( echo "$end - $start" | bc -l )
+    hours=$((runtime / 3600))
+    minutes=$(( (runtime % 3600) / 60 ))
+    seconds=$(( (runtime % 3600) % 60 ))
+    echo "INFO: time ellapsed for $mode step: $hours:$minutes:$seconds (hh:mm:ss)"
     echo "STATUS: done"
     exit 0
 
   elif [ $mode == 'alignment' ]; then
     echo "INFO: mode=$mode - Alignment of taxa from genes capture"
+    start=$(date +%s)
     listpath=`echo ${target[@]} | perl -pe 's/ /,/g'`
     if [ ${SELECTION} == 'on' ]; then
         for element in "${target[@]}";
@@ -2345,6 +2457,12 @@ mkdir -p ${RES}/Extraction
       echo "STATUS: done"
       fi
     fi
+    end=`date +%s`
+    runtime=$( echo "$end - $start" | bc -l )
+    hours=$((runtime / 3600))
+    minutes=$(( (runtime % 3600) / 60 ))
+    seconds=$(( (runtime % 3600) % 60 ))
+    echo "INFO: time ellapsed for $mode step: $hours:$minutes:$seconds (hh:mm:ss)"
     echo "STATUS: done"
     echo ""
     exit 0
@@ -2355,6 +2473,7 @@ mkdir -p ${RES}/Extraction
     mkdir -p ${RES}/Mapping/mitochondrion
     mkdir -p ${RES}/Mapping/nucrdna
     mkdir -p ${RES}/references
+    start=$(date +%s)
     #for f in `find ${RES}/Assembly/Samples/ -type f -name \*.fa`;
     while read f;
 		do
@@ -2767,6 +2886,12 @@ mkdir -p ${RES}/Extraction
         echo ${lib} >> ${RES}/chloroplast_rRNA_error.log
       fi
     done <${LIST_FILES}
+    end=`date +%s`
+    runtime=$( echo "$end - $start" | bc -l )
+    hours=$((runtime / 3600))
+    minutes=$(( (runtime % 3600) / 60 ))
+    seconds=$(( (runtime % 3600) % 60 ))
+    echo "INFO: time ellapsed for $mode step: $hours:$minutes:$seconds (hh:mm:ss)"
 		echo "STATUS: done"
     echo ""
 		exit 0
@@ -2777,6 +2902,7 @@ mkdir -p ${RES}/Extraction
     mkdir -p ${RES}/Mapping/mitochondrion
     mkdir -p ${RES}/Mapping/nucrdna
     mkdir -p ${RES}/references
+    start=$(date +%s)
     #for f in `find ${RES}/Assembly/Samples/ -type f -name \*.fa`;
     while read f;
 		do
@@ -3139,6 +3265,12 @@ mkdir -p ${RES}/Extraction
         echo ${lib} >> ${RES}/chloroplast_tRNA_error.log
       fi
     done <${LIST_FILES}
+    end=`date +%s`
+    runtime=$( echo "$end - $start" | bc -l )
+    hours=$((runtime / 3600))
+    minutes=$(( (runtime % 3600) / 60 ))
+    seconds=$(( (runtime % 3600) % 60 ))
+    echo "INFO: time ellapsed for $mode step: $hours:$minutes:$seconds (hh:mm:ss)"
 		echo "STATUS: done"
     echo ""
 		exit 0
@@ -3149,6 +3281,7 @@ mkdir -p ${RES}/Extraction
     mkdir -p ${RES}/Mapping/mitochondrion
     mkdir -p ${RES}/Mapping/nucrdna
     mkdir -p ${RES}/references
+    start=$(date +%s)
     while read f;
 		do
       lib=`echo ${f} | awk '{print $1}'`
@@ -3551,6 +3684,12 @@ mkdir -p ${RES}/Extraction
         echo ${lib} >> ${RES}/chloroplast_CDS_error.log
       fi
     done <${LIST_FILES}
+    end=`date +%s`
+    runtime=$( echo "$end - $start" | bc -l )
+    hours=$((runtime / 3600))
+    minutes=$(( (runtime % 3600) / 60 ))
+    seconds=$(( (runtime % 3600) % 60 ))
+    echo "INFO: time ellapsed for $mode step: $hours:$minutes:$seconds (hh:mm:ss)"
     echo "STATUS: done"
     echo ""
 		exit 0
@@ -3560,6 +3699,7 @@ mkdir -p ${RES}/Extraction
     mkdir -p ${RES}/Mapping/nucrdna
     mkdir -p ${RES}/references
     #for f in `find ${RES}/Assembly/Samples/ -type f -name \*.fa`;
+    start=$(date +%s)
     while read f;
     do
       #lib=`basename $f | perl -pe 's/\.fa//'`
@@ -4173,6 +4313,12 @@ mkdir -p ${RES}/Extraction
         echo ${lib} >> ${RES}/nucrdna_error.log
       fi
     done <${LIST_FILES}
+    end=`date +%s`
+    runtime=$( echo "$end - $start" | bc -l )
+    hours=$((runtime / 3600))
+    minutes=$(( (runtime % 3600) / 60 ))
+    seconds=$(( (runtime % 3600) % 60 ))
+    echo "INFO: time ellapsed for $mode step: $hours:$minutes:$seconds (hh:mm:ss)"
     echo "STATUS: done"
     echo ""
     exit 0
@@ -4181,7 +4327,7 @@ mkdir -p ${RES}/Extraction
 
     echo "INFO: mode $mode - Checking captured genes by mapping them with blast to NCBI database (family rank)"
     listbarcodes=`echo ${BARCODES[@]} | perl -pe 's/ /,/g'`
-
+    start=$(date +%s)
     if [ ! -d "${RES}/Errors" ]; then
       mkdir ${RES}/Errors
     else
@@ -4220,6 +4366,12 @@ mkdir -p ${RES}/Extraction
       `dirname $0`/src/TaxIDCompare_missingtaxid.py --accession ${RES}/Errors/blast.accessions -o ${RES}/Errors/ -b $listbarcodes -t ${TAXALIST} > ${RES}/Errors/ValidationSamples.out
     fi
 
+    end=`date +%s`
+    runtime=$( echo "$end - $start" | bc -l )
+    hours=$((runtime / 3600))
+    minutes=$(( (runtime % 3600) / 60 ))
+    seconds=$(( (runtime % 3600) % 60 ))
+    echo "INFO: time ellapsed for $mode step: $hours:$minutes:$seconds (hh:mm:ss)"
     echo "STATUS: done"
     echo ""
     exit 0
