@@ -5,12 +5,18 @@ ORTHOSKIM is a pipeline providing different tools to  capture targeted genes fro
 This software was developed under the [PhyloAlps project](https://www.france-genomique.org/projet/phyloalps/).
 
 
-**Applications:** ORTHOSKIM can be run on genomes skims libraries to capture chloroplast, mitochondrial and ribosomal genes thanks to specific modes of assembly and capture. In addition, we provided additional mode to capture nuclear genes and BUSCO markers as well as in transcriptomic or target sequences capture libraries.
+ ORTHOSKIM is a command-line program, that needs to be run from a terminal/console, by calling different modes along with specific targets (see Fig. 1), to: produce the gene references database (purple arrrows), perform the contigs assemblies and cleaning from sequencing reads (green arrows), capture the targeted genes (blue arrows), and get taxa alignment of these genes for phylogenetic inference (orange arrows).
+
+<b>ORTHOSKIM flowchart</b>
+![Fig.1. ORTHOSKIM worflow](orthoskim_workflow.jpeg)
+>**Fig. 1. ORTHOSKIM workflow**. Yellow boxes represents data that needs to be provided by users. To capture any of the chloroplast, ribosomal or mitochondrial genes, users have to provide each of the three/two annotation genome files if plant/non-plant models are analyzed (see Pipeline description section).
+
+**Applications:** ORTHOSKIM can be run on genomes skims libraries to capture chloroplast, mitochondrial and ribosomal genes. This pipeline can also be run to nuclear genes and [BUSCO](https://busco.ezlab.org) markers from transcriptomic or target sequences capture libraries.
 
 
 **Citation:**
-+ Pouchon et al. *in prep.* ORTHOSKIM: in silico gene capture from genomic and transcriptomic libraries for phylogenomic and barcoding applications.   
-+ Inger Greve Alsos, Sebastien Lavergne, Marie Kristine Føreid Merkel, Marti Boleda, Youri Lammers, Adriana Alberti, Charles Pouchon, France Denoeud, Iva Pitelkova, Mihai Pușcaș, Cristina Roquet, Bogdan-Iuliu Hurdu, Wilfried Thuiller, Niklaus E. Zimmermann, Peter M. Hollingsworth, Eric Coissac, The Treasure Vault Can be Opened: Large-Scale Genome Skimming Works Well Using Herbarium and Silica Gel Dried Material, Plants, 10.3390/plants9040432, 9, 4, (432), (2020).</font>
+<br/>Pouchon et al. *in prep.* ORTHOSKIM: in silico gene capture from genomic and transcriptomic libraries for phylogenomic and barcoding applications.</font>  
+
 
 License: GPL https://www.gnu.org/licenses/gpl-3.0.html
 
