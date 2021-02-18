@@ -5,7 +5,11 @@ ORTHOSKIM is a pipeline providing different tools to  capture targeted genes fro
 This software was developed under the [PhyloAlps project](https://www.france-genomique.org/projet/phyloalps/).
 
 
- ORTHOSKIM is a command-line program, that needs to be run from a terminal/console, by calling different modes along with specific targets (see Fig. 1), to: produce the gene references database (purple arrrows), perform the contigs assemblies and cleaning from sequencing reads (green arrows), capture the targeted genes (blue arrows), and get taxa alignment of these genes for phylogenetic inference (orange arrows).
+ ORTHOSKIM is a command-line program, that needs to be run from a terminal/console, by calling different modes along with specific targets (see Figure 1), to:
+ 1. produce the gene references database (purple arrrows in Figure 1)
+ 2. perform the contigs assemblies and cleaning from sequencing reads (green arrows)
+ 3. capture the targeted genes (step 3, blue arrows)
+ 4. get taxa alignment of these genes for phylogenetic inference (orange arrows).
 
 <b>ORTHOSKIM flowchart</b>
 ![Fig.1. ORTHOSKIM worflow](orthoskim_workflow.jpeg)
