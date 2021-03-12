@@ -11,7 +11,6 @@ from Bio.SeqUtils import *
 from ete3 import NCBITaxa
 
 
-import pandas as pd
 import numpy as np
 import random
 import argparse

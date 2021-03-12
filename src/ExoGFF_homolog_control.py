@@ -9,12 +9,13 @@ import argparse
 from joblib import Parallel, delayed
 import multiprocessing
 import time
+import numpy as N
 
 from Bio.Seq import Seq
 #from Bio.Alphabet import generic_dna
 start_time = time.time()
 
-parser = argparse.ArgumentParser(description='Export regions of query database from exonerate alignment. Filtering is made according to rawscore. Script was writen by C. Pouchon (2019).')
+parser = argparse.ArgumentParser(description='Capture regions of query reference genes from exonerate alignment. Script was writen by C. Pouchon (2019).')
 parser.add_argument("-i","--infile", help="Fasta input contigs file",
                     type=str)
 parser.add_argument("-m","--model", help="molecular type compartment",
@@ -29,9 +30,13 @@ parser.add_argument("-clt","--control", help="input gff table from exonerate ali
                     type=str)
 parser.add_argument("-t","--typeofseq", help="type of sequence to extract",
                     type=str,choices=["all", "exon","intron"])
+parser.add_argument("--cov_cutoff", help="coverage cut-off option for organelles according to a standard deviation of mean coverage",
+                    type=str,choices=["on", "off"])
 parser.add_argument("-l","--minlength", help="minimal length of alignment into reference to consider output",
                     type=int)
 parser.add_argument("-rp","--refpct", help="minimal percent of reference covered allowed",
+                    type=float)
+parser.add_argument("--orfcov", help="minimal fraction of captured sequenced covered by ORF",
                     type=float)
 parser.add_argument("-c","--mincov", help="minimal coverage of contigs allowed for genomic scan",
                     type=int)
@@ -60,6 +65,28 @@ def mkdir(path, overwrite=False):
                 print ("path '%s' already exists" % path)   # overwrite == False and we've hit a directory that exists
         else: raise
 
+def mad(a, axis=None):
+    """
+    Compute *Median Absolute Deviation* of an array along given axis.
+    """
+
+    # Median along given axis, but *keeping* the reduced axis so that
+    # result can still broadcast against a.
+    med = N.median(a, axis=axis, keepdims=True)
+    mad = N.median(N.absolute(a - med), axis=axis)  # MAD along given axis
+
+    return mad
+
+def weighted_std(values, weights):
+    """
+    Return the weighted average and standard deviation.
+    values, weights -- Numpy ndarrays with the same shape.
+    """
+    average = N.average(values, weights=weights)
+    # Fast and numerically precise:
+    variance = N.average((values-average)**2, weights=weights)
+    return N.sqrt(variance)
+
 
 class ProgressBar:
     '''
@@ -85,17 +112,17 @@ def GeneExtraction(genenumber):
     contpart=[]
     num_exon=[]
     num_intron=[]
-    geneid=list(besthits_filtered4.keys())[genenumber]
+    geneid=list(besthits_filtered5.keys())[genenumber]
     extract_contigs=list()
 
-    if len(besthits_filtered4[geneid])==1:
+    if len(besthits_filtered5[geneid])==1:
         refcoverage_dict={}
         refcoverage_pass=[]
 
-        seqid = besthits_filtered4[geneid][0][1]
+        seqid = besthits_filtered5[geneid][0][1]
         concat=[]
 
-        for hits in besthits_filtered4[geneid]:
+        for hits in besthits_filtered5[geneid]:
             seqid=hits[1]
             if seqid in refcoverage_dict:
                 exon_cov=hits[4]-hits[3]+1
@@ -119,10 +146,10 @@ def GeneExtraction(genenumber):
             list_combo=list()
             pos_to_extract=list()
 
-            if len(stored[besthits_filtered4[geneid][0]])==0:
+            if len(stored[besthits_filtered5[geneid][0]])==0:
                 pass
             else:
-                for parts in stored[besthits_filtered4[geneid][0]]:
+                for parts in stored[besthits_filtered5[geneid][0]]:
                     if 'frame' in parts.keys():
                         fr=parts['frame']
                     else:
@@ -186,8 +213,8 @@ def GeneExtraction(genenumber):
 
                 #newseq="".join(concat)
 
-                num_exon.append(str(stat_stored[besthits_filtered4[geneid][0]]["exon"]))
-                num_intron.append(str(stat_stored[besthits_filtered4[geneid][0]]["intron"]))
+                num_exon.append(str(stat_stored[besthits_filtered5[geneid][0]]["exon"]))
+                num_intron.append(str(stat_stored[besthits_filtered5[geneid][0]]["intron"]))
 
     else:
         'condition pour voir quelle position il faut extraire en premier'
@@ -196,7 +223,7 @@ def GeneExtraction(genenumber):
         refcoverage_dict={}
         refcoverage_pass=[]
 
-        for hits in besthits_filtered4[geneid]:
+        for hits in besthits_filtered5[geneid]:
             seqid=hits[1]
             lmin.append(hits[3])
             if seqid in refcoverage_dict:
@@ -215,7 +242,7 @@ def GeneExtraction(genenumber):
         orderindx=sorted(range(len(lmin)), key=lambda k: lmin[k])
         concat=[]
         for idx in orderindx:
-            seqid = besthits_filtered4[geneid][idx][1]
+            seqid = besthits_filtered5[geneid][idx][1]
             if seqid in refcoverage_pass:
                 contpart.append(str(len(set(counthits[geneid][idx]))))
                 extract_contigs.append(seqid)
@@ -223,10 +250,10 @@ def GeneExtraction(genenumber):
                 dna=str(seqs[seqid][0])
                 list_combo=list()
                 pos_to_extract=list()
-                if len(stored[besthits_filtered4[geneid][idx]])==0:
+                if len(stored[besthits_filtered5[geneid][idx]])==0:
                     pass
                 else:
-                    for parts in stored[besthits_filtered4[geneid][idx]]:
+                    for parts in stored[besthits_filtered5[geneid][idx]]:
                         if 'frame' in parts.keys():
                             fr=parts['frame']
                         else:
@@ -288,12 +315,13 @@ def GeneExtraction(genenumber):
                             extract=str(Seq(dna[posmin-1:posmax]))
                         concat.append(extract)
 
-                num_exon.append(str(stat_stored[besthits_filtered4[geneid][idx]]["exon"]))
-                num_intron.append(str(stat_stored[besthits_filtered4[geneid][idx]]["intron"]))
+                num_exon.append(str(stat_stored[besthits_filtered5[geneid][idx]]["exon"]))
+                num_intron.append(str(stat_stored[besthits_filtered5[geneid][idx]]["intron"]))
             else:
                 continue
 
-    newseq="".join(concat).replace("N","")
+    newseq="".join(concat)
+
     newlength = len(newseq)
 
     if typeseq=="exon":
@@ -307,18 +335,295 @@ def GeneExtraction(genenumber):
     if newlength>=min_length:
         cond_min_length=cond_min_length+1
 
+    cond_toprint_var=0
+    cond_orf=0
+
+    if typeseq=="exon" and (model=="chloroplast_CDS" or model=="mitochondrion_CDS" or model=="busco"):
+        tseq=Seq(newseq).translate()
+        if "*" in tseq:
+            seqframes=[Seq(newseq).translate(),Seq(newseq[1:len(newseq)]).translate(),Seq(newseq[2:len(newseq)]).translate()]
+            frame_select=0
+            len_orf=0
+            orf_select=""
+            for p in range(len(seqframes)):
+                orf_parts=[]
+                start=0
+                for i in range(len(str(seqframes[p]))):
+                    if seqframes[p][i]!="*":
+                        end=i
+                    else:
+                        end=i
+                        orf_parts.append(str(start)+"-"+str(end))
+                        start=i+1
+                orf_parts.append(str(start)+"-"+str(end))
+                for i in range(len(orf_parts)):
+                    part=orf_parts[i]
+                    s=int(part.split("-")[0])
+                    e=int(part.split("-")[1])
+                    if len(seqframes[p][s:e])>len_orf and len(seqframes[p][s:e])>=(float(orfcond)*len(seqframes[p])):
+                        len_orf=len(seqframes[p][s:e])
+                        orf_select=part
+                        frame_select=p
+            #check that orf cov refpct
+            if len(orf_select)>0:
+                s=int(orf_select.split("-")[0])
+                e=int(orf_select.split("-")[1])
+                if float(len(seqframes[frame_select][s:e]))/float(reflength[geneid])>=refcond:
+                    if frame_select==0:
+                        frame_seq=newseq
+                    elif frame_select==1:
+                        frame_seq=newseq[1:len(newseq)]
+                    elif frame_select==2:
+                        frame_seq=newseq[2:len(newseq)]
+                    newseq2=frame_seq[((s+1)*3)-3:(e)*3]
+                    cond_orf=cond_orf+1
+                else:
+                    cond_toprint_var=cond_toprint_var+1
+                    newseq2=newseq
+            else:
+                cond_toprint_var=cond_toprint_var+1
+                newseq2=newseq
+        else:
+            newseq2=newseq
+    elif typeseq=="all" and (model=="chloroplast_CDS" or model=="mitochondrion_CDS" or model=="busco"):
+        if cond_min_length!=0:
+            if int(max(num_exon))>1:
+                # condition si intron dans la séquence, on recupere les sequences d'exon, sans cond_orf
+                lmin=list()
+                refcoverage_dict={}
+                refcoverage_pass=[]
+                for hits in besthits_filtered5[geneid]:
+                    seqid=hits[1]
+                    lmin.append(hits[3])
+                    if seqid in refcoverage_dict:
+                        exon_cov=hits[4]-hits[3]+1
+                        refcoverage_dict[seqid]=refcoverage_dict[seqid]+int(exon_cov)
+                    else:
+                        refcoverage_dict[seqid]=hits[4]-hits[3]+1
+
+                for cont in refcoverage_dict.keys():
+                    genepercent=round(float(refcoverage_dict[cont])/float(reflength[geneid]),2)
+                    if genepercent>=refcond:
+                        refcoverage_pass.append(cont)
+                    else:
+                        pass
+
+                orderindx=sorted(range(len(lmin)), key=lambda k: lmin[k])
+                exon_concat=[]
+                for idx in orderindx:
+                    seqid = besthits_filtered5[geneid][idx][1]
+                    if seqid in refcoverage_pass:
+                        contpart.append(str(len(set(counthits[geneid][idx]))))
+                        extract_contigs.append(seqid)
+                        #fr = stored[besthits[geneid][idx]][0]['frame']
+                        dna=str(seqs[seqid][0])
+                        list_combo=list()
+                        pos_to_extract=list()
+                        if len(stored[besthits_filtered5[geneid][idx]])==0:
+                            pass
+                        else:
+                            for parts in stored[besthits_filtered5[geneid][idx]]:
+                                if 'frame' in parts.keys():
+                                    fr=parts['frame']
+                                else:
+                                    pass
+                            for expart in stat_stored_position[besthits_filtered5[geneid][idx]]["exon"]:
+                                start=int(expart.split("-")[0])
+                                end=int(expart.split("-")[1])
+                                combo=str(start)+"_"+str(end)+"_"+fr
+                                if len(list_combo)==0:
+                                    list_combo.append(combo)
+                                    pos_to_extract.append(combo)
+                                else:
+                                    num_overlapp=0
+                                    for elem in list_combo:
+                                        m=int(elem.split("_")[0])
+                                        M=int(elem.split("_")[1])
+                                        if start <= m:
+                                            if end >= m:
+                                                num_overlapp=num_overlapp+1
+                                            elif end == M:
+                                                num_overlapp=num_overlapp+1
+                                            else:
+                                                pass
+                                        else:
+                                            if start <= M:
+                                                num_overlapp=num_overlapp+1
+                                            else:
+                                                pass
+                                    if num_overlapp==0:
+                                        pos_to_extract.append(combo)
+                                        list_combo=pos_to_extract
+                                    else:
+                                        pass
+
+                            sublmin=list()
+                            framelist=list()
+                            for i in pos_to_extract:
+                                sublmin.append(int(i.split("_")[0]))
+                                if i.split("_")[2] in framelist:
+                                    pass
+                                else:
+                                    framelist.append(i.split("_")[2])
+                            suborderindx=sorted(range(len(sublmin)), key=lambda k: sublmin[k])
+
+                            if len(framelist)==1:
+                                if framelist[0]=="-":
+                                    suborderindx.reverse()
+                                else:
+                                    pass
+                            else:
+                                pass
+
+                            for i in suborderindx:
+                                posmin=int(pos_to_extract[i].split("_")[0])
+                                posmax=int(pos_to_extract[i].split("_")[1])
+                                posfr=pos_to_extract[i].split("_")[2]
+                                if posfr == "-":
+                                    extract=str(Seq(dna[posmin-1:posmax]).reverse_complement())
+                                else:
+                                    extract=str(Seq(dna[posmin-1:posmax]))
+                                exon_concat.append(extract)
+                exon_seq="".join(exon_concat)
+                tseq=Seq(exon_seq).translate()
+                if "*" in tseq:
+                    seqframes=[Seq(exon_seq).translate(),Seq(exon_seq[1:len(exon_seq)]).translate(),Seq(exon_seq[2:len(exon_seq)]).translate()]
+                    frame_select=0
+                    len_orf=0
+                    orf_select=""
+                    for p in range(len(seqframes)):
+                        orf_parts=[]
+                        start=0
+                        for i in range(len(str(seqframes[p]))):
+                            if seqframes[p][i]!="*":
+                                end=i
+                            else:
+                                end=i
+                                orf_parts.append(str(start)+"-"+str(end))
+                                start=i+1
+                        orf_parts.append(str(start)+"-"+str(end))
+                        for i in range(len(orf_parts)):
+                            part=orf_parts[i]
+                            s=int(part.split("-")[0])
+                            e=int(part.split("-")[1])
+                            if len(seqframes[p][s:e])>len_orf and len(seqframes[p][s:e])>=(float(orfcond)*len(seqframes[p])):
+                                len_orf=len(seqframes[p][s:e])
+                                orf_select=part
+                                frame_select=p
+                    #check that orf cov refpct
+                    if len(orf_select)>0:
+                        s=int(orf_select.split("-")[0])
+                        e=int(orf_select.split("-")[1])
+                        if float(len(seqframes[frame_select][s:e]))/float(reflength[geneid])>=refcond:
+                            if frame_select==0:
+                                frame_seq=newseq
+                            elif frame_select==1:
+                                frame_seq=newseq[1:len(newseq)]
+                            elif frame_select==2:
+                                frame_seq=newseq[2:len(newseq)]
+                            newseq2=newseq
+                        else:
+                            cond_toprint_var=cond_toprint_var+1
+                            newseq2=newseq
+                    else:
+                        cond_toprint_var=cond_toprint_var+1
+                        newseq2=newseq
+                else:
+                    newseq2=newseq
+            else:
+                tseq=Seq(newseq).translate()
+                if "*" in tseq:
+                    seqframes=[Seq(newseq).translate(),Seq(newseq[1:len(newseq)]).translate(),Seq(newseq[2:len(newseq)]).translate()]
+                    frame_select=0
+                    len_orf=0
+                    orf_select=""
+                    for p in range(len(seqframes)):
+                        orf_parts=[]
+                        start=0
+                        for i in range(len(str(seqframes[p]))):
+                            if seqframes[p][i]!="*":
+                                end=i
+                            else:
+                                end=i
+                                orf_parts.append(str(start)+"-"+str(end))
+                                start=i+1
+                        orf_parts.append(str(start)+"-"+str(end))
+                        for i in range(len(orf_parts)):
+                            part=orf_parts[i]
+                            s=int(part.split("-")[0])
+                            e=int(part.split("-")[1])
+                            if len(seqframes[p][s:e])>len_orf and len(seqframes[p][s:e])>=(float(orfcond)*len(seqframes[p])):
+                                len_orf=len(seqframes[p][s:e])
+                                orf_select=part
+                                frame_select=p
+                    #check that orf cov refpct
+                    if len(orf_select)>0:
+                        s=int(orf_select.split("-")[0])
+                        e=int(orf_select.split("-")[1])
+                        if float(len(seqframes[frame_select][s:e]))/float(reflength[geneid])>=refcond:
+                            if frame_select==0:
+                                frame_seq=newseq
+                            elif frame_select==1:
+                                frame_seq=newseq[1:len(newseq)]
+                            elif frame_select==2:
+                                frame_seq=newseq[2:len(newseq)]
+                            newseq2=frame_seq[((s+1)*3)-3:(e)*3]
+                            cond_orf=cond_orf+1
+                        else:
+                            cond_toprint_var=cond_toprint_var+1
+                            newseq2=newseq
+                    else:
+                        cond_toprint_var=cond_toprint_var+1
+                        newseq2=newseq
+                else:
+                    newseq2=newseq
+        else:
+            newseq2=newseq
+    else:
+        newseq2=newseq
+
     fname = geneid+".fa"
 
     exon_l_recovered=0
     for p in refcoverage_pass:
         exon_l_recovered=exon_l_recovered+int(refcoverage_dict[p])
-    gpct=round(float(exon_l_recovered)/float(reflength[geneid]),2)
+    if cond_orf<1:
+        gpct=round(float(exon_l_recovered)/float(reflength[geneid]),2)
+    else:
+        if model=="nucleus_nt":
+            gpct=round(float(len(newseq2)/3)/float(reflength[geneid]/3),2)
+        else:
+            gpct=round(float(len(newseq2)/3)/float(reflength[geneid]),2)
+    newlength=len(newseq2)
 
     if cond_min_length!=0:
-        header = ">"+str(nameofsample)+"; "+"gene="+str(geneid)+"; "+"info="+str(genepart)+"; "+"type="+str(model)+"; "+"length="+str(newlength)+"; "+"match_contigs="+str("-".join(contpart))+"; "+"ref_percent="+str(gpct)+"; "+"n_exons="+str("-".join(num_exon))+"; "+"n_introns="+str("-".join(num_intron))
-        if "RNA" in str(model):
-            if len(contpart)>1 or len(num_exon)>1 or len(num_intron)>1:
-                pass
+        if cond_toprint_var<1:
+            header = ">"+str(nameofsample)+"; "+"gene="+str(geneid)+"; "+"info="+str(genepart)+"; "+"type="+str(model)+"; "+"length="+str(newlength)+"; "+"match_contigs="+str("-".join(contpart))+"; "+"ref_percent="+str(gpct)+"; "+"n_exons="+str("-".join(num_exon))+"; "+"n_introns="+str("-".join(num_intron))
+            if "RNA" in str(model):
+                if len(contpart)>1 or len(num_exon)>1 or len(num_intron)>1:
+                    pass
+                else:
+                    if os.path.isfile(os.path.join(outpath+"/"+model, fname)):
+                        with open(os.path.join(outpath+"/"+model, fname), 'a+') as file:
+                            old_headers = []
+                            end_file=file.tell()
+                            file.seek(0)
+                            for line in file:
+                                if line.startswith(">"):
+                                    old_headers.append(line.rstrip().replace(">","").split(";")[0])
+                            if not nameofsample in old_headers:
+                                file.seek(end_file)
+                                file.write(header+'\n')
+                                file.write(str(newseq2)+'\n')
+                            else:
+                                pass
+                    else:
+                        with open(os.path.join(outpath+"/"+model, fname), 'w') as out:
+                            out.write(header+'\n')
+                            out.write(str(newseq2)+'\n')
+
+                    for elem in extract_contigs:
+                        return elem
             else:
                 if os.path.isfile(os.path.join(outpath+"/"+model, fname)):
                     with open(os.path.join(outpath+"/"+model, fname), 'a+') as file:
@@ -331,38 +636,67 @@ def GeneExtraction(genenumber):
                         if not nameofsample in old_headers:
                             file.seek(end_file)
                             file.write(header+'\n')
-                            file.write(str(newseq)+'\n')
+                            file.write(str(newseq2)+'\n')
                         else:
                             pass
                 else:
                     with open(os.path.join(outpath+"/"+model, fname), 'w') as out:
                         out.write(header+'\n')
-                        out.write(str(newseq)+'\n')
+                        out.write(str(newseq2)+'\n')
 
                 for elem in extract_contigs:
                     return elem
         else:
-            if os.path.isfile(os.path.join(outpath+"/"+model, fname)):
-                with open(os.path.join(outpath+"/"+model, fname), 'a+') as file:
-                    old_headers = []
-                    end_file=file.tell()
-                    file.seek(0)
-                    for line in file:
-                        if line.startswith(">"):
-                            old_headers.append(line.rstrip().replace(">","").split(";")[0])
-                    if not nameofsample in old_headers:
-                        file.seek(end_file)
-                        file.write(header+'\n')
-                        file.write(str(newseq)+'\n')
+            print("WARN: min ORF length condition not filled for %s in %s. The sequence is given in %s" % (str(nameofsample),str(geneid),str(geneid)+"-like.fa"))
+            fname = geneid+"-like.fa"
+            header = ">"+str(nameofsample)+"; "+"gene="+str(geneid)+"-like"+"; "+"info="+str(genepart)+"; "+"type="+str(model)+"; "+"length="+str(newlength)+"; "+"match_contigs="+str("-".join(contpart))+"; "+"ref_percent="+str(gpct)+"; "+"n_exons="+str("-".join(num_exon))+"; "+"n_introns="+str("-".join(num_intron))
+            if "RNA" in str(model):
+                if len(contpart)>1 or len(num_exon)>1 or len(num_intron)>1:
+                    pass
+                else:
+                    if os.path.isfile(os.path.join(outpath+"/"+model, fname)):
+                        with open(os.path.join(outpath+"/"+model, fname), 'a+') as file:
+                            old_headers = []
+                            end_file=file.tell()
+                            file.seek(0)
+                            for line in file:
+                                if line.startswith(">"):
+                                    old_headers.append(line.rstrip().replace(">","").split(";")[0])
+                            if not nameofsample in old_headers:
+                                file.seek(end_file)
+                                file.write(header+'\n')
+                                file.write(str(newseq2)+'\n')
+                            else:
+                                pass
                     else:
-                        pass
-            else:
-                with open(os.path.join(outpath+"/"+model, fname), 'w') as out:
-                    out.write(header+'\n')
-                    out.write(str(newseq)+'\n')
+                        with open(os.path.join(outpath+"/"+model, fname), 'w') as out:
+                            out.write(header+'\n')
+                            out.write(str(newseq2)+'\n')
 
-            for elem in extract_contigs:
-                return elem
+                    for elem in extract_contigs:
+                        return elem
+            else:
+                if os.path.isfile(os.path.join(outpath+"/"+model, fname)):
+                    with open(os.path.join(outpath+"/"+model, fname), 'a+') as file:
+                        old_headers = []
+                        end_file=file.tell()
+                        file.seek(0)
+                        for line in file:
+                            if line.startswith(">"):
+                                old_headers.append(line.rstrip().replace(">","").split(";")[0])
+                        if not nameofsample in old_headers:
+                            file.seek(end_file)
+                            file.write(header+'\n')
+                            file.write(str(newseq2)+'\n')
+                        else:
+                            pass
+                else:
+                    with open(os.path.join(outpath+"/"+model, fname), 'w') as out:
+                        out.write(header+'\n')
+                        out.write(str(newseq2)+'\n')
+
+                for elem in extract_contigs:
+                    return elem
     else:
         pass
 
@@ -381,6 +715,8 @@ num_cores = args.threads
 tabseeds=args.seeds
 refcond=args.refpct
 control=args.control
+option_cutoff=args.cov_cutoff
+orfcond=args.orfcov
 
 stored={}
 stat_stored={}
@@ -391,6 +727,7 @@ seqs={}
 counthits={}
 dict_aln={}
 contigs_homolog=dict()
+stat_stored_position={}
 
 mkdir(str(outpath+"/"+model))
 
@@ -590,6 +927,13 @@ for line in tab:
                 stat_stored[id]["exon"]=0
                 stat_stored[id]["intron"]=0
 
+            if id in stat_stored_position.keys():
+                pass
+            else:
+                stat_stored_position[id]={}
+                stat_stored_position[id]["exon"]=[]
+                stat_stored_position[id]["intron"]=[]
+
             if genename not in dicscore.keys():
                 dicscore.setdefault(genename, []).append(int(score))
                 #besthits.setdefault(genename, []).append(dicinfo)
@@ -653,10 +997,23 @@ for line in tab:
                 pass
 
         elif l[2]=='exon':
+            if contigcov<cov or contiglength<clen:
+                continue
+            else:
+                pass
+
             old_num=stat_stored[id]["exon"]
             stat_stored[id]["exon"]=old_num+1
+            posexonmin=l[3]
+            poseexonmax=l[4]
+            stat_stored_position[id]["exon"].append(str(posexonmin)+"-"+str(poseexonmax))
 
         elif l[2]=="intron":
+            if contigcov<cov or contiglength<clen:
+                continue
+            else:
+                pass
+
             old_num=stat_stored[id]["intron"]
             stat_stored[id]["intron"]=old_num+1
 
@@ -696,6 +1053,13 @@ for line in tab:
                 stat_stored[id]={}
                 stat_stored[id]["exon"]=0
                 stat_stored[id]["intron"]=0
+
+            if id in stat_stored_position.keys():
+                pass
+            else:
+                stat_stored_position[id]={}
+                stat_stored_position[id]["exon"]=[]
+                stat_stored_position[id]["intron"]=[]
 
             'dictionary to identify the best score with combination seqID/refID'
             'we have to keep index in the same order of overlapp and create new dict'
@@ -764,6 +1128,9 @@ for line in tab:
 
                 old_num=stat_stored[id]["exon"]
                 stat_stored[id]["exon"]=old_num+1
+                posexonmin=l[3]
+                poseexonmax=l[4]
+                stat_stored_position[id]["exon"].append(str(posexonmin)+"-"+str(poseexonmax))
 
                 'we keep all cds position for each combination'
                 if dict_aln[genename].count(aln_info)==1:
@@ -777,6 +1144,11 @@ for line in tab:
                     pass
 
             elif l[2]=="intron":
+                if contigcov<cov or contiglength<clen:
+                    continue
+                else:
+                    pass
+
                 old_num=stat_stored[id]["intron"]
                 stat_stored[id]["intron"]=old_num+1
 
@@ -802,6 +1174,10 @@ for line in tab:
                     pass
 
             elif l[2]=="exon":
+                if contigcov<cov or contiglength<clen:
+                    continue
+                else:
+                    pass
                 old_num=stat_stored[id]["exon"]
                 stat_stored[id]["exon"]=old_num+1
 
@@ -812,6 +1188,7 @@ for g in list(besthits.keys()):
     bhit_partcount=0
     bhitfilt_parcount=0
     for bhits in besthits[g]:
+        tmp_score=0
         bhit_partcount=bhit_partcount+1
         frame_bhits=[i["frame"] for i in stored[bhits] if "frame" in list(i.keys())][0]
         for hit in stored.keys():
@@ -831,8 +1208,15 @@ for g in list(besthits.keys()):
                     if ratio>0.8 and rscore>0.8:
                         if frame_bhits!=frame_hit:
                             if stat_stored[hit]['intron']<stat_stored[bhits]['intron']:
-                                besthits_filtered[g].append(hit)
-                                bhitfilt_parcount=bhitfilt_parcount+1
+                                if tmp_score==0:
+                                    tmp_score=rscore
+                                    tmp_hit=hit
+                                else:
+                                    if rscore>tmp_score:
+                                        tmp_score=rscore
+                                        tmp_hit=hit
+                                #besthits_filtered[g].append(hit)
+                                #bhitfilt_parcount=bhitfilt_parcount+1
                             else:
                                 pass
                         else:
@@ -843,6 +1227,11 @@ for g in list(besthits.keys()):
                     pass
             else:
                 pass
+        if tmp_score>0:
+            besthits_filtered[g].append(tmp_hit)
+            bhitfilt_parcount=bhitfilt_parcount+1
+        else:
+            pass
         if bhitfilt_parcount<bhit_partcount:
             if bhits in besthits_filtered[g]:
                 pass
@@ -1083,10 +1472,18 @@ for line in controltab:
                 pass
 
         elif l[2]=='exon':
+            if contigcov<cov or contiglength<clen:
+                continue
+            else:
+                pass
             old_num=cstat_stored[id]["exon"]
             cstat_stored[id]["exon"]=old_num+1
 
         elif l[2]=="intron":
+            if contigcov<cov or contiglength<clen:
+                continue
+            else:
+                pass
             old_num=cstat_stored[id]["intron"]
             cstat_stored[id]["intron"]=old_num+1
 
@@ -1168,6 +1565,7 @@ for line in controltab:
                 pass
 
         elif typeseq=="exon":
+
             if l[2]==typeseq:
                 if contigcov<cov or contiglength<clen:
                     continue
@@ -1189,6 +1587,11 @@ for line in controltab:
                     pass
 
             elif l[2]=="intron":
+                if contigcov<cov or contiglength<clen:
+                    continue
+                else:
+                    pass
+
                 old_num=cstat_stored[id]["intron"]
                 cstat_stored[id]["intron"]=old_num+1
 
@@ -1214,6 +1617,10 @@ for line in controltab:
                     pass
 
             elif l[2]=="exon":
+                if contigcov<cov or contiglength<clen:
+                    continue
+                else:
+                    pass
                 old_num=cstat_stored[id]["exon"]
                 cstat_stored[id]["exon"]=old_num+1
 
@@ -1333,10 +1740,76 @@ for g in list(besthits_filtered3.keys()):
         pass
 
 
+if (option_cutoff=="on" and "chloroplast" in model) or (option_cutoff=="on" and "mitochondrion" in model):
+    besthits_filtered5=dict()
+    contigs_cov=[]
+    contigs_name=[]
+    cut_contigs=[]
+    contigs_lgth=[]
+    for g in list(besthits_filtered4.keys()):
+        for bhits in besthits_filtered4[g]:
+            cont=bhits[1]
+            if cont in contigs_name:
+                pass
+            else:
+                contigs_name.append(cont)
+                cov=float(str(cont.split("cov_")[1]).split("_")[0])
+                lgth=int(str(cont.split("length_")[1]).split("_")[0])
+                contigs_cov.append(cov)
+                contigs_lgth.append(lgth)
 
-if len(list(besthits_filtered4.keys()))>0:
+    if len(contigs_name)>1:
+        bf=N.average(contigs_cov, weights=contigs_lgth)-3*weighted_std(contigs_cov, contigs_lgth)
+        if bf<0:
+            bf=N.average(contigs_cov, weights=contigs_lgth)-1*weighted_std(contigs_cov, contigs_lgth)
+        else:
+            pass
+        if bf<0:
+            bf=N.average(contigs_cov, weights=contigs_lgth)-1*mad(contigs_cov)
+        else:
+            pass
+
+        for i in range(len(contigs_name)):
+            if contigs_cov[i] < bf:
+                cut_contigs.append(contigs_name[i])
+            else:
+                pass
+    else:
+        pass
+
+    miss_genes=[]
+    for g in list(besthits_filtered4.keys()):
+        subpart=[]
+        for bhits in besthits_filtered4[g]:
+            seqid=bhits[1]
+            control_pass=0
+            if seqid in cut_contigs:
+                control_pass=control_pass+1
+                if g in miss_genes:
+                    pass
+                else:
+                    miss_genes.append(g)
+            else:
+                pass
+            if control_pass==0:
+                subpart.append(bhits)
+            else:
+                pass
+        if len(subpart)>0:
+            besthits_filtered5[g]=subpart
+        else:
+            pass
+
+    if len(cut_contigs)>0:
+        print("WARN: %s contig(s) removed in %s according to standard deviation cut-off: %s" % (len(cut_contigs),str(nameofsample),",".join(cut_contigs)))
+    else:
+        pass
+else:
+    besthits_filtered5=besthits_filtered4
+
+if len(list(besthits_filtered5.keys()))>0:
     print ("Extraction of sequences for %s" % nameofsample)
-    inputs=range(len(list(besthits_filtered4.keys())))
+    inputs=range(len(list(besthits_filtered5.keys())))
     x=Parallel(n_jobs=num_cores)(delayed(GeneExtraction)(i) for i in inputs)
 
     l = [i for i in x if i is not None]
