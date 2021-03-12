@@ -681,9 +681,17 @@ for line in tab:
 
             else:
                 if l[2]=='exon':
+                    if contigcov<cov or contiglength<clen:
+                        continue
+                    else:
+                        pass
                     old_num=stat_stored[id]["exon"]
                     stat_stored[id]["exon"]=old_num+1
                 if l[2]=='intron':
+                    if contigcov<cov or contiglength<clen:
+                        continue
+                    else:
+                        pass
 
                     'we make groups for gene with borne values'
                     if genename not in groups.keys():
@@ -842,10 +850,10 @@ for line in tab:
                     pass
         else:
 
-            #if contigcov<cov or contiglength<clen:
-            #    continue
-            #else:
-            #    pass
+            if contigcov<cov or contiglength<clen:
+                continue
+            else:
+                pass
 
             ###____1_____
             'we make groups for gene with borne values'
@@ -926,10 +934,10 @@ for line in tab:
 
             if l[2]=="gene":
 
-                #if contigcov<cov or contiglength<clen:
-                #    continue
-                #else:
-                #    pass
+                if contigcov<cov or contiglength<clen:
+                    continue
+                else:
+                    pass
 
                 score = l[5]
                 frame = l[6]
@@ -1014,6 +1022,11 @@ for line in tab:
 
             else:
                 if typeseq=="exon":
+                    if contigcov<cov or contiglength<clen:
+                        continue
+                    else:
+                        pass
+
                     if dict_aln[genename].count(aln_info)==1:
                         dicframe=dict()
                         dicframe['frame']=str(frame)
@@ -1046,6 +1059,10 @@ for line in tab:
                         stat_stored[id]["intron"]=old_num+1
 
                 elif typeseq=="intron":
+                    if contigcov<cov or contiglength<clen:
+                        continue
+                    else:
+                        pass
 
                     if dict_aln[genename].count(aln_info)==1:
                         dicframe=dict()
