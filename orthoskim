@@ -29,19 +29,17 @@ if [ "$1" == "-h" ]; then
 OrthoSkim: in silico gene capture from genomic and transcriptomic libraries
            where:
             -m (mode) perform pipeline according to the chosen mode:
-                  - [alignment] (gene alignment between taxa and phylogenetic matrix inference)
-                  - [assembly] (de novo assembly for each sample)
+                  - [alignment] (multiple sequence alignments between libraries and phylogenetic matrix computation)
+                  - [assembly] (de novo assembly for each library)
                   - [database] (make a database bank of mitochondrial/chloroplast/nucrdna genes from annotations)
-                  - [capture] (capture of genes from non-targeted assemblies directly
-                                            with mapping into references using targets (-t)
-                  - [checking] (taxonomy checking of gene captured from blast to NCBI database)
+                  - [capture] (capture of targeted sequences from assemblies and references using targets (-t)
+                  - [checking] (taxonomic checking of sequences captured from blast alignments into the NCBI database)
                   - [cleaning] (identification and filtering of contaminants in assemblies)
-                  - [phyloskim_indexing] (make paramfile files)
+                  - [phyloskim_indexing] (make sample files for phyloskim databases)
                   - [phyloskim_database] (make a database bank of mitochondrial/chloroplast/nucrdna genes from phyloskims annotations)
-                  - [phyloskim_extraction_targeted] (extraction of genes from targeted assemblies directly with
-                                          annotations; target: chloroplast,nucrdna)
+                  - [phyloskim_extraction_targeted] (extraction of genes from phyloskims annotations; target: chloroplast,nucrdna)
                   - [format] (format assemblies output)
-                  - [statistic_assembly,capture] (summary statistics on assemblies and gene capture)
+                  - [statistic_assembly,capture] (summary statistics on assemblies and sequence capture)
             -c (config_file) set the config file
             -t (target) gene type targeted:
                   - [chloroplast] (for [*database*, *phyloskim_extraction_targeted*, *phyloskim_database*] modes. Extract all CDS+tRNA+rRNA genes)
