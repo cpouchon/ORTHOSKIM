@@ -8,14 +8,14 @@ This software was developed under the [PhyloAlps project](https://www.france-gen
  ORTHOSKIM is a command-line program, that needs to be run from a terminal/console, by calling different tasks, called 'modes', along with an other parameter corresponding to specific 'targets' (see Figure 1). ORTHOSKIM can be parameterized in order to:
  1. produce the sequence references databases (purple arrrows in Figure 1)
  2. perform the contigs assemblies and cleaning from whole sequencing reads (green arrows)
- 3. capture the targeted sequences from the closed reference (step 3, blue arrows)
- 4. get multiple alignment of these sequences across taxa suitable for phylogenetic inferences (orange arrows).
+ 3. capture the targeted sequences from the closest reference (step 3, blue arrows)
+ 4. get multiple alignment of these sequences between libraries, suitable for phylogenetic inferences (orange arrows).
 
 <b>ORTHOSKIM flowchart</b>
 ![Fig.1. ORTHOSKIM worflow](orthoskim_workflow.png)
 >**Fig. 1. ORTHOSKIM workflow**. Yellow boxes represents data that needs to be provided by users. To capture any of the chloroplast, ribosomal or mitochondrial sequences, users have to provide each of the three/two annotation genome files if plant/non-plant models are analyzed (see Pipeline description section).
 
-**Applications:** ORTHOSKIM can be run on genomes skimming libraries to capture chloroplast (cpDNA) and mitochondrial (mtDNA) genes as ribosomal (rDNA) clusters (RNA genes and intergenic spacers sequences). This pipeline can also be run to capture nuclear and single copy orthologs markers ([BUSCO](https://busco.ezlab.org)), in genome skimming libraries if the sequencing depth is large enough or in transcriptomic or target sequences capture libraries.
+**Applications:** ORTHOSKIM can be run on genomes skimming libraries to capture chloroplast (cpDNA) and mitochondrial (mtDNA) genes as ribosomal (rDNA) clusters (RNA genes and intergenic spacers sequences). This pipeline can also be run to capture nuclear and single copy orthologs markers ([BUSCO](https://busco.ezlab.org)), in genome skimming libraries if the sequencing depth is large enough, or in transcriptomic and target sequences capture libraries.
 
 
 **Citation:**
@@ -244,7 +244,7 @@ Androsace_helvetica_199610_CLA000520_BGN_ETA    /Users/pouchonc/PhyloAlps/CDS/An
 
 ORTHOSKIM uses a multi-taxa bank of reference sequences to capture targeted markers into assemblies (see *3. Pipeline description* below part).
 
-This bank can be built in ORTHOSKIM for the *nucrdna*, *chloroplast* and *mitochondrion* targets (purple arrows in Fig. 1), directly from genomic annotations collected by users for each genomic compartment (genbank or embl format required, a single file is set in the config file at lines 13-15). These annotations can be collected directly from the [NCBI](https://www.ncbi.nlm.nih.gov/genbank/) for example. To achieve this, seeds are required for each type of genes (e.g. CDS or rRNA) to correctly identify each targeted genes with a standard name (header) as following: `>genename_taxid_Genus_species_other-arguments"` (*e.g.* *>cox1_3702_Arabidopsis_thaliana* for cox1 gene). Seeds can include all CDS, rRNA and trnL-UAA (in tRNA seeds) for the cpDNA, all CDS and rRNA genes for the mtDNA, and the three rRNA genes (*i.e.* rrn18S, rrn5.8S and rrn26S) for the rDNA. Moreover, ORTHOSKIM provides probes for the internal transcribed spacer (ITS) regions ITS1 and ITS2 that are designed on these rRNA genes for the seeds and for the references, allowing to also capture these two regions. Location of seeds is given in lines 38-39, 43-45 and 51 of the config file.
+This bank is built in ORTHOSKIM for the *nucrdna*, *chloroplast* and *mitochondrion* targets (pink arrows in Fig. 1), directly from genomic annotations collected by the user for each genomic compartment (genbank or embl format required, a single file is set in the config file at lines 13-15). These annotations can be collected from the [NCBI](https://www.ncbi.nlm.nih.gov/genbank/). To achieve this, seeds are required for each type of genes (e.g. CDS or rRNA) to correctly identify each targeted genes with a standard name (header) as following: `>genename_taxid_Genus_species_other-arguments"` (*e.g.* *>cox1_3702_Arabidopsis_thaliana* for cox1 gene). Seeds can include all CDS, rRNA and trnL-UAA (in tRNA seeds) for the cpDNA, all CDS and rRNA genes for the mtDNA, and the three rRNA genes (*i.e.* rrn18S, rrn5.8S and rrn26S) for the rDNA. Moreover, ORTHOSKIM provides probes for the internal transcribed spacer (ITS) regions ITS1 and ITS2 that are designed on these rRNA genes for the seeds and for the references, allowing to also capture these two regions. Location of seeds is given in lines 38-39, 43-45 and 51 of the config file.
 
 ORTHOSKIM creates a multi-fasta file for each type of gene (*i.e.* CDS, rRNA or tRNA) with protein sequences for the coding regions  and nucleotidic sequences for the non-coding regions. Location of these output files are set in the *config_orthoskim.txt* file at lines 40-41, 46-48 and 50.
 
@@ -291,20 +291,20 @@ Users can easily adapted the files for other models by respecting the recommenda
 
 The sequence capture is driven on genomic or transcriptomic global (or untargeted) assemblies. This allowed to capture from a single assembly dataset different targeted sequences (*e.g.* cpDNA, mtDNA and rDNA genes).
 
-ORTHOSKIM pipeline uses different modes to compute the databases, capture the targeted sequences and align them between taxa (see Figure 1).
+ORTHOSKIM pipeline uses different modes to compute the databases, capture the targeted sequences and align them between libraries (see Figure 1).
 
 > **NOTE**: A *mode_done.log* file is created during the pipeline containing the list of sample libraries that were correctly processed, whereas unprocessed libraries were added into *mode_error.log* file. This file could be used to remove processed libraries from the initial sample file if the script has to be re-run. Command lines are also print if users want to re-run specific commands on some libraries.
 
 
 ### 3.1. Database (optional)
 
-ORTHOSKIM provides a mode to create gene database for the mitochondrial, chloroplast and ribosomal regions with `-m database` mode along with `-t mitochondrion, chloroplast, nucrdna` targets (purple arrows in Fig. 1). To do this, genomic annotations for these compartments has to be collected across taxa in a single file and set into the config file.
+ORTHOSKIM provides a mode to create the gene reference database for the mitochondrial, chloroplast and ribosomal regions with `-m database` mode along with `-t mitochondrion, chloroplast, nucrdna` targets (purple arrows in Fig. 1). To do this, genomic annotations for these compartments has to be collected across different taxa in a single file (file location set into the config file).
 
-ORTHOSKIM will then extract all CDS, rRNA and tRNA genes from these annotations and align them into the given seeds thanks to *EXONERATE* to keep a standard gene name and  to correctly identify the extracted genes. Output files (l. 40-41, 46-48 and 50) are generated containing a bank of reference genes. Only genes given in the seeds will be included on the reference sequences.
+ORTHOSKIM will extract all CDS, rRNA and tRNA genes from these annotations and align them into the given seeds thanks to *EXONERATE* to keep a standard gene name and correctly identify the extracted genes. Output files (l. 40-41, 46-48 and 50), composed of reference genes bank, are generated. Only genes given in the seeds will be included on the reference sequences.
 
 > **NOTE**: Users have to collect all three genomic annotations and corresponding seeds to run ORTHOSKIM (or two for non plant model), as a selection is done on contigs from these different genomic regions (see 3.3.1.b. section). If users want to capture nuclear or busco markers, this step is skipped. In such case, users have to collected reference sequences for these markers into the *config_orthoskim.txt* file, by following instructions for the sequence header.
 
-We also supplied with ORTHOSKIM a function, *SortDB.py*, to reduce the reference sequences datasets or the genomic annotations by specific family. This script can be used in order to reduce the computational time of capture if too much sequences of reference were collected (see section 4.2.1).  
+We also supplied with ORTHOSKIM different functions to reduce the reference sequences datasets or the genomic annotations (*AnotFilter.py* or *SortDB_family.py*, *SortDB_lineages.py* functions). These functions can be used in order to reduce the computational time of capture if too much sequences of reference were collected (see section 4.2.1).  
 
 
 

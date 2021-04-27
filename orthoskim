@@ -849,6 +849,18 @@ mkdir -p ${RES}/Extraction
                           echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
                           `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
                           echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                        elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ]; then
+                          awk '{print $1}' ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info
+                          echo "WARN: no mtDNA and rDNA contigs found for ${lib}"
+                          echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                        elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                          awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                          echo "WARN: no mtDNA and cpDNA contigs found for ${lib}"
+                          echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                        elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                          awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                          echo "WARN: no cpDNA and rDNA contigs found for ${lib}"
+                          echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
                         else
                           echo "WARN: error in selection of contigs for ${lib}"
                           echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
@@ -929,6 +941,18 @@ mkdir -p ${RES}/Extraction
                       elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
                         echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
                         `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info
+                        echo "WARN: no mtDNA and rDNA contigs found for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                        echo "WARN: no mtDNA and cpDNA contigs found for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                        echo "WARN: no cpDNA and rDNA contigs found for ${lib}"
                         echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
                       else
                         echo "WARN: error in selection of contigs for ${lib}"
@@ -1177,6 +1201,18 @@ mkdir -p ${RES}/Extraction
                         echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
                         `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
                         echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info
+                        echo "WARN: no mtDNA and rDNA contigs found for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                        echo "WARN: no mtDNA and cpDNA contigs found for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                        echo "WARN: no cpDNA and rDNA contigs found for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
                       else
                         echo "WARN: error in selection of contigs for ${lib}"
                         echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
@@ -1256,6 +1292,18 @@ mkdir -p ${RES}/Extraction
                     elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
                       echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
                       `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info
+                      echo "WARN: no mtDNA and rDNA contigs found for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                      echo "WARN: no mtDNA and cpDNA contigs found for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                      echo "WARN: no cpDNA and rDNA contigs found for ${lib}"
                       echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
                     else
                       echo "WARN: error in selection of contigs for ${lib}"
@@ -1535,6 +1583,18 @@ mkdir -p ${RES}/Extraction
                           echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
                           `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
                           echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                        elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ]; then
+                          awk '{print $1}' ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info
+                          echo "WARN: no mtDNA and rDNA contigs found for ${lib}"
+                          echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                        elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                          awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                          echo "WARN: no mtDNA and cpDNA contigs found for ${lib}"
+                          echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                        elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                          awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                          echo "WARN: no cpDNA and rDNA contigs found for ${lib}"
+                          echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
                         else
                           echo "WARN: error in selection of contigs for ${lib}"
                           echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
@@ -1614,6 +1674,18 @@ mkdir -p ${RES}/Extraction
                       elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
                         echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
                         `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info
+                        echo "WARN: no mtDNA and rDNA contigs found for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                        echo "WARN: no mtDNA and cpDNA contigs found for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                        echo "WARN: no cpDNA and rDNA contigs found for ${lib}"
                         echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
                       else
                         echo "WARN: error in selection of contigs for ${lib}"
@@ -1862,6 +1934,18 @@ mkdir -p ${RES}/Extraction
                         echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
                         `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
                         echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info
+                        echo "WARN: no mtDNA and rDNA contigs found for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                        echo "WARN: no mtDNA and cpDNA contigs found for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                        echo "WARN: no cpDNA and rDNA contigs found for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
                       else
                         echo "WARN: error in selection of contigs for ${lib}"
                         echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
@@ -1941,6 +2025,18 @@ mkdir -p ${RES}/Extraction
                     elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
                       echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
                       `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info
+                      echo "WARN: no mtDNA and rDNA contigs found for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                      echo "WARN: no mtDNA and cpDNA contigs found for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                      echo "WARN: no cpDNA and rDNA contigs found for ${lib}"
                       echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
                     else
                       echo "WARN: error in selection of contigs for ${lib}"
@@ -2407,8 +2503,8 @@ mkdir -p ${RES}/Extraction
                 $MAFFT --auto --thread ${THREADS} --adjustdirectionaccurately $f > ${RES}/Selection/Alignment/${element}/files/$(basename $f)
                 if [ ${TRIMMING} == 'on' ]; then
                   echo "INFO: automated alignment trimming is performed"
-                  echo "CMD: $TRIMAL -in ${RES}/Selection/Alignment/${element}/files/$(basename $f) -automated1 -out ${RES}/Selection/Alignment/${element}/trim/$(basename $f | perl -pe 's/.fa/.trim/')"
-                  $TRIMAL -in ${RES}/Selection/Alignment/${element}/files/$(basename $f) -automated1 -out ${RES}/Selection/Alignment/${element}/trim/$(basename $f | perl -pe 's/.fa/.trim/')
+                  echo "CMD: $TRIMAL -in ${RES}/Selection/Alignment/${element}/files/$(basename $f) -${TRIMMODE} -out ${RES}/Selection/Alignment/${element}/trim/$(basename $f | perl -pe 's/.fa/.trim/')"
+                  $TRIMAL -in ${RES}/Selection/Alignment/${element}/files/$(basename $f) -${TRIMMODE} -out ${RES}/Selection/Alignment/${element}/trim/$(basename $f | perl -pe 's/.fa/.trim/')
                 else
                   :
                 fi
@@ -2447,8 +2543,8 @@ mkdir -p ${RES}/Extraction
               $MAFFT --auto --thread ${THREADS} --adjustdirectionaccurately $f > ${RES}/Alignment/${element}/files/$(basename $f)
               if [ ${TRIMMING} == 'on' ]; then
                 echo "INFO: automated alignment trimming is performed"
-                echo "CMD: $TRIMAL -in ${RES}/Alignment/${element}/files/$(basename $f) -automated1 -out ${RES}/Alignment/${element}/trim/$(basename $f | perl -pe 's/.fa/.trim/')"
-                $TRIMAL -in ${RES}/Alignment/${element}/files/$(basename $f) -automated1 -out ${RES}/Alignment/${element}/trim/$(basename $f | perl -pe 's/.fa/.trim/')
+                echo "CMD: $TRIMAL -in ${RES}/Alignment/${element}/files/$(basename $f) -${TRIMMODE} -out ${RES}/Alignment/${element}/trim/$(basename $f | perl -pe 's/.fa/.trim/')"
+                $TRIMAL -in ${RES}/Alignment/${element}/files/$(basename $f) -${TRIMMODE} -out ${RES}/Alignment/${element}/trim/$(basename $f | perl -pe 's/.fa/.trim/')
               else
                 :
               fi
@@ -2576,6 +2672,18 @@ mkdir -p ${RES}/Extraction
                         echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
                         `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
                         echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info
+                        echo "WARN: no mtDNA and rDNA contigs found for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                        echo "WARN: no mtDNA and cpDNA contigs found for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                        echo "WARN: no cpDNA and rDNA contigs found for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
                       else
                         echo "WARN: error in selection of contigs for ${lib}"
                         echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
@@ -2655,6 +2763,18 @@ mkdir -p ${RES}/Extraction
                     elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
                       echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
                       `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info
+                      echo "WARN: no mtDNA and rDNA contigs found for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                      echo "WARN: no mtDNA and cpDNA contigs found for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                      echo "WARN: no cpDNA and rDNA contigs found for ${lib}"
                       echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
                     else
                       echo "WARN: error in selection of contigs for ${lib}"
@@ -2774,6 +2894,18 @@ mkdir -p ${RES}/Extraction
                       echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
                       `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
                       echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info
+                      echo "WARN: no mtDNA and rDNA contigs found for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                      echo "WARN: no mtDNA and cpDNA contigs found for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                      echo "WARN: no cpDNA and rDNA contigs found for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
                     else
                       echo "WARN: error in selection of contigs for ${lib}"
                       echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
@@ -2853,6 +2985,18 @@ mkdir -p ${RES}/Extraction
                   elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
                     echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
                     `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                    echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                  elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ]; then
+                    awk '{print $1}' ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info
+                    echo "WARN: no mtDNA and rDNA contigs found for ${lib}"
+                    echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                  elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                    awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                    echo "WARN: no mtDNA and cpDNA contigs found for ${lib}"
+                    echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                  elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                    awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                    echo "WARN: no cpDNA and rDNA contigs found for ${lib}"
                     echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
                   else
                     echo "WARN: error in selection of contigs for ${lib}"
@@ -2996,6 +3140,18 @@ mkdir -p ${RES}/Extraction
                         echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
                         `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
                         echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info
+                        echo "WARN: no mtDNA and rDNA contigs found for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                        echo "WARN: no mtDNA and cpDNA contigs found for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                        echo "WARN: no cpDNA and rDNA contigs found for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
                       else
                         echo "WARN: error in selection of contigs for ${lib}"
                         echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
@@ -3066,6 +3222,18 @@ mkdir -p ${RES}/Extraction
                     elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
                       echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
                       `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info
+                      echo "WARN: no mtDNA and rDNA contigs found for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                      echo "WARN: no mtDNA and cpDNA contigs found for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                      echo "WARN: no cpDNA and rDNA contigs found for ${lib}"
                       echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
                     else
                       echo "WARN: error in selection of contigs for ${lib}"
@@ -3169,6 +3337,18 @@ mkdir -p ${RES}/Extraction
                       echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
                       `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
                       echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info
+                      echo "WARN: no mtDNA and rDNA contigs found for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                      echo "WARN: no mtDNA and cpDNA contigs found for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                      echo "WARN: no cpDNA and rDNA contigs found for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
                     else
                       echo "WARN: error in selection of contigs for ${lib}"
                       echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
@@ -3239,6 +3419,18 @@ mkdir -p ${RES}/Extraction
                   elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
                     echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
                     `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                    echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                  elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ]; then
+                    awk '{print $1}' ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info
+                    echo "WARN: no mtDNA and rDNA contigs found for ${lib}"
+                    echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                  elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                    awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                    echo "WARN: no mtDNA and cpDNA contigs found for ${lib}"
+                    echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                  elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                    awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                    echo "WARN: no cpDNA and rDNA contigs found for ${lib}"
                     echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
                   else
                     echo "WARN: error in selection of contigs for ${lib}"
@@ -3380,6 +3572,18 @@ mkdir -p ${RES}/Extraction
                         echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
                         `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
                         echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info
+                        echo "WARN: no mtDNA and rDNA contigs found for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                        echo "WARN: no mtDNA and cpDNA contigs found for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                        echo "WARN: no cpDNA and rDNA contigs found for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
                       else
                         echo "WARN: error in selection of contigs for ${lib}"
                         echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
@@ -3457,6 +3661,18 @@ mkdir -p ${RES}/Extraction
                     elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
                       echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
                       `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info
+                      echo "WARN: no mtDNA and rDNA contigs found for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                      echo "WARN: no mtDNA and cpDNA contigs found for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                      echo "WARN: no cpDNA and rDNA contigs found for ${lib}"
                       echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
                     else
                       echo "WARN: error in selection of contigs for ${lib}"
@@ -3574,6 +3790,18 @@ mkdir -p ${RES}/Extraction
                       echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
                       `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
                       echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info
+                      echo "WARN: no mtDNA and rDNA contigs found for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                      echo "WARN: no mtDNA and cpDNA contigs found for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                      echo "WARN: no cpDNA and rDNA contigs found for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
                     else
                       echo "WARN: error in selection of contigs for ${lib}"
                       echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
@@ -3651,6 +3879,18 @@ mkdir -p ${RES}/Extraction
                   elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
                     echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
                     `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                    echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                  elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ]; then
+                    awk '{print $1}' ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info
+                    echo "WARN: no mtDNA and rDNA contigs found for ${lib}"
+                    echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                  elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                    awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                    echo "WARN: no mtDNA and cpDNA contigs found for ${lib}"
+                    echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                  elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                    awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                    echo "WARN: no cpDNA and rDNA contigs found for ${lib}"
                     echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
                   else
                     echo "WARN: error in selection of contigs for ${lib}"
@@ -3795,6 +4035,18 @@ mkdir -p ${RES}/Extraction
                           echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
                           `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
                           echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                        elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ]; then
+                          awk '{print $1}' ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info
+                          echo "WARN: no mtDNA and rDNA contigs found for ${lib}"
+                          echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                        elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                          awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                          echo "WARN: no mtDNA and cpDNA contigs found for ${lib}"
+                          echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                        elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                          awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                          echo "WARN: no cpDNA and rDNA contigs found for ${lib}"
+                          echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
                         else
                           echo "WARN: error in selection of contigs for ${lib}"
                           echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
@@ -3867,6 +4119,18 @@ mkdir -p ${RES}/Extraction
                       elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
                         echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
                         `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info
+                        echo "WARN: no mtDNA and rDNA contigs found for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                        echo "WARN: no mtDNA and cpDNA contigs found for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                        echo "WARN: no cpDNA and rDNA contigs found for ${lib}"
                         echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
                       else
                         echo "WARN: error in selection of contigs for ${lib}"
@@ -4094,6 +4358,18 @@ mkdir -p ${RES}/Extraction
                         echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
                         `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
                         echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info
+                        echo "WARN: no mtDNA and rDNA contigs found for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                        echo "WARN: no mtDNA and cpDNA contigs found for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                        echo "WARN: no cpDNA and rDNA contigs found for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
                       else
                         echo "WARN: error in selection of contigs for ${lib}"
                         echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
@@ -4166,6 +4442,18 @@ mkdir -p ${RES}/Extraction
                     elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
                       echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
                       `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info
+                      echo "WARN: no mtDNA and rDNA contigs found for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                      echo "WARN: no mtDNA and cpDNA contigs found for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                      echo "WARN: no cpDNA and rDNA contigs found for ${lib}"
                       echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
                     else
                       echo "WARN: error in selection of contigs for ${lib}"
