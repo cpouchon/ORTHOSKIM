@@ -289,186 +289,193 @@ for i in families_taxid.keys():
 cond_loop_len_fam=len(taxid_fam_list)
 
 if len(taxid_fam_list)>0:
-    if query_fam_taxid in taxid_fam_list:
-        taxid_all_fam=taxid_fam_list
-        tree_fam = ncbi.get_topology(taxid_all_fam)
-        # faire comme en dessous mais ne pas supprimé le query_taxid_fam car présent
-        list_loop_fam=[]
-        closed_list=[]
+    if len(taxid_fam_list)>1:
+        if query_fam_taxid in taxid_fam_list:
+            taxid_all_fam=taxid_fam_list
+            tree_fam = ncbi.get_topology(taxid_all_fam)
+            # faire comme en dessous mais ne pas supprimé le query_taxid_fam car présent
+            list_loop_fam=[]
+            closed_list=[]
 
-        if len(tree_fam.search_nodes(name=str(query_fam_taxid)))==0:
-            if len(ncbi.get_lineage(query_fam_taxid))>0:
-                search_taxid_fam=ncbi.get_lineage(query_fam_taxid)[len(ncbi.get_lineage(query_fam_taxid))-1]
-                if len(tree_fam.search_nodes(name=str(search_taxid_fam)))>0:
-                    if len(list_loop_fam)==0:
-                        t2fam=tree_fam.search_nodes(name=str(search_taxid_fam))[0]
-                        closed = []
-                        for l in t2fam.get_leaves():
-                            if l.__dict__['taxid'] in taxid_all_fam:
-                                closed.append(str(l.__dict__['taxid']))
-                                if str(l.__dict__['taxid']) in list_loop_fam:
-                                    pass
+            if len(tree_fam.search_nodes(name=str(query_fam_taxid)))==0:
+                if len(ncbi.get_lineage(query_fam_taxid))>0:
+                    search_taxid_fam=ncbi.get_lineage(query_fam_taxid)[len(ncbi.get_lineage(query_fam_taxid))-1]
+                    if len(tree_fam.search_nodes(name=str(search_taxid_fam)))>0:
+                        if len(list_loop_fam)==0:
+                            t2fam=tree_fam.search_nodes(name=str(search_taxid_fam))[0]
+                            closed = []
+                            for l in t2fam.get_leaves():
+                                if l.__dict__['taxid'] in taxid_all_fam:
+                                    closed.append(str(l.__dict__['taxid']))
+                                    if str(l.__dict__['taxid']) in list_loop_fam:
+                                        pass
+                                    else:
+                                        list_loop_fam.append(str(l.__dict__['taxid']))
                                 else:
-                                    list_loop_fam.append(str(l.__dict__['taxid']))
-                            else:
-                                continue
-                        closed_list.append(closed)
-                    while len(list_loop_fam)<cond_loop_len_fam:
-                        t2fam=t2fam.up
-                        closed = []
-                        for l in t2fam.get_leaves():
-                            if l.__dict__['taxid'] in taxid_all_fam:
-                                closed.append(str(l.__dict__['taxid']))
-                                if str(l.__dict__['taxid']) in list_loop_fam:
-                                    pass
+                                    continue
+                            closed_list.append(closed)
+                        while len(list_loop_fam)<cond_loop_len_fam:
+                            t2fam=t2fam.up
+                            closed = []
+                            for l in t2fam.get_leaves():
+                                if l.__dict__['taxid'] in taxid_all_fam:
+                                    closed.append(str(l.__dict__['taxid']))
+                                    if str(l.__dict__['taxid']) in list_loop_fam:
+                                        pass
+                                    else:
+                                        list_loop_fam.append(str(l.__dict__['taxid']))
                                 else:
-                                    list_loop_fam.append(str(l.__dict__['taxid']))
-                            else:
-                                continue
-                        closed_list.append(closed)
+                                    continue
+                            closed_list.append(closed)
+                    else:
+                        pass
                 else:
                     pass
             else:
-                pass
-        else:
-            if len(list_loop_fam)==0:
-                t2fam=tree_fam.search_nodes(name=str(query_fam_taxid))[0]
-                closed = []
-                for l in t2fam.get_leaves():
-                    if l.__dict__['taxid'] in taxid_all_fam:
-                        closed.append(str(l.__dict__['taxid']))
-                        if str(l.__dict__['taxid']) in list_loop_fam:
-                            pass
+                if len(list_loop_fam)==0:
+                    t2fam=tree_fam.search_nodes(name=str(query_fam_taxid))[0]
+                    closed = []
+                    for l in t2fam.get_leaves():
+                        if l.__dict__['taxid'] in taxid_all_fam:
+                            closed.append(str(l.__dict__['taxid']))
+                            if str(l.__dict__['taxid']) in list_loop_fam:
+                                pass
+                            else:
+                                list_loop_fam.append(str(l.__dict__['taxid']))
                         else:
-                            list_loop_fam.append(str(l.__dict__['taxid']))
-                    else:
-                        continue
-                closed_list.append(closed)
+                            continue
+                    closed_list.append(closed)
 
-            while len(list_loop_fam)<cond_loop_len_fam:
-                t2fam=t2fam.up
-                closed = []
-                for l in t2fam.get_leaves():
-                    if l.__dict__['taxid'] in taxid_all_fam:
-                        closed.append(str(l.__dict__['taxid']))
-                        if str(l.__dict__['taxid']) in list_loop_fam:
-                            pass
+                while len(list_loop_fam)<cond_loop_len_fam:
+                    t2fam=t2fam.up
+                    closed = []
+                    for l in t2fam.get_leaves():
+                        if l.__dict__['taxid'] in taxid_all_fam:
+                            closed.append(str(l.__dict__['taxid']))
+                            if str(l.__dict__['taxid']) in list_loop_fam:
+                                pass
+                            else:
+                                list_loop_fam.append(str(l.__dict__['taxid']))
                         else:
-                            list_loop_fam.append(str(l.__dict__['taxid']))
+                            continue
+                    closed_list.append(closed)
+
+        else:
+            taxid_all_fam=taxid_fam_list
+            taxid_all_fam.append(query_fam_taxid)
+            tree_fam = ncbi.get_topology(taxid_all_fam)
+
+            list_loop_fam=[]
+            closed_list=[]
+
+            if len(tree_fam.search_nodes(name=str(query_fam_taxid)))==0:
+                if len(ncbi.get_lineage(query_fam_taxid))>0:
+                    search_taxid_fam=ncbi.get_lineage(query_fam_taxid)[len(ncbi.get_lineage(query_fam_taxid))-1]
+                    if len(tree_fam.search_nodes(name=str(search_taxid_fam)))>0:
+                        if len(list_loop_fam)==0:
+                            tcond=tree_fam.search_nodes(name=str(search_taxid_fam))[0].up
+                            if tcond is None:
+                                t2fam=tree_fam.search_nodes(name=str(search_taxid_fam))[0]
+                            else:
+                                t2fam=tree_fam.search_nodes(name=str(search_taxid_fam))[0].up
+                            closed = []
+                            for l in t2fam.get_leaves():
+                                if l.__dict__['taxid'] in taxid_all_fam:
+                                    closed.append(str(l.__dict__['taxid']))
+                                    if str(l.__dict__['taxid']) in list_loop_fam:
+                                        pass
+                                    else:
+                                        list_loop_fam.append(str(l.__dict__['taxid']))
+                                else:
+                                    continue
+                            if str(search_taxid_fam) in closed:
+                                closed.remove(str(search_taxid_fam))
+                            else:
+                                pass
+                            if str(search_taxid_fam) in list_loop_fam:
+                                list_loop_fam.remove(str(search_taxid_fam))
+                            else:
+                                pass
+                            closed_list.append(closed)
+                        while len(list_loop_fam)<cond_loop_len_fam:
+                            t2fam=t2fam.up
+                            closed = []
+                            for l in t2fam.get_leaves():
+                                if l.__dict__['taxid'] in taxid_all_fam:
+                                    closed.append(str(l.__dict__['taxid']))
+                                    if str(l.__dict__['taxid']) in list_loop_fam:
+                                        pass
+                                    else:
+                                        list_loop_fam.append(str(l.__dict__['taxid']))
+                                else:
+                                    continue
+                            if str(search_taxid_fam) in closed:
+                                closed.remove(str(search_taxid_fam))
+                            else:
+                                pass
+                            if str(search_taxid_fam) in list_loop_fam:
+                                list_loop_fam.remove(str(search_taxid_fam))
+                            else:
+                                pass
+                            closed_list.append(closed)
                     else:
-                        continue
-                closed_list.append(closed)
+                        pass
+                else:
+                    pass
+            else:
+                if len(list_loop_fam)==0:
+                    tcond=tree_fam.search_nodes(name=str(query_fam_taxid))[0].up
+                    if tcond is None:
+                        t2fam=tree_fam.search_nodes(name=str(query_fam_taxid))[0]
+                    else:
+                        t2fam=tree_fam.search_nodes(name=str(query_fam_taxid))[0].up
+                    closed = []
+                    for l in t2fam.get_leaves():
+                        if l.__dict__['taxid'] in taxid_all_fam:
+                            closed.append(str(l.__dict__['taxid']))
+                            if str(l.__dict__['taxid']) in list_loop_fam:
+                                pass
+                            else:
+                                list_loop_fam.append(str(l.__dict__['taxid']))
+                        else:
+                            continue
+                    if str(query_fam_taxid) in closed:
+                        closed.remove(str(query_fam_taxid))
+                    else:
+                        pass
+                    if str(query_fam_taxid) in list_loop_fam:
+                        list_loop_fam.remove(str(query_fam_taxid))
+                    else:
+                        pass
+                    closed_list.append(closed)
+
+                while len(list_loop_fam)<cond_loop_len_fam:
+                    t2fam=t2fam.up
+                    closed = []
+                    for l in t2fam.get_leaves():
+                        if l.__dict__['taxid'] in taxid_all_fam:
+                            closed.append(str(l.__dict__['taxid']))
+                            if str(l.__dict__['taxid']) in list_loop_fam:
+                                pass
+                            else:
+                                list_loop_fam.append(str(l.__dict__['taxid']))
+                        else:
+                            continue
+                    if str(query_fam_taxid) in closed:
+                        closed.remove(str(query_fam_taxid))
+                    else:
+                        pass
+                    if str(query_fam_taxid) in list_loop_fam:
+                        list_loop_fam.remove(str(query_fam_taxid))
+                    else:
+                        pass
+                    closed_list.append(closed)
 
     else:
-        taxid_all_fam=taxid_fam_list
-        taxid_all_fam.append(query_fam_taxid)
-        tree_fam = ncbi.get_topology(taxid_all_fam)
-
-        list_loop_fam=[]
         closed_list=[]
-
-        if len(tree_fam.search_nodes(name=str(query_fam_taxid)))==0:
-            if len(ncbi.get_lineage(query_fam_taxid))>0:
-                search_taxid_fam=ncbi.get_lineage(query_fam_taxid)[len(ncbi.get_lineage(query_fam_taxid))-1]
-                if len(tree_fam.search_nodes(name=str(search_taxid_fam)))>0:
-                    if len(list_loop_fam)==0:
-                        tcond=tree_fam.search_nodes(name=str(search_taxid_fam))[0].up
-                        if tcond is None:
-                            t2fam=tree_fam.search_nodes(name=str(search_taxid_fam))[0]
-                        else:
-                            t2fam=tree_fam.search_nodes(name=str(search_taxid_fam))[0].up
-                        closed = []
-                        for l in t2fam.get_leaves():
-                            if l.__dict__['taxid'] in taxid_all_fam:
-                                closed.append(str(l.__dict__['taxid']))
-                                if str(l.__dict__['taxid']) in list_loop_fam:
-                                    pass
-                                else:
-                                    list_loop_fam.append(str(l.__dict__['taxid']))
-                            else:
-                                continue
-                        if str(search_taxid_fam) in closed:
-                            closed.remove(str(search_taxid_fam))
-                        else:
-                            pass
-                        if str(search_taxid_fam) in list_loop_fam:
-                            list_loop_fam.remove(str(search_taxid_fam))
-                        else:
-                            pass
-                        closed_list.append(closed)
-                    while len(list_loop_fam)<cond_loop_len_fam:
-                        t2fam=t2fam.up
-                        closed = []
-                        for l in t2fam.get_leaves():
-                            if l.__dict__['taxid'] in taxid_all_fam:
-                                closed.append(str(l.__dict__['taxid']))
-                                if str(l.__dict__['taxid']) in list_loop_fam:
-                                    pass
-                                else:
-                                    list_loop_fam.append(str(l.__dict__['taxid']))
-                            else:
-                                continue
-                        if str(search_taxid_fam) in closed:
-                            closed.remove(str(search_taxid_fam))
-                        else:
-                            pass
-                        if str(search_taxid_fam) in list_loop_fam:
-                            list_loop_fam.remove(str(search_taxid_fam))
-                        else:
-                            pass
-                        closed_list.append(closed)
-                else:
-                    pass
-            else:
-                pass
-        else:
-            if len(list_loop_fam)==0:
-                tcond=tree_fam.search_nodes(name=str(query_fam_taxid))[0].up
-                if tcond is None:
-                    t2fam=tree_fam.search_nodes(name=str(query_fam_taxid))[0]
-                else:
-                    t2fam=tree_fam.search_nodes(name=str(query_fam_taxid))[0].up
-                closed = []
-                for l in t2fam.get_leaves():
-                    if l.__dict__['taxid'] in taxid_all_fam:
-                        closed.append(str(l.__dict__['taxid']))
-                        if str(l.__dict__['taxid']) in list_loop_fam:
-                            pass
-                        else:
-                            list_loop_fam.append(str(l.__dict__['taxid']))
-                    else:
-                        continue
-                if str(query_fam_taxid) in closed:
-                    closed.remove(str(query_fam_taxid))
-                else:
-                    pass
-                if str(query_fam_taxid) in list_loop_fam:
-                    list_loop_fam.remove(str(query_fam_taxid))
-                else:
-                    pass
-                closed_list.append(closed)
-
-            while len(list_loop_fam)<cond_loop_len_fam:
-                t2fam=t2fam.up
-                closed = []
-                for l in t2fam.get_leaves():
-                    if l.__dict__['taxid'] in taxid_all_fam:
-                        closed.append(str(l.__dict__['taxid']))
-                        if str(l.__dict__['taxid']) in list_loop_fam:
-                            pass
-                        else:
-                            list_loop_fam.append(str(l.__dict__['taxid']))
-                    else:
-                        continue
-                if str(query_fam_taxid) in closed:
-                    closed.remove(str(query_fam_taxid))
-                else:
-                    pass
-                if str(query_fam_taxid) in list_loop_fam:
-                    list_loop_fam.remove(str(query_fam_taxid))
-                else:
-                    pass
-                closed_list.append(closed)
+        closed=[]
+        closed.append(str(taxid_fam_list[0]))
+        closed_list.append(closed)
 
     cond_len = 1
     closed_taxa=[]
@@ -493,6 +500,7 @@ if len(taxid_fam_list)>0:
                     else:
                         closed_taxa.append(s)
                         cond_len += 1
+
 else:
     closed_taxa=[]
     # pas de close car pas de sequences de familles donc --> à la fin prendre sur la taille si >5 --> 5 sinon tout

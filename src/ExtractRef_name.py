@@ -578,8 +578,10 @@ if __name__ == "__main__":
                 query=000000
 
     mkdir(outpath)
-
-    fname = "close_"+str(model)+".fa"
+    if str(model)=="nucrdna":
+        fname = "close_"+str(model)+"_sequences.fa"
+    else:
+        fname = "close_"+str(model)+".fa"
     open(os.path.join(outpath, fname), 'w').close()
 
     seeds_seq={}

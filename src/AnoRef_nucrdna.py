@@ -8,10 +8,10 @@ from Bio.SeqRecord import *
 #from Bio.Alphabet.IUPAC import IUPACAmbiguousDNA;
 from Bio.Seq import *
 from Bio.SeqUtils import *
-try:
-    from Bio.Alphabet import generic_dna
-except ImportError:
-    generic_dna is None
+#try:
+#    from Bio.Alphabet import generic_dna
+#except ImportError:
+#    generic_dna is None
 
 import argparse
 import sys

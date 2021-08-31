@@ -65,29 +65,29 @@ License: GPL https://www.gnu.org/licenses/gpl-3.0.html
 
 ## 1. Installation
 
-ORTHOSKIM is tested on Unix environment and requires:
-+ [EXONERATE](https://www.ebi.ac.uk/about/vertebrate-genomics/software/EXONERATE)
-+ [SPADES](http://cab.spbu.ru/software/spades/)
-+ [DIAMOND](https://github.com/bbuchfink/DIAMOND)
-+ [BLAST](https://BLAST.ncbi.nlm.nih.gov/BLAST.cgi?PAGE_TYPE=BLASTDocs&DOC_TYPE=Download)
-+ [MAFFT](https://MAFFT.cbrc.jp/alignment/software/)
-+ [TRIMAL](http://TRIMAL.cgenomics.org/)
-+ Needs Awk, Python
-
-Some python libraries are also required, and can be installed via [conda](https://docs.conda.io/projects/conda/en/latest/commands/install.html)  *install*:
-+ ete3==3.0.0b35
-+ joblib==0.16.0
-+ numpy==1.19.1
-+ Bio==0.3.0
-
-ORTHOSKIM is installed from the source code:
+ORTHOSKIM is tested on Unix environment and downloaded from the source code:
 
 ```
 wget https://github.com/cpouchon/ORTHOSKIM/archive/master.zip
 unzip master.zip
-cd OrthoSkim-master/
 ```
 
+As it depends on different softwares (exonerate, SPAdes, diamond, BLAST, MAFFT, trimAl) and python libraries (ete3,joblib,numpy, Bio), user has to  create the orthoskim package with all required dependencies using [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html), which has to be installed (see https://conda.io/projects/conda/en/latest/user-guide/install/index.html).
+
+ORTHOSKIM package is create with the *orthoskim-env.yml* file provided:
+
+```
+cd ./OrthoSkim-master/
+conda env create --prefix your_path_to_install --file orthoskim-env.yml
+```
+
+Such package as then to be activate when running ORTHOSKIM and deactivate:
+
+```
+conda activate orthoskim-env
+(orthoskim-env) ./OrthoSkim-master/orthoskim
+conda deactivate
+```
 
 
 ## 2. Input files
@@ -205,7 +205,24 @@ NRDNA_GENES=~/OrthoSkim-master/ressources/listGenes.rdna                        
 
 ### 2.2. Dependencies
 
-The path to all dependencies which are required in ORTHOSKIM must be supplied in the *tools.sh* file, using following command:
+The path to all dependencies which are required in ORTHOSKIM must be supplied in the *tools.sh* file.
+
+To retrieve dependencies, once the orthoskim-env is activate, please use:
+
+```
+conda activate orthoskim-env
+(orthoskim-env) which diamond spades.py exonerate makeblastdb blastn mafft trimal
+/home/charles/.conda/envs/orthoskim-env/bin/diamond
+/home/charles/.conda/envs/orthoskim-env/bin/spades.py
+/home/charles/.conda/envs/orthoskim-env/bin/exonerate
+/home/charles/.conda/envs/orthoskim-env/bin/makeblastdb
+/home/charles/.conda/envs/orthoskim-env/bin/blastn
+/home/charles/.conda/envs/orthoskim-env/bin/mafft
+/home/charles/.conda/envs/orthoskim-env/bin/trimal
+
+```
+
+Paths are then filled on the *tools.sh* file using following command:
 
 ```
 nano tools.sh
@@ -213,14 +230,16 @@ nano tools.sh
 ```
 #!/bin/bash
 
-SPADES=/Users/pouchonc/PhyloAlps/OrthoSkim/TOOLS/SPAdes-3.13.0-Darwin/bin/spades.py
-DIAMOND=/Users/pouchonc/miniconda2/bin/DIAMOND
-EXONERATE=/usr/local/bin/EXONERATE
-BLASTDB=/Users/pouchonc/miniconda2/bin/makeBLASTdb
-BLASTN=/Users/pouchonc/miniconda2/bin/BLASTn
-MAFFT=/path/to/MAFFT
-TRIMAL=/path/to/TRIMAL
+SPADES=/home/charles/.conda/envs/orthoskim-env/bin/spades.py
+DIAMOND=/home/charles/.conda/envs/orthoskim-env/bin/diamond
+EXONERATE=/home/charles/.conda/envs/orthoskim-env/bin/exonerate
+BLASTDB=/home/charles/.conda/envs/orthoskim-env/bin/makeblastdb
+BLASTN=/home/charles/.conda/envs/orthoskim-env/bin/blastn
+MAFFT=/home/charles/.conda/envs/orthoskim-env/bin/mafft
+TRIMAL=/home/charles/.conda/envs/orthoskim-env/bin/trimal
 ```
+
+
 
 ### 2.3. Sample file
 

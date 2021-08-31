@@ -156,37 +156,69 @@ mkdir -p ${RES}/Extraction
     while read f;
     do
       lib=`echo ${f} | awk '{print $1}'`
-      file=${RES}/Assembly/Samples/unfiltered/${lib}.fa
-      if [ -s $file ]; then
-        for seq in `dirname $0`/ressources/rRNA_database/silva-*.fasta;
-        do
-          echo "CMD: ${BLASTN} -db $seq -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn -best_hit_overhang 0.1 -max_target_seqs 1 -best_hit_score_edge 0.1 | awk -v SIM=${SIMILARITY_CONTA_THSLD} -v LEN=${MAPPING_CONTA_LENGTH} '!/^#/ {if (\$3>=SIM && \$4>=LEN) print}' >> ${RES}/Assembly/Samples/blast_$lib.out"
-          ${BLASTN} -db $seq -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn -best_hit_overhang 0.1 -max_target_seqs 1 -best_hit_score_edge 0.1 | awk -v SIM=${SIMILARITY_CONTA_THSLD} -v LEN=${MAPPING_CONTA_LENGTH} '!/^#/ {if ($3>=SIM && $4>=LEN) print}' >> ${RES}/Assembly/Samples/blast_$lib.out
-        done
-        for seq in `dirname $0`/ressources/rRNA_database/rfam*.fasta;
-        do
-          echo "CMD: ${BLASTN} -db $seq -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn -best_hit_overhang 0.1 -max_target_seqs 1 -best_hit_score_edge 0.1 | awk -v SIM=${SIMILARITY_CONTA_THSLD} -v LEN=100 '!/^#/ {if (\$3>=SIM && \$4>=LEN) print}' >> ${RES}/Assembly/Samples/blast_$lib.out"
-          ${BLASTN} -db $seq -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn -best_hit_overhang 0.1 -max_target_seqs 1 -best_hit_score_edge 0.1 | awk -v SIM=${SIMILARITY_CONTA_THSLD} -v LEN=100 '!/^#/ {if ($3>=SIM && $4>=LEN) print}' >> ${RES}/Assembly/Samples/blast_$lib.out
-        done
-        for seq in `dirname $0`/ressources/rRNA_database/DBFAM*.fasta;
-        do
-          echo "CMD: ${BLASTN} -db $seq -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn -best_hit_overhang 0.1 -max_target_seqs 1 -best_hit_score_edge 0.1 | awk -v SIM=${SIMILARITY_CONTA_THSLD} -v LEN=${MAPPING_CONTA_LENGTH} '!/^#/ {if (\$3>=SIM && \$4>=LEN) print}' >> ${RES}/Assembly/Samples/blast_$lib.out"
-          ${BLASTN} -db $seq -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn -best_hit_overhang 0.1 -max_target_seqs 1 -best_hit_score_edge 0.1 | awk -v SIM=${SIMILARITY_CONTA_THSLD} -v LEN=${MAPPING_CONTA_LENGTH} '!/^#/ {if ($3>=SIM && $4>=LEN) print}' >> ${RES}/Assembly/Samples/blast_$lib.out
-        done
-        `dirname $0`/src/SelectContigs_contaminants.py --blast ${RES}/Assembly/Samples/blast_${lib}.out --rank ${TAXONOMIC_PHYLUM_EXPECTED} --taxo `dirname $0`/ressources/rRNA_database_taxonomy.txt > ${RES}/Assembly/Samples/log/bad_${lib}.log
-        awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $file | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a == 0) {print ">"$1"\n"$NF}}' ${RES}/Assembly/Samples/log/bad_${lib}.log - > ${RES}/Assembly/Samples/filtered/${lib}.fa
-        rm ${RES}/Assembly/Samples/blast_${lib}.out
-        echo ""
-        echo "filtering done for $lib"
-        echo ""
-        # if [ -s ${RES}/Assembly/Samples/filtered/${lib}.fa ]; then
-        #   rm $file
-        # else
-        #   echo "WARN: $lib could not be filtered"
-        # fi
+      if [ -s ${RES}/Assembly/cleaning_done.log ]; then
+        if grep -Fxq "${lib}" ${RES}/Assembly/cleaning_done.log; then
+          echo "WARN: $lib contigs already cleaned"
+          continue
+        else
+          file=${RES}/Assembly/Samples/unfiltered/${lib}.fa
+          if [ -s $file ]; then
+            for seq in `dirname $0`/ressources/rRNA_database/silva-*.fasta;
+            do
+              echo "CMD: ${BLASTN} -db $seq -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn -best_hit_overhang 0.1 -max_target_seqs 1 -best_hit_score_edge 0.1 | awk -v SIM=${SIMILARITY_CONTA_THSLD} -v LEN=${MAPPING_CONTA_LENGTH} '!/^#/ {if (\$3>=SIM && \$4>=LEN) print}' >> ${RES}/Assembly/Samples/blast_$lib.out"
+              ${BLASTN} -db $seq -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn -best_hit_overhang 0.1 -max_target_seqs 1 -best_hit_score_edge 0.1 | awk -v SIM=${SIMILARITY_CONTA_THSLD} -v LEN=${MAPPING_CONTA_LENGTH} '!/^#/ {if ($3>=SIM && $4>=LEN) print}' >> ${RES}/Assembly/Samples/blast_$lib.out
+            done
+            for seq in `dirname $0`/ressources/rRNA_database/rfam*.fasta;
+            do
+              echo "CMD: ${BLASTN} -db $seq -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn -best_hit_overhang 0.1 -max_target_seqs 1 -best_hit_score_edge 0.1 | awk -v SIM=${SIMILARITY_CONTA_THSLD} -v LEN=100 '!/^#/ {if (\$3>=SIM && \$4>=LEN) print}' >> ${RES}/Assembly/Samples/blast_$lib.out"
+              ${BLASTN} -db $seq -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn -best_hit_overhang 0.1 -max_target_seqs 1 -best_hit_score_edge 0.1 | awk -v SIM=${SIMILARITY_CONTA_THSLD} -v LEN=100 '!/^#/ {if ($3>=SIM && $4>=LEN) print}' >> ${RES}/Assembly/Samples/blast_$lib.out
+            done
+            for seq in `dirname $0`/ressources/rRNA_database/DBFAM*.fasta;
+            do
+              echo "CMD: ${BLASTN} -db $seq -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn -best_hit_overhang 0.1 -max_target_seqs 1 -best_hit_score_edge 0.1 | awk -v SIM=${SIMILARITY_CONTA_THSLD} -v LEN=${MAPPING_CONTA_LENGTH} '!/^#/ {if (\$3>=SIM && \$4>=LEN) print}' >> ${RES}/Assembly/Samples/blast_$lib.out"
+              ${BLASTN} -db $seq -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn -best_hit_overhang 0.1 -max_target_seqs 1 -best_hit_score_edge 0.1 | awk -v SIM=${SIMILARITY_CONTA_THSLD} -v LEN=${MAPPING_CONTA_LENGTH} '!/^#/ {if ($3>=SIM && $4>=LEN) print}' >> ${RES}/Assembly/Samples/blast_$lib.out
+            done
+            `dirname $0`/src/SelectContigs_contaminants.py --blast ${RES}/Assembly/Samples/blast_${lib}.out --rank ${TAXONOMIC_PHYLUM_EXPECTED} --taxo `dirname $0`/ressources/rRNA_database_taxonomy.txt > ${RES}/Assembly/Samples/log/bad_${lib}.log
+            awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $file | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a == 0) {print ">"$1"\n"$NF}}' ${RES}/Assembly/Samples/log/bad_${lib}.log - > ${RES}/Assembly/Samples/filtered/${lib}.fa
+            rm ${RES}/Assembly/Samples/blast_${lib}.out
+            echo ""
+            echo "filtering done for $lib"
+            echo $lib >> ${RES}/Assembly/cleaning_done.log
+            echo ""
+          else
+            echo "WARN: ${file} does not exist"
+            continue
+          fi
+        fi
       else
-        echo "WARN: ${file} does not exist"
-        continue
+        file=${RES}/Assembly/Samples/unfiltered/${lib}.fa
+        if [ -s $file ]; then
+          for seq in `dirname $0`/ressources/rRNA_database/silva-*.fasta;
+          do
+            echo "CMD: ${BLASTN} -db $seq -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn -best_hit_overhang 0.1 -max_target_seqs 1 -best_hit_score_edge 0.1 | awk -v SIM=${SIMILARITY_CONTA_THSLD} -v LEN=${MAPPING_CONTA_LENGTH} '!/^#/ {if (\$3>=SIM && \$4>=LEN) print}' >> ${RES}/Assembly/Samples/blast_$lib.out"
+            ${BLASTN} -db $seq -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn -best_hit_overhang 0.1 -max_target_seqs 1 -best_hit_score_edge 0.1 | awk -v SIM=${SIMILARITY_CONTA_THSLD} -v LEN=${MAPPING_CONTA_LENGTH} '!/^#/ {if ($3>=SIM && $4>=LEN) print}' >> ${RES}/Assembly/Samples/blast_$lib.out
+          done
+          for seq in `dirname $0`/ressources/rRNA_database/rfam*.fasta;
+          do
+            echo "CMD: ${BLASTN} -db $seq -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn -best_hit_overhang 0.1 -max_target_seqs 1 -best_hit_score_edge 0.1 | awk -v SIM=${SIMILARITY_CONTA_THSLD} -v LEN=100 '!/^#/ {if (\$3>=SIM && \$4>=LEN) print}' >> ${RES}/Assembly/Samples/blast_$lib.out"
+            ${BLASTN} -db $seq -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn -best_hit_overhang 0.1 -max_target_seqs 1 -best_hit_score_edge 0.1 | awk -v SIM=${SIMILARITY_CONTA_THSLD} -v LEN=100 '!/^#/ {if ($3>=SIM && $4>=LEN) print}' >> ${RES}/Assembly/Samples/blast_$lib.out
+          done
+          for seq in `dirname $0`/ressources/rRNA_database/DBFAM*.fasta;
+          do
+            echo "CMD: ${BLASTN} -db $seq -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn -best_hit_overhang 0.1 -max_target_seqs 1 -best_hit_score_edge 0.1 | awk -v SIM=${SIMILARITY_CONTA_THSLD} -v LEN=${MAPPING_CONTA_LENGTH} '!/^#/ {if (\$3>=SIM && \$4>=LEN) print}' >> ${RES}/Assembly/Samples/blast_$lib.out"
+            ${BLASTN} -db $seq -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn -best_hit_overhang 0.1 -max_target_seqs 1 -best_hit_score_edge 0.1 | awk -v SIM=${SIMILARITY_CONTA_THSLD} -v LEN=${MAPPING_CONTA_LENGTH} '!/^#/ {if ($3>=SIM && $4>=LEN) print}' >> ${RES}/Assembly/Samples/blast_$lib.out
+          done
+          `dirname $0`/src/SelectContigs_contaminants.py --blast ${RES}/Assembly/Samples/blast_${lib}.out --rank ${TAXONOMIC_PHYLUM_EXPECTED} --taxo `dirname $0`/ressources/rRNA_database_taxonomy.txt > ${RES}/Assembly/Samples/log/bad_${lib}.log
+          awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $file | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a == 0) {print ">"$1"\n"$NF}}' ${RES}/Assembly/Samples/log/bad_${lib}.log - > ${RES}/Assembly/Samples/filtered/${lib}.fa
+          rm ${RES}/Assembly/Samples/blast_${lib}.out
+          echo ""
+          echo "filtering done for $lib"
+          echo $lib >> ${RES}/Assembly/cleaning_done.log
+          echo ""
+        else
+          echo "WARN: ${file} does not exist"
+          continue
+        fi
       fi
     done <${LIST_FILES}
     end=`date +%s`
@@ -2486,13 +2518,25 @@ mkdir -p ${RES}/Extraction
         do
           echo "INFO: selection of taxa for alignment"
           inpath=${RES}/Extraction/${element}/
+          if [ -d ${RES}/Selection/${element} ]; then
+            rm -rf ${RES}/Selection/${element}
+          else
+            :
+          fi
           echo "CMD: `dirname $0`/src/SelecTaxa.py --inpath $inpath --outpath ${RES}/Selection -t ${TAXALIST} -e ${EXTENSION} --threads ${THREADS}"
           `dirname $0`/src/SelecTaxa.py --inpath $inpath --outpath ${RES}/Selection -t ${TAXALIST} -e fa --threads ${THREADS}
 
           echo "INFO: Alignment of each gene"
           alinpath=${RES}/Selection/${element}/
-          mkdir -p ${RES}/Selection/Alignment/${element}/files/
-          mkdir -p ${RES}/Selection/Alignment/${element}/trim/
+          if [ -d ${RES}/Selection/Alignment/${element}/ ]; then
+            echo "WARN: previous alignments files have been located and deleted for the $element target"
+            rm -rf ${RES}/Selection/Alignment/${element}/
+            mkdir -p ${RES}/Selection/Alignment/${element}/files/
+            mkdir -p ${RES}/Selection/Alignment/${element}/trim/
+          else
+            mkdir -p ${RES}/Selection/Alignment/${element}/files/
+            mkdir -p ${RES}/Selection/Alignment/${element}/trim/
+          fi
 
           for f in `find ${alinpath} -type f -name \*.fa`;
           do
@@ -2517,6 +2561,11 @@ mkdir -p ${RES}/Extraction
           done
         done
         echo "INFO: concatenation of alignments"
+        if [ -f ${RES}/Selection/concatenated.fa ]; then
+          rm ${RES}/Selection/concatenated.*
+        else
+          :
+        fi
         alnfiles=${RES}/Selection/Alignment/
         if [ ${TRIMMING} == 'on' ]; then
           echo "CMD: `dirname $0`/src/ConcatSeq.py -p ${alnfiles} --pathfind -o ${RES}/Selection/concatenated -t ${TAXALIST} --missingfract ${MISSING_RATIO} --target ${listpath} --trim -g ${GENES_TO_CONCAT}"
@@ -2531,8 +2580,15 @@ mkdir -p ${RES}/Extraction
         echo "INFO: No selection of taxa is made for alignment"
         echo "INFO: Alignment of each gene"
         alinpath=${RES}/Extraction/${element}/
-        mkdir -p ${RES}/Alignment/${element}/files/
-        mkdir -p ${RES}/Alignment/${element}/trim/
+        if [ -d ${RES}/Alignment/${element}/ ]; then
+          echo "WARN: previous alignments files have been located and deleted for the $element target."
+          rm -rf ${RES}/Alignment/${element}/
+          mkdir -p ${RES}/Alignment/${element}/files/
+          mkdir -p ${RES}/Alignment/${element}/trim/
+        else
+          mkdir -p ${RES}/Alignment/${element}/files/
+          mkdir -p ${RES}/Alignment/${element}/trim/
+        fi
 
         for f in `find ${alinpath} -type f -name \*.fa`;
         do
@@ -2557,6 +2613,11 @@ mkdir -p ${RES}/Extraction
         done
       done
       echo "INFO: concatenation of alignments"
+      if [ -f ${RES}/Alignment/concatenated.fa ]; then
+        rm ${RES}/Alignment/concatenated.*
+      else
+        :
+      fi
       awk '{print $1}' ${LIST_FILES} > ${RES}/Alignment/taxalist
       TAXALIST=${RES}/Alignment/taxalist
       alnfiles=${RES}/Alignment/
@@ -3970,7 +4031,7 @@ mkdir -p ${RES}/Extraction
             echo "*** make formatted reference on the closest taxa from the database ***"
             echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${NRDNA_REF} -q ${lib} -o ${RES}/references/ -s ${SEEDS_NRDNA} --target ${target} -t ${SEEDS_THRESHOLD}"
             `dirname $0`/src/ExtractRef_name.py -in ${NRDNA_REF} -q ${lib} -o ${RES}/references/ -s ${SEEDS_NRDNA} --target ${target} -t ${SEEDS_THRESHOLD}
-            CLOSE_REF=${RES}/references/close_${target}.fa
+            CLOSE_REF=${RES}/references/close_${target}_sequences.fa
             if [ -s ${CLOSE_REF} ]; then
               if [ -s ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info ]; then
                 echo "*** mapping and extraction of assemblies into reference ***"
@@ -4293,7 +4354,7 @@ mkdir -p ${RES}/Extraction
           echo "*** make formatted reference on the closest taxa from the database ***"
           echo "CMD: `dirname $0`/src/ExtractRef_name.py -in ${NRDNA_REF} -q ${lib} -o ${RES}/references/ -s ${SEEDS_NRDNA} --target ${target} -t ${SEEDS_THRESHOLD}"
           `dirname $0`/src/ExtractRef_name.py -in ${NRDNA_REF} -q ${lib} -o ${RES}/references/ -s ${SEEDS_NRDNA} --target ${target} -t ${SEEDS_THRESHOLD}
-          CLOSE_REF=${RES}/references/close_${target}.fa
+          CLOSE_REF=${RES}/references/close_${target}_sequences.fa
           if [ -s ${CLOSE_REF} ]; then
             if [ -s ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info ]; then
               echo "*** mapping and extraction of assemblies into reference ***"
