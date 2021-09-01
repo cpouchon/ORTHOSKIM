@@ -187,3 +187,25 @@ for taxa in stored.keys():
                 f.write(str(catseq)+'\n')
             else:
                 pass
+    elif 'rrn25S' in stored[taxa].keys() and 'rrn5.8S' in stored[taxa].keys():
+        if len(str(stored[taxa]['rrn25S']))>50:
+            amorce_28S=str(stored[taxa]['rrn25S'])[0:50]
+        else:
+            amorce_28S=str(stored[taxa]['rrn25S'])
+        catseq="".join((str(stored[taxa]['rrn5.8S']),str(amorce_28S)))
+        genename = "rrnITS2"
+        header=">"+genename+"_"+taxa
+        fname=taxa+".fa"
+        with open(file, 'a+') as f:
+            old_headers = []
+            end_file=f.tell()
+            f.seek(0)
+            for line in f:
+                if line.startswith(">"):
+                    old_headers.append(line.rstrip().replace(">","").split(";")[0])
+            if not str(genename+"_"+taxa) in old_headers:
+                f.seek(end_file)
+                f.write(header+'\n')
+                f.write(str(catseq)+'\n')
+            else:
+                pass

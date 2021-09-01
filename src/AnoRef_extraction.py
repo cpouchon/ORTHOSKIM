@@ -313,6 +313,57 @@ if args.single:
                             Bar.update(barp)
                             out.write(header+'\n')
                             out.write(str(out_seq)+'\n')
+                elif 'product' in feat.qualifiers:
+                    gene = feat.qualifiers['product'][0]
+                    barp=barp+1
+                    if feat.location_operator=="join":
+                        length=0
+                        out_seq=""
+                        joinlocation=str(feat.location).replace("join{","").replace("}","").replace("(-)","").replace("(+)","").replace("]","").split(",")
+                        for parts in joinlocation:
+                            clean=parts.split("[")[1]
+                            if ">" in clean or "<" in clean:
+                                pass
+                            else:
+                                spart = int(float(clean.split(":")[0]))
+                                epart = int(float(clean.split(":")[1]))
+                                strand = feat.location.strand
+                                flanked = FeatureLocation(spart, epart, strand)
+                                seq = flanked.extract(record.seq)
+                                length = length+len(str(seq))
+                                out_seq=out_seq+seq
+                    else:
+                        s, e, strand = feat.location.start, feat.location.end, feat.location.strand
+                        length = e-s
+                        flanked = FeatureLocation(s, e, strand)
+                        out_seq = flanked.extract(record.seq)
+
+                    header = ">"+str(gene.replace(" ","").replace("_","-"))+"_"+str(taxid)+"_"+"_".join(org).replace("'","").replace("[","").replace("]","").replace(".","").replace("(","").replace(")","").replace(",","").replace("&","").replace("__","_").replace("_&_","_").replace("_cf_","_")
+                    fname = taxaname+".fa"
+                    subdir=str(model)+"_"+str("rRNA")
+
+                    'check for nucleotidic sequence if existing or not'
+                    if os.path.isfile(os.path.join(str(outdirect),str(subdir), fname)):
+                        with open(os.path.join(str(outdirect),str(subdir), fname), 'a+') as file:
+                            old_headers = []
+                            end_file=file.tell()
+                            file.seek(0)
+                            for line in file:
+                                if line.startswith(">"):
+                                    old_headers.append(line.rstrip())
+
+                            if not header in old_headers:
+                                Bar.update(barp)
+                                file.seek(end_file)
+                                file.write(header+'\n')
+                                file.write(str(out_seq)+'\n')
+                            else:
+                                pass
+                    else :
+                        with open(os.path.join(str(outdirect),str(subdir), fname), 'a') as out:
+                            Bar.update(barp)
+                            out.write(header+'\n')
+                            out.write(str(out_seq)+'\n')
                 else:
                     pass
 
@@ -490,6 +541,57 @@ else:
                             out_seq = flanked.extract(record.seq)
 
                         header = ">"+str(gene.replace("_","-"))+"_"+str(taxid)+"_"+"_".join(org).replace("'","").replace("[","").replace("]","").replace(".","").replace("(","").replace(")","").replace(",","").replace("&","").replace("__","_").replace("_&_","_").replace("_cf_","_")
+                        fname = taxaname+".fa"
+                        subdir=str(model)+"_"+str("rRNA")
+
+                        'check for nucleotidic sequence if existing or not'
+                        if os.path.isfile(os.path.join(str(outdirect),str(subdir), fname)):
+                            with open(os.path.join(str(outdirect),str(subdir), fname), 'a+') as file:
+                                old_headers = []
+                                end_file=file.tell()
+                                file.seek(0)
+                                for line in file:
+                                    if line.startswith(">"):
+                                        old_headers.append(line.rstrip())
+
+                                if not header in old_headers:
+                                    Bar.update(barp)
+                                    file.seek(end_file)
+                                    file.write(header+'\n')
+                                    file.write(str(out_seq)+'\n')
+                                else:
+                                    pass
+                        else :
+                            with open(os.path.join(str(outdirect),str(subdir), fname), 'a') as out:
+                                Bar.update(barp)
+                                out.write(header+'\n')
+                                out.write(str(out_seq)+'\n')
+                    elif 'product' in feat.qualifiers:
+                        gene = feat.qualifiers['product'][0]
+                        barp=barp+1
+                        if feat.location_operator=="join":
+                            length=0
+                            out_seq=""
+                            joinlocation=str(feat.location).replace("join{","").replace("}","").replace("(-)","").replace("(+)","").replace("]","").split(",")
+                            for parts in joinlocation:
+                                clean=parts.split("[")[1]
+                                if ">" in clean or "<" in clean:
+                                    pass
+                                else:
+                                    spart = int(float(clean.split(":")[0]))
+                                    epart = int(float(clean.split(":")[1]))
+                                    strand = feat.location.strand
+                                    flanked = FeatureLocation(spart, epart, strand)
+                                    seq = flanked.extract(record.seq)
+                                    length = length+len(str(seq))
+                                    out_seq=out_seq+seq
+                        else:
+                            s, e, strand = feat.location.start, feat.location.end, feat.location.strand
+                            length = e-s
+                            flanked = FeatureLocation(s, e, strand)
+                            out_seq = flanked.extract(record.seq)
+
+                        header = ">"+str(gene.replace(" ","").replace("_","-"))+"_"+str(taxid)+"_"+"_".join(org).replace("'","").replace("[","").replace("]","").replace(".","").replace("(","").replace(")","").replace(",","").replace("&","").replace("__","_").replace("_&_","_").replace("_cf_","_")
                         fname = taxaname+".fa"
                         subdir=str(model)+"_"+str("rRNA")
 
