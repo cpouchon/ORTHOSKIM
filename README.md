@@ -477,7 +477,7 @@ CHLORO_REF_tRNA=~/ORTHOSKIM-master/data/chloro_tRNA_unaligned.fa                
 NRDNA_REF=~/ORTHOSKIM-master/data/nucrdna_rRNA_unaligned.fa                          ## [53] rDNA rRNA reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
 ```
 
-`>` **output files **
+`>` **output files**
 
 Database mode generates references files for cpDNA, mtDNA and rDNA sequences separately according to the type of sequence: CDS, rRNA and tRNA.
 
