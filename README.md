@@ -443,7 +443,7 @@ ORTHOSKIM provides a mode to create the gene reference database for the cpDNA, m
 
 For such purpose, annotations of genomic compartments has to be collected for different taxa in a single file (file location set into the config file). Only genes given in the seeds will be included on the reference sequences.
 
-`>`** list of commands**
+`>` **list of commands**
 
 ```
 user$: (orthoskim-env) ./orthoskim -m database -t chloroplast -c config_orthoskim.txt
@@ -451,7 +451,7 @@ user$: (orthoskim-env) ./orthoskim -m database -t mitochondrion -c config_orthos
 user$: (orthoskim-env) ./orthoskim -m database -t nucrdna -c config_orthoskim.txt
 ```
 
-`>`** parameters used **
+`>` **parameters used **
 + annotation files and respective formats
 ```
 MITO_ANNOTATIONS=~/ORTHOSKIM-master/data/mitochondrion_viridiplantae.gb              ## [13] input mtDNA Annotations file (in .gb or .embl)
@@ -477,7 +477,7 @@ CHLORO_REF_tRNA=~/ORTHOSKIM-master/data/chloro_tRNA_unaligned.fa                
 NRDNA_REF=~/ORTHOSKIM-master/data/nucrdna_rRNA_unaligned.fa                          ## [53] rDNA rRNA reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
 ```
 
-`>`** output files **
+`>` **output files **
 
 Database mode generates references files for cpDNA, mtDNA and rDNA sequences separately according to the type of sequence: CDS, rRNA and tRNA.
 
@@ -505,7 +505,7 @@ with -i input genes/genomes file; -l number of queried lineages by family; -f in
 Global assemblies are performed for each library given in the sample file (l.7) by using [SPAdes](http://cab.spbu.ru/software/spades/). The user has to use the `-m assembly -t spades` or `-m assembly -t rnaspades` commands to run the assemblies according to the type of library (green arrows in Fig. 1). After [SPAdes](http://cab.spbu.ru/software/spades/) runs, ORTHOSKIM has to preprocess scaffolding contigs by formating the output files according to the library names provided in sample file. For such purpose, the user has to run the `-m format` mode with `-t spades` or `-t rnaspades` targets according to the type of library that were processed.
 
 
-`>`** list of commands**
+`>` **list of commands**
 + for genomic libraries
 
 ```
@@ -520,7 +520,7 @@ user$: (orthoskim-env) ./orthoskim -m format -t rnaspades -c config_orthoskim.tx
 ```
 
 
-`>`** parameters used **
+`>` **parameters used **
 
 + [SPAdes](http://cab.spbu.ru/software/spades/) is run by using different assembly options
 
@@ -531,7 +531,7 @@ MEMORY=30                                                                       
 KMER=55                                                                              ## [9] K-mer size used in assembly with single (here 55) or range values (as 21,33,55). Note: less than 128
 ```
 
-`>`** output files **
+`>` **output files **
 
 ORTHOSKIM creates an `/Working_directory/Assembly/` directory including two subdirectories:
 + `/Working_directory/Assembly/SPADES/` or `/Working_directory/Assembly/RNASPADES/` directory with all assemblies produced by SPAdes ordered by libraries (with the given samplenames)
@@ -547,7 +547,7 @@ Before the capture of target sequences, all assemblies are cleaned using the `-m
 The taxonomic level of the best hit is next identified for each contig of each library, and compared onto an expected taxonomy, defined by the user.
 
 
-`>`** list of commands**
+`>` **list of commands**
 
 ```
 user$: (orthoskim-env) ./orthoskim -m cleaning -c config_orthoskim.txt
@@ -555,7 +555,7 @@ user$: (orthoskim-env) ./orthoskim -m cleaning -c config_orthoskim.txt
 
 
 
-`>`** parameters used **
+`>` **parameters used **
 
 
 ```
@@ -565,7 +565,7 @@ TAXONOMIC_PHYLUM_EXPECTED=Embryophyta                                           
 ```
 > **NOTE:** Please check the taxonomy provided in the ~/ORTHOSKIM-master/ressources/rRNA_database_taxonomy.txt file to set a correct phylum (*e.g.* "Embryophyta", "Eumetazoa","Arthropoda","Annelida" etc).
 
-`>`** output files **
+`>` **output files **
 
 Cleaned assemblies are generated within the `/Working_directory/Assembly/Samples/filtered/` subdirectory. Contaminant contigs which were filtered out are listed in the `Assembly/Samples/log/` subdirectory
 
@@ -581,7 +581,7 @@ The capture of targeted sequence is achieved with the `-m capture` mode by follo
 > **Note:** Concerning plant models, a second control is performed during the capture to ensure the correct origin of reconstructed organelle genes. To do so, the extracted sequences are aligned against the cpDNA and mtDNA seeds. All cpDNA and mtDNA seeds have consequently to be collected by users even if only chloroplast genes will be captured.     
 
 
-`>`** list of commands**
+`>` **list of commands**
 
 The capture mode is running with specific targets according to the querried targeted sequences:
 
@@ -599,7 +599,7 @@ user$: (orthoskim-env) ./orthoskim -m capture -t nucleus_aa -c config_orthoskim.
 user$: (orthoskim-env) ./orthoskim -m capture -t nucleus_nt -c config_orthoskim.txt
 ```
 
-`>`** parameters used **
+`>` **parameters used **
 
 + for the pre-selection of contigs for cpDNA, mtDNA and rDNA targets
 ```
@@ -672,7 +672,7 @@ ORFCOV=0.8                                                                      
   ```
 
 
-`>`** output files **
+`>` **output files **
 
 Captured sequences are generated in multi-FASTA files within the `/Working_directory/Extraction/` subdirectory and ordered by the targets used (*e.g.* `/Working_directory/Extraction/chloroplast_CDS/` subdirectory). One FASTA file is produced per targeted sequence (*e.g.* ycf1.fa). For CDS targets using amino-acid reference sequences, a control is performed by checking that the longest open reading frame (ORF) from the extracted exons of each targeted sequences covers at least a minimal fraction of the capture sequence set by users (*e.g.* ORFCOV=0.8). This step allows taking into account for variations or errors in gene predictions like alternative start codon in protein sequence of the reference. If such condition is not filled (*e.g.* due to pseudogenes or prediction errors), the sequence is tagged as a gene-like sequence (*e.g.* ycf1-like), and stored apart (*e.g.* ycf1-like.fa file).
 
@@ -714,14 +714,14 @@ ORTHOSKIM provides a mode to align each captured sequences across the libraries 
 
 
 
-`>`** list of commands**
+`>` **list of commands**
 
 ```
 user$: (orthoskim-env) ./orthoskim -m alignment -t chloroplast_CDS -t chloroplast_rRNA -t chloroplast_tRNA -c config_orthoskim.txt
 ```
 >**Note:** Here, we used multiple targets with the `-t option` to align CDS, rRNA and tRNA sequences in a single run.
 
-`>`** parameters used **
+`>` **parameters used **
 
 ```
 SELECTION=on                                                                         ## [55] selection of taxa for the alignment: [on/off]
@@ -732,7 +732,7 @@ MISSING_RATIO=1.0                                                               
 GENES_TO_CONCAT=~/ORTHOSKIM-master/ressources/listGenes_To_Concat.tab                ## [60] file with selected genes for the alignment (each line corresponds to one gene)
 ```
 
-`>`** output files **
+`>` **output files **
 
 ORTHOSKIM produces a concatenated alignment of sequences along with a partition file under a RAxML-style format suitable for phylogenetic inferences within the `/Working_directory/Assembly/` or `/Working_directory/Selection/` subdirectory (if a selection of taxa is made). For such needs, users have to choose which sequences will be concatenated from a given list (list stated in l. 57 of the config file). A file with informations about gappy or missing data is also produced by library.
 
@@ -775,13 +775,13 @@ Dipsacus_fullonum_183561_TROM_V_159792_CDM_BFO	0.1808
 
 ORTHOSKIM allows to output summary statistic over assemblies by using the `-m statistic_assembly` mode once contigs were cleaned.
 
-`>`** list of commands**
+`>` **list of commands**
 
 ```
 user$: (orthoskim-env) ./orthoskim -m statistic_assembly -c config_orthoskim.txt
 ```
 
-`>`** output files **
+`>` **output files **
 
 The output *assemblies_statistics.txt* file is generated in `/Working_directory/Statistics/` folder, including:
 + the library name
@@ -817,14 +817,14 @@ Anagallis_arvensis_4337_PHA000447_BGN_NS	DBFAM_mitochondrion	227	root,eukaryota,
 ORTHOSKIM allows to get statistic from the sequence captured by using the `-m statistic_capture` mode for the different targets.
 
 
-`>`** list of commands**
+`>` **list of commands**
 
 ```
 user$: (orthoskim-env) ./orthoskim -m statistic_capture -t chloroplast_CDS -c config_orthoskim.txt
 ```
 >**Note:** multiple targets can be supplied, *e.g.* `-t chloroplast_CDS -t chloroplast_rRNA`.
 
-`>`** output files **
+`>` **output files **
 
 The pipeline generates table (*report.tab*) within the `/Working_directory/Statistics/` folder, containing:
 + the targeted sequence name (gene_name)
@@ -896,13 +896,13 @@ wget ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/accession2taxid//nucl_gb.accession2
 > **Note:** a new version of this mode, without this requirement, will be available soon.
 
 
-`>`** list of commands**
+`>` **list of commands**
 
 ```
 user$: (orthoskim-env) ./orthoskim -m checking -c config_orthoskim.txt
 ```
 
-`>`** parameters used **
+`>` **parameters used **
 ```
 BARCODES=( matK rbcL )                                                               ## [61] list of sequences used for the taxonomic checking. Users have to respect spaces between sequence names. If only one gene, set BARCODES=( matK ). We recommend to use only genes that are widely represented in the NCBI database (e.g. traditional barcodes).
 BARCODES_TYPE=chloroplast_CDS                                                        ## [62] ORTHOSKIM targets including these genes [chloroplast_CDS, chloroplast_rRNA, chloroplast_tRNA, chloroplast_nt, mitochondrion_CDS, mitochondrion_rRNA, mitochondrion_nt,nuleus_aa, nucleus_nt, busco, nucrdna]
@@ -914,7 +914,7 @@ FAMILIES_LOCAL=off                                                              
 CORRESPONDING_FAMILIES=ecofind_out.tab                                               ## [68] table with query taxID and corresponding family (with space separator)
 ```
 
-`>`** output files **
+`>` **output files **
 
 ORTHOSKIM generates a `/Working_directory/Errors/` subdirectory with a *ValidationSamples.out* file. This file gives for each library and for each sequence analyzed (*e.g.* matK and rbcL genes) if the taxonomic checking is TRUE, FALSE or NA (*i.e.* missing), as following:
 ```
