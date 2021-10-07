@@ -338,7 +338,7 @@ def GeneExtraction(genenumber):
     cond_toprint_var=0
     cond_orf=0
 
-    if typeseq=="exon" and (model=="chloroplast_CDS" or model=="mitochondrion_CDS" or model=="busco"):
+    if typeseq=="exon" and (model=="chloroplast_CDS" or model=="mitochondrion_CDS" or model=="busco" or model=="nucleus_aa"):
         tseq=Seq(newseq).translate()
         if "*" in tseq:
             seqframes=[Seq(newseq).translate(),Seq(newseq[1:len(newseq)]).translate(),Seq(newseq[2:len(newseq)]).translate()]
@@ -385,7 +385,7 @@ def GeneExtraction(genenumber):
                 newseq2=newseq
         else:
             newseq2=newseq
-    elif typeseq=="all" and (model=="chloroplast_CDS" or model=="mitochondrion_CDS" or model=="busco"):
+    elif typeseq=="all" and (model=="chloroplast_CDS" or model=="mitochondrion_CDS" or model=="busco" or model=="nucleus_aa"):
         if cond_min_length!=0:
             if int(max(num_exon))>1:
                 # condition si intron dans la séquence, on recupere les sequences d'exon, sans cond_orf

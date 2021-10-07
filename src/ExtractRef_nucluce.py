@@ -29,7 +29,7 @@ parser.add_argument("-q","--query", help="taxa name",
 parser.add_argument("-o","--outdir", help="out directory path",
                     type=str)
 parser.add_argument("--target", help="gene type targeted",
-                    type=str,choices=["chloroplast_CDS","chloroplast_tRNA","chloroplast_rRNA", "mitochondrion_CDS","mitochondrion_rRNA","nucrdna","nucleus_aa","nucleus_nt"])
+                    type=str,choices=["chloroplast_CDS","chloroplast_tRNA","chloroplast_rRNA","chloroplast_nt","mitochondrion_CDS","mitochondrion_rRNA","mitochondrion_nt","nucrdna","nucleus_aa","nucleus_nt"])
 
 
 if len(sys.argv)==1:

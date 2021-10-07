@@ -26,7 +26,7 @@ if [ "$1" == "-h" ]; then
   o       O o       O o       O
 
 
-OrthoSkim: in silico gene capture from genomic and transcriptomic libraries
+ORTHOSKIM: in silico gene capture from genomic and transcriptomic libraries
            where:
             -m (mode) perform pipeline according to the chosen mode:
                   - [alignment] (multiple sequence alignments between libraries and phylogenetic matrix computation)
@@ -51,8 +51,10 @@ OrthoSkim: in silico gene capture from genomic and transcriptomic libraries
                   - [chloroplast_CDS] (*capture*,*statistic_capture*)
                   - [chloroplast_tRNA] (*capture*,*statistic_capture*)
                   - [chloroplast_rRNA] (*capture*,*statistic_capture*)
+                  - [chloroplast_nt] (*capture*,*statistic_capture*)
                   - [mitochondrion_CDS] (*capture*,*statistic_capture*)
                   - [mitochondrion_rRNA] (*capture*,*statistic_capture*)
+                  - [mitochondrion_nt] (*capture*,*statistic_capture*)
                   - [spades] (*assembly*,*format*)
                   - [rnaspades] (*assembly*,*format*)
             -p  (path) [only for phyloskims users] give path to indexing file
@@ -72,7 +74,7 @@ if [ ${VERBOSE} -eq 1 ]; then
 fi
 
 
-echo 'Processing OrthoSkim program'
+echo 'Processing ORTHOSKIM'
 echo "
 O       o O       o O       o
 | O   o | | O   o | | O   o |
@@ -86,8 +88,8 @@ mkdir -p ${RES}/Extraction
 
   if [ $mode == 'phyloskim_indexing' ]; then
 		echo "INFO: indexing of annotation files"
-    echo "CMD: `dirname $0`/src/Indexing.py -p ${path} -cfind > ${LIST_FILES}"
-		`dirname $0`/src/Indexing.py -p ${path} -cfind > ${LIST_FILES}
+    echo "CMD: `dirname $0`/src/Indexing.py -p ${path} -cfind > ${SAMPLES}"
+		`dirname $0`/src/Indexing.py -p ${path} -cfind > ${SAMPLES}
 		echo "STATUS: done"
     echo ""
 		exit 0
@@ -105,7 +107,7 @@ mkdir -p ${RES}/Extraction
         echo "WARN: $samplename unprocessed"
         continue
       fi
-    done <${LIST_FILES}
+    done <${SAMPLES}
     end=`date +%s`
     runtime=$( echo "$end - $start" | bc -l )
     hours=$((runtime / 3600))
@@ -131,7 +133,7 @@ mkdir -p ${RES}/Extraction
         echo "WARN: $samplename unprocessed"
         #continue
       fi
-    done <${LIST_FILES}
+    done <${SAMPLES}
     end=`date +%s`
     runtime=$( echo "$end - $start" | bc -l )
     hours=$((runtime / 3600))
@@ -148,7 +150,7 @@ mkdir -p ${RES}/Extraction
     mkdir -p ${RES}/Assembly/Samples/log/
     start=$(date +%s)
     echo "*** make BLAST formatted reference database for rRNA sequences ***"
-    for seq in `dirname $0`/ressources/rRNA_database/*.fasta;
+    for seq in `dirname $0`/resources/rRNA_database/*.fasta;
     do
       ${BLASTDB} -in $seq -dbtype nucl
     done
@@ -163,22 +165,22 @@ mkdir -p ${RES}/Extraction
         else
           file=${RES}/Assembly/Samples/unfiltered/${lib}.fa
           if [ -s $file ]; then
-            for seq in `dirname $0`/ressources/rRNA_database/silva-*.fasta;
+            for seq in `dirname $0`/resources/rRNA_database/silva-*.fasta;
             do
               echo "CMD: ${BLASTN} -db $seq -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn -best_hit_overhang 0.1 -max_target_seqs 1 -best_hit_score_edge 0.1 | awk -v SIM=${SIMILARITY_CONTA_THSLD} -v LEN=${MAPPING_CONTA_LENGTH} '!/^#/ {if (\$3>=SIM && \$4>=LEN) print}' >> ${RES}/Assembly/Samples/blast_$lib.out"
               ${BLASTN} -db $seq -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn -best_hit_overhang 0.1 -max_target_seqs 1 -best_hit_score_edge 0.1 | awk -v SIM=${SIMILARITY_CONTA_THSLD} -v LEN=${MAPPING_CONTA_LENGTH} '!/^#/ {if ($3>=SIM && $4>=LEN) print}' >> ${RES}/Assembly/Samples/blast_$lib.out
             done
-            for seq in `dirname $0`/ressources/rRNA_database/rfam*.fasta;
+            for seq in `dirname $0`/resources/rRNA_database/rfam*.fasta;
             do
               echo "CMD: ${BLASTN} -db $seq -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn -best_hit_overhang 0.1 -max_target_seqs 1 -best_hit_score_edge 0.1 | awk -v SIM=${SIMILARITY_CONTA_THSLD} -v LEN=100 '!/^#/ {if (\$3>=SIM && \$4>=LEN) print}' >> ${RES}/Assembly/Samples/blast_$lib.out"
               ${BLASTN} -db $seq -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn -best_hit_overhang 0.1 -max_target_seqs 1 -best_hit_score_edge 0.1 | awk -v SIM=${SIMILARITY_CONTA_THSLD} -v LEN=100 '!/^#/ {if ($3>=SIM && $4>=LEN) print}' >> ${RES}/Assembly/Samples/blast_$lib.out
             done
-            for seq in `dirname $0`/ressources/rRNA_database/DBFAM*.fasta;
+            for seq in `dirname $0`/resources/rRNA_database/DBFAM*.fasta;
             do
               echo "CMD: ${BLASTN} -db $seq -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn -best_hit_overhang 0.1 -max_target_seqs 1 -best_hit_score_edge 0.1 | awk -v SIM=${SIMILARITY_CONTA_THSLD} -v LEN=${MAPPING_CONTA_LENGTH} '!/^#/ {if (\$3>=SIM && \$4>=LEN) print}' >> ${RES}/Assembly/Samples/blast_$lib.out"
               ${BLASTN} -db $seq -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn -best_hit_overhang 0.1 -max_target_seqs 1 -best_hit_score_edge 0.1 | awk -v SIM=${SIMILARITY_CONTA_THSLD} -v LEN=${MAPPING_CONTA_LENGTH} '!/^#/ {if ($3>=SIM && $4>=LEN) print}' >> ${RES}/Assembly/Samples/blast_$lib.out
             done
-            `dirname $0`/src/SelectContigs_contaminants.py --blast ${RES}/Assembly/Samples/blast_${lib}.out --rank ${TAXONOMIC_PHYLUM_EXPECTED} --taxo `dirname $0`/ressources/rRNA_database_taxonomy.txt > ${RES}/Assembly/Samples/log/bad_${lib}.log
+            `dirname $0`/src/SelectContigs_contaminants.py --blast ${RES}/Assembly/Samples/blast_${lib}.out --rank ${TAXONOMIC_PHYLUM_EXPECTED} --taxo `dirname $0`/resources/rRNA_database_taxonomy.txt > ${RES}/Assembly/Samples/log/bad_${lib}.log
             awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $file | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a == 0) {print ">"$1"\n"$NF}}' ${RES}/Assembly/Samples/log/bad_${lib}.log - > ${RES}/Assembly/Samples/filtered/${lib}.fa
             rm ${RES}/Assembly/Samples/blast_${lib}.out
             echo ""
@@ -193,22 +195,22 @@ mkdir -p ${RES}/Extraction
       else
         file=${RES}/Assembly/Samples/unfiltered/${lib}.fa
         if [ -s $file ]; then
-          for seq in `dirname $0`/ressources/rRNA_database/silva-*.fasta;
+          for seq in `dirname $0`/resources/rRNA_database/silva-*.fasta;
           do
             echo "CMD: ${BLASTN} -db $seq -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn -best_hit_overhang 0.1 -max_target_seqs 1 -best_hit_score_edge 0.1 | awk -v SIM=${SIMILARITY_CONTA_THSLD} -v LEN=${MAPPING_CONTA_LENGTH} '!/^#/ {if (\$3>=SIM && \$4>=LEN) print}' >> ${RES}/Assembly/Samples/blast_$lib.out"
             ${BLASTN} -db $seq -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn -best_hit_overhang 0.1 -max_target_seqs 1 -best_hit_score_edge 0.1 | awk -v SIM=${SIMILARITY_CONTA_THSLD} -v LEN=${MAPPING_CONTA_LENGTH} '!/^#/ {if ($3>=SIM && $4>=LEN) print}' >> ${RES}/Assembly/Samples/blast_$lib.out
           done
-          for seq in `dirname $0`/ressources/rRNA_database/rfam*.fasta;
+          for seq in `dirname $0`/resources/rRNA_database/rfam*.fasta;
           do
             echo "CMD: ${BLASTN} -db $seq -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn -best_hit_overhang 0.1 -max_target_seqs 1 -best_hit_score_edge 0.1 | awk -v SIM=${SIMILARITY_CONTA_THSLD} -v LEN=100 '!/^#/ {if (\$3>=SIM && \$4>=LEN) print}' >> ${RES}/Assembly/Samples/blast_$lib.out"
             ${BLASTN} -db $seq -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn -best_hit_overhang 0.1 -max_target_seqs 1 -best_hit_score_edge 0.1 | awk -v SIM=${SIMILARITY_CONTA_THSLD} -v LEN=100 '!/^#/ {if ($3>=SIM && $4>=LEN) print}' >> ${RES}/Assembly/Samples/blast_$lib.out
           done
-          for seq in `dirname $0`/ressources/rRNA_database/DBFAM*.fasta;
+          for seq in `dirname $0`/resources/rRNA_database/DBFAM*.fasta;
           do
             echo "CMD: ${BLASTN} -db $seq -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn -best_hit_overhang 0.1 -max_target_seqs 1 -best_hit_score_edge 0.1 | awk -v SIM=${SIMILARITY_CONTA_THSLD} -v LEN=${MAPPING_CONTA_LENGTH} '!/^#/ {if (\$3>=SIM && \$4>=LEN) print}' >> ${RES}/Assembly/Samples/blast_$lib.out"
             ${BLASTN} -db $seq -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn -best_hit_overhang 0.1 -max_target_seqs 1 -best_hit_score_edge 0.1 | awk -v SIM=${SIMILARITY_CONTA_THSLD} -v LEN=${MAPPING_CONTA_LENGTH} '!/^#/ {if ($3>=SIM && $4>=LEN) print}' >> ${RES}/Assembly/Samples/blast_$lib.out
           done
-          `dirname $0`/src/SelectContigs_contaminants.py --blast ${RES}/Assembly/Samples/blast_${lib}.out --rank ${TAXONOMIC_PHYLUM_EXPECTED} --taxo `dirname $0`/ressources/rRNA_database_taxonomy.txt > ${RES}/Assembly/Samples/log/bad_${lib}.log
+          `dirname $0`/src/SelectContigs_contaminants.py --blast ${RES}/Assembly/Samples/blast_${lib}.out --rank ${TAXONOMIC_PHYLUM_EXPECTED} --taxo `dirname $0`/resources/rRNA_database_taxonomy.txt > ${RES}/Assembly/Samples/log/bad_${lib}.log
           awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $file | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a == 0) {print ">"$1"\n"$NF}}' ${RES}/Assembly/Samples/log/bad_${lib}.log - > ${RES}/Assembly/Samples/filtered/${lib}.fa
           rm ${RES}/Assembly/Samples/blast_${lib}.out
           echo ""
@@ -220,7 +222,7 @@ mkdir -p ${RES}/Extraction
           continue
         fi
       fi
-    done <${LIST_FILES}
+    done <${SAMPLES}
     end=`date +%s`
     runtime=$( echo "$end - $start" | bc -l )
     hours=$((runtime / 3600))
@@ -264,7 +266,7 @@ mkdir -p ${RES}/Extraction
           echo ${samplename} >> ${RES}/assembly_error.log
         fi
       fi
-		done <${LIST_FILES}
+		done <${SAMPLES}
     end=`date +%s`
     runtime=$( echo "$end - $start" | bc -l )
     hours=$((runtime / 3600))
@@ -308,7 +310,7 @@ mkdir -p ${RES}/Extraction
           echo ${samplename} >> ${RES}/assembly_error.log
         fi
       fi
-    done <${LIST_FILES}
+    done <${SAMPLES}
     end=`date +%s`
     runtime=$( echo "$end - $start" | bc -l )
     hours=$((runtime / 3600))
@@ -385,7 +387,7 @@ mkdir -p ${RES}/Extraction
         echo "no assemblies done for $lib"
         echo ${lib} >> ${RES}/busco_error.log
       fi
-		done <${LIST_FILES}
+		done <${SAMPLES}
     end=`date +%s`
     runtime=$( echo "$end - $start" | bc -l )
     hours=$((runtime / 3600))
@@ -451,7 +453,7 @@ mkdir -p ${RES}/Extraction
         echo $samplename
         echo $samplename >> ${RES}/chloroplast_error.log
       fi
-		done <${LIST_FILES}
+		done <${SAMPLES}
 		echo "STATUS: done"
 		exit 0
 
@@ -501,7 +503,7 @@ mkdir -p ${RES}/Extraction
       else
         echo $samplename >> ${RES}/nucrdna_error.log
       fi
-		done <${LIST_FILES}
+		done <${SAMPLES}
 		echo "STATUS: done"
     echo ""
 		exit 0
@@ -511,8 +513,8 @@ mkdir -p ${RES}/Extraction
 		mkdir -p ${RES}/references/unclean
     start=$(date +%s)
     echo '*** extraction of all genes from annotations ***'
-    echo "CMD: `dirname $0`/src/AnoRef_extraction.py --single -in ${MITO_ANNOTATIONS} -o ${RES}/references/unclean -m mitochondrion -fmt ${MITO_DB_FMT} --codon `dirname $0`/ressources/tRNA_codons.tab"
-		`dirname $0`/src/AnoRef_extraction.py --single -in ${MITO_ANNOTATIONS} -o ${RES}/references/unclean -m mitochondrion -fmt ${MITO_DB_FMT} --codon `dirname $0`/ressources/tRNA_codons.tab
+    echo "CMD: `dirname $0`/src/AnoRef_extraction.py --single -in ${MITO_ANNOTATIONS} -o ${RES}/references/unclean -m mitochondrion -fmt ${MITO_DB_FMT} --codon `dirname $0`/resources/tRNA_codons.tab"
+		`dirname $0`/src/AnoRef_extraction.py --single -in ${MITO_ANNOTATIONS} -o ${RES}/references/unclean -m mitochondrion -fmt ${MITO_DB_FMT} --codon `dirname $0`/resources/tRNA_codons.tab
 
 		echo '*** alignment of CDS into mito seeds, and extraction of final CDS of reference ***'
 		for file in `find ${RES}/references/unclean/mitochondrion_CDS/ -type f -name \*.fa`;
@@ -598,8 +600,8 @@ mkdir -p ${RES}/Extraction
 		mkdir -p ${RES}/references/unclean
     start=$(date +%s)
     echo '*** extraction of all genes from annotations ***'
-    echo "CMD: `dirname $0`/src/AnoRef_extraction.py --single -in ${CHLORO_ANNOTATIONS} -o ${RES}/references/unclean -m chloroplast -fmt ${CHLORO_DB_FMT} --codon `dirname $0`/ressources/tRNA_codons.tab"
-		`dirname $0`/src/AnoRef_extraction.py --single -in ${CHLORO_ANNOTATIONS} -o ${RES}/references/unclean -m chloroplast -fmt ${CHLORO_DB_FMT} --codon `dirname $0`/ressources/tRNA_codons.tab
+    echo "CMD: `dirname $0`/src/AnoRef_extraction.py --single -in ${CHLORO_ANNOTATIONS} -o ${RES}/references/unclean -m chloroplast -fmt ${CHLORO_DB_FMT} --codon `dirname $0`/resources/tRNA_codons.tab"
+		`dirname $0`/src/AnoRef_extraction.py --single -in ${CHLORO_ANNOTATIONS} -o ${RES}/references/unclean -m chloroplast -fmt ${CHLORO_DB_FMT} --codon `dirname $0`/resources/tRNA_codons.tab
 
 		echo '*** alignment of CDS into seeds, and extraction of final CDS of reference ***'
 		for file in `find ${RES}/references/unclean/chloroplast_CDS/ -type f -name \*.fa`;
@@ -703,7 +705,7 @@ mkdir -p ${RES}/Extraction
         echo $lib
         echo $lib >> ${RES}/references/chloroplast_error.log
       fi
-		done <${LIST_FILES}
+		done <${SAMPLES}
 
     cat ${RES}/references/clean/chloroplast_CDS/*.fa > ${CHLORO_REF_CDS}
     cat ${RES}/references/clean/chloroplast_tRNA/*.fa > ${CHLORO_REF_tRNA}
@@ -764,7 +766,7 @@ mkdir -p ${RES}/Extraction
       else
         echo $lib >> ${RES}/references/nucrdna_error.log
       fi
-		done <${LIST_FILES}
+		done <${SAMPLES}
 
     `dirname $0`/src/rrnITS.py -p ${RES}/references/clean/nucrdna_rRNA/ -o ${RES}/references/clean/nucrdna_misc_RNA/
     `dirname $0`/src/rrnITS_seeds.py -i ${SEEDS_NRDNA}
@@ -1505,7 +1507,7 @@ mkdir -p ${RES}/Extraction
         echo "no assemblies done for $lib"
         echo ${lib} >> ${RES}/mitochondrion_rRNA_error.log
       fi
-		done <${LIST_FILES}
+		done <${SAMPLES}
     end=`date +%s`
     runtime=$( echo "$end - $start" | bc -l )
     hours=$((runtime / 3600))
@@ -2238,7 +2240,7 @@ mkdir -p ${RES}/Extraction
         echo "no assemblies done for $lib"
         echo ${lib} >> ${RES}/mitochondrion_CDS_error.log
       fi
-		done <${LIST_FILES}
+		done <${SAMPLES}
     end=`date +%s`
     runtime=$( echo "$end - $start" | bc -l )
     hours=$((runtime / 3600))
@@ -2246,6 +2248,697 @@ mkdir -p ${RES}/Extraction
     seconds=$(( (runtime % 3600) % 60 ))
     echo "INFO: time ellapsed for $mode step: $hours:$minutes:$seconds (hh:mm:ss)"
     echo "STATUS: done"
+    echo ""
+		exit 0
+
+  elif [ $mode == 'capture' ] && [ $target == 'mitochondrion_nt' ]; then
+    echo "INFO: Free-mode of mtDNA sequence capture from assemblies"
+    mkdir -p ${RES}/Mapping/mitochondrion
+    mkdir -p ${RES}/references
+    start=$(date +%s)
+    #for f in `find ${RES}/Assembly/Samples/ -type f -name \*.fa`;
+    while read f;
+    do
+      #lib=`basename $f | perl -pe 's/\.fa//'`
+      lib=`echo ${f} | awk '{print $1}'`
+      file=${RES}/Assembly/Samples/filtered/${lib}.fa
+      if [ -s $file ]; then
+        if [ -s ${RES}/mitochondrion_nt_done.log ]; then
+          if grep -Fxq "${lib}" ${RES}/mitochondrion_nt_done.log; then
+            echo "WARN: $lib already processed"
+            continue
+          else
+            echo "*** make formatted reference on the closest taxa from the database ***"
+            echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${MITO_REF_NT} -q ${lib} -o ${RES}/references/ --target ${target}"
+            `dirname $0`/src/ExtractRef_nucluce.py -in ${MITO_REF_NT} -q ${lib} -o ${RES}/references/ --target ${target}
+            CLOSE_REF=${RES}/references/close_${target}.fa
+            if [ -s ${CLOSE_REF} ]; then
+              if [ -s ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info ]; then
+                echo "*** mapping and extraction of assemblies into reference ***"
+                awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $file | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info - > ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta
+                echo "CMD: ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSE_REF} -t ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=$0;next;}{entry = entry "\n" $0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff"
+                if ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSE_REF} -t ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=$0;next;}{entry = entry "\n" $0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff; then
+                  if [ ${PLANT_MODEL} == "yes" ]; then
+                    echo "CMD: `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}"
+                    `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}
+                    rm ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta
+                    echo ${lib} >> ${RES}/mitochondrion_nt_done.log
+                  else
+                    echo "CMD: `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}"
+                    `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}
+                    rm ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta
+                    echo ${lib} >> ${RES}/mitochondrion_nt_done.log
+                  fi
+                else
+                  echo ${lib} >> ${RES}/mitochondrion_nt_error.log
+                fi
+              else
+                if [ ${PLANT_MODEL} == "yes" ]; then
+                  if [ -s ${RES}/Mapping/selection_contigs_done.log ]; then
+                    if grep -Fxq "${lib}" ${RES}/Mapping/selection_contigs_done.log; then
+                      echo "WARN: $lib has not mitochondrial contigs into assemblies"
+                      echo ${lib} >> ${RES}/Mapping/mitochondrion_contig_errors.log
+                      continue
+                    else
+                      mkdir -p ${RES}/Mapping/chloroplast
+                      mkdir -p ${RES}/Mapping/nucrdna
+                      echo "INFO: Selection of contigs in $lib assemblies according to mitochondrial, chloroplastic and ribosomal origin"
+                      echo "*** Extraction of close genomes ***"
+                      echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${CHLORO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${CHLORO_SIZE_MIN} -M ${CHLORO_SIZE_MAX}"
+                      `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${CHLORO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${CHLORO_SIZE_MIN} -M ${CHLORO_SIZE_MAX}
+                      echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${MITO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MITO_SIZE_MIN} -M ${MITO_SIZE_MAX}"
+                      `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${MITO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MITO_SIZE_MIN} -M ${MITO_SIZE_MAX}
+                      echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${NRDNA_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${NRDNA_SIZE_MIN} -M ${NRDNA_SIZE_MAX}"
+                      `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${NRDNA_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${NRDNA_SIZE_MIN} -M ${NRDNA_SIZE_MAX}
+                      CLOSE_CHLORO_GENOME=${RES}/references/close_chloroplast.fa
+                      CLOSE_MITO_GENOME=${RES}/references/close_mitochondrion.fa
+                      CLOSE_GENOME=${RES}/references/close_nucrdna.fa
+                      if [ -s ${CLOSE_CHLORO_GENOME} ] && [ -s ${CLOSE_MITO_GENOME} ] && [ -s ${CLOSE_GENOME} ]; then
+                        echo "CMD: ${BLASTDB} -in ${CLOSE_CHLORO_GENOME} -dbtype nucl"
+                        ${BLASTDB} -in ${CLOSE_CHLORO_GENOME} -dbtype nucl
+                        echo "CMD: ${BLASTDB} -in ${CLOSE_MITO_GENOME} -dbtype nucl"
+                        ${BLASTDB} -in ${CLOSE_MITO_GENOME} -dbtype nucl
+                        echo "CMD: ${BLASTDB} -in ${CLOSE_GENOME} -dbtype nucl"
+                        ${BLASTDB} -in ${CLOSE_GENOME} -dbtype nucl
+                        echo "*** Mapping of contigs into close genomes ***"
+                        echo "CMD: ${BLASTN} -db ${CLOSE_CHLORO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split(\$1,a,\"_\")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib}"
+                  			${BLASTN} -db ${CLOSE_CHLORO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib}
+                        echo "CMD: ${BLASTN} -db ${CLOSE_MITO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split(\$1,a,\"_\")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib}"
+                  			${BLASTN} -db ${CLOSE_MITO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib}
+                        echo "CMD: ${BLASTN} -db ${CLOSE_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split(\$1,a,\"_\")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib}"
+                  			${BLASTN} -db ${CLOSE_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib}
+                        if [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ] && [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                          echo "CMD: `dirname $0`/src/SelectContigs_chloro-mito-rdna.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                          `dirname $0`/src/SelectContigs_chloro-mito-rdna.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                          echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                        elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                          echo "CMD: `dirname $0`/src/SelectContigs_organelles.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                          `dirname $0`/src/SelectContigs_organelles.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                          echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                        elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ] && [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                          echo "CMD: `dirname $0`/src/SelectContigs_chloro-rdna.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --rdna ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_rdna ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                          `dirname $0`/src/SelectContigs_chloro-rdna.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                          echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                        elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                          echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                          `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                          echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                        elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ]; then
+                          awk '{print $1}' ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info
+                          echo "WARN: no mtDNA and rDNA contigs found for ${lib}"
+                          echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                        elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                          awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                          echo "WARN: no mtDNA and cpDNA contigs found for ${lib}"
+                          echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                        elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                          awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                          echo "WARN: no cpDNA and rDNA contigs found for ${lib}"
+                          echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                        else
+                          echo "WARN: error in selection of contigs for ${lib}"
+                          echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
+                          continue
+                        fi
+                        rm ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ${CLOSE_CHLORO_GENOME} ${CLOSE_MITO_GENOME} ${CLOSE_GENOME} ${CLOSE_CHLORO_GENOME}.* ${CLOSE_MITO_GENOME}.* ${CLOSE_GENOME}.*
+                        if [ -s ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info ]; then
+                          echo "*** mapping and extraction of assemblies into reference ***"
+                          awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $file | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info - > ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta
+                          echo "CMD: ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSE_REF} -t ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print \$0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=\$0;next;}{entry = entry \"\n\" \$0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff"
+                          if ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSE_REF} -t ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=$0;next;}{entry = entry "\n" $0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff; then
+                            echo "CMD: `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}"
+                            `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}
+                            rm ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta
+                            echo ${lib} >> ${RES}/mitochondrion_nt_done.log
+                          else
+                            echo ${lib} >> ${RES}/mitochondrion_nt_error.log
+                          fi
+                        else
+                          echo "WARN: No hits were detected when mapping ${lib} into mitochondrial genomes"
+                          echo ${lib} >> ${RES}/Mapping/mitochondrion_contig_errors.log
+                          continue
+                        fi
+                      else
+                        echo "WARN: error in selection of contigs into close related genomes for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
+                        continue
+                      fi
+                    fi
+                  else
+                    mkdir -p ${RES}/Mapping/chloroplast
+                    mkdir -p ${RES}/Mapping/nucrdna
+                    echo "INFO: Selection of contigs in $lib assemblies according to mitochondrial, chloroplastic and ribosomal origin"
+                    echo "*** Extraction of close genomes ***"
+                    echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${CHLORO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${CHLORO_SIZE_MIN} -M ${CHLORO_SIZE_MAX}"
+                    `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${CHLORO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${CHLORO_SIZE_MIN} -M ${CHLORO_SIZE_MAX}
+                    echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${MITO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MITO_SIZE_MIN} -M ${MITO_SIZE_MAX}"
+                    `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${MITO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MITO_SIZE_MIN} -M ${MITO_SIZE_MAX}
+                    echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${NRDNA_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${NRDNA_SIZE_MIN} -M ${NRDNA_SIZE_MAX}"
+                    `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${NRDNA_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${NRDNA_SIZE_MIN} -M ${NRDNA_SIZE_MAX}
+                    CLOSE_CHLORO_GENOME=${RES}/references/close_chloroplast.fa
+                    CLOSE_MITO_GENOME=${RES}/references/close_mitochondrion.fa
+                    CLOSE_GENOME=${RES}/references/close_nucrdna.fa
+                    if [ -s ${CLOSE_CHLORO_GENOME} ] && [ -s ${CLOSE_MITO_GENOME} ] && [ -s ${CLOSE_GENOME} ]; then
+                      echo "CMD: ${BLASTDB} -in ${CLOSE_CHLORO_GENOME} -dbtype nucl"
+                      ${BLASTDB} -in ${CLOSE_CHLORO_GENOME} -dbtype nucl
+                      echo "CMD: ${BLASTDB} -in ${CLOSE_MITO_GENOME} -dbtype nucl"
+                      ${BLASTDB} -in ${CLOSE_MITO_GENOME} -dbtype nucl
+                      echo "CMD: ${BLASTDB} -in ${CLOSE_GENOME} -dbtype nucl"
+                      ${BLASTDB} -in ${CLOSE_GENOME} -dbtype nucl
+                      echo "*** Mapping of contigs into close genomes ***"
+                      echo "CMD: ${BLASTN} -db ${CLOSE_CHLORO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib}"
+                      ${BLASTN} -db ${CLOSE_CHLORO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib}
+                      echo "CMD: ${BLASTN} -db ${CLOSE_MITO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib}"
+                      ${BLASTN} -db ${CLOSE_MITO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib}
+                      echo "CMD: ${BLASTN} -db ${CLOSE_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib}"
+                      ${BLASTN} -db ${CLOSE_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib}
+                      if [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ] && [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                        echo "CMD: `dirname $0`/src/SelectContigs_chloro-mito-rdna.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                        `dirname $0`/src/SelectContigs_chloro-mito-rdna.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                        echo "CMD: `dirname $0`/src/SelectContigs_organelles.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                        `dirname $0`/src/SelectContigs_organelles.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ] && [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                        echo "CMD: `dirname $0`/src/SelectContigs_chloro-rdna.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --rdna ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_rdna ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                        `dirname $0`/src/SelectContigs_chloro-rdna.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                        echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                        `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info
+                        echo "WARN: no mtDNA and rDNA contigs found for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                        echo "WARN: no mtDNA and cpDNA contigs found for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                        echo "WARN: no cpDNA and rDNA contigs found for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      else
+                        echo "WARN: error in selection of contigs for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
+                        continue
+                      fi
+                      rm ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ${CLOSE_CHLORO_GENOME} ${CLOSE_MITO_GENOME} ${CLOSE_GENOME} ${CLOSE_CHLORO_GENOME}.* ${CLOSE_MITO_GENOME}.* ${CLOSE_GENOME}.*
+                      if [ -s ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info ]; then
+                        echo "*** mapping and extraction of assemblies into reference ***"
+                        awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $file | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info - > ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta
+                        echo "CMD: ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSE_REF} -t ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print \$0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=\$0;next;}{entry = entry \"\n\" \$0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff"
+                        if ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSE_REF} -t ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=$0;next;}{entry = entry "\n" $0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff; then
+                          echo "CMD: `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}"
+                          `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}
+                          rm ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta
+                          echo ${lib} >> ${RES}/mitochondrion_nt_done.log
+                        else
+                          echo ${lib} >> ${RES}/mitochondrion_nt_error.log
+                        fi
+                      else
+                        echo "WARN: No hits were detected when mapping ${lib} into mitochondrial genomes"
+                        echo ${lib} >> ${RES}/Mapping/mitochondrion_contig_errors.log
+                        continue
+                      fi
+                    else
+                      echo "WARN: error in selection of contigs into close related genomes for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
+                      continue
+                    fi
+                  fi
+                else
+                  if [ -s ${RES}/Mapping/selection_contigs_done.log ]; then
+                    if grep -Fxq "${lib}" ${RES}/Mapping/selection_contigs_done.log; then
+                      echo "WARN: $lib has not mitochondrial contigs into assemblies"
+                      echo ${lib} >> ${RES}/Mapping/mitochondrion_contig_errors.log
+                      continue
+                    else
+                      mkdir -p ${RES}/Mapping/nucrdna
+                      echo "INFO: Selection of contigs in $lib assemblies according to mitochondrial and ribosomal origin"
+                      echo "*** Extraction of close genomes ***"
+                      echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${MITO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MITO_SIZE_MIN} -M ${MITO_SIZE_MAX}"
+                      `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${MITO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MITO_SIZE_MIN} -M ${MITO_SIZE_MAX}
+                      echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${NRDNA_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${NRDNA_SIZE_MIN} -M ${NRDNA_SIZE_MAX}"
+                      `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${NRDNA_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${NRDNA_SIZE_MIN} -M ${NRDNA_SIZE_MAX}
+                      CLOSE_MITO_GENOME=${RES}/references/close_mitochondrion.fa
+                      CLOSE_GENOME=${RES}/references/close_nucrdna.fa
+                      if [ -s ${CLOSE_MITO_GENOME} ] && [ -s ${CLOSE_GENOME} ]; then
+                        echo "CMD: ${BLASTDB} -in ${CLOSE_MITO_GENOME} -dbtype nucl"
+                        ${BLASTDB} -in ${CLOSE_MITO_GENOME} -dbtype nucl
+                        echo "CMD: ${BLASTDB} -in ${CLOSE_GENOME} -dbtype nucl"
+                        ${BLASTDB} -in ${CLOSE_GENOME} -dbtype nucl
+                        echo "*** Mapping of contigs into close genomes ***"
+                        echo "CMD: ${BLASTN} -db ${CLOSE_MITO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split(\$1,a,\"_\")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib}"
+                  			${BLASTN} -db ${CLOSE_MITO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib}
+                        echo "CMD: ${BLASTN} -db ${CLOSE_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split(\$1,a,\"_\")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib}"
+                  			${BLASTN} -db ${CLOSE_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib}
+                        if [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ] && [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                          echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                          `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                          echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                        elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                          awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                        elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                          awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                        else
+                          echo "WARN: error in selection of contigs for ${lib}"
+                          echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
+                          continue
+                        fi
+                        rm ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ${CLOSE_MITO_GENOME} ${CLOSE_GENOME} ${CLOSE_MITO_GENOME}.* ${CLOSE_GENOME}.*
+                        if [ -s ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info ]; then
+                          echo "*** mapping and extraction of assemblies into reference ***"
+                          awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $file | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info - > ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta
+                          echo "CMD: ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSE_REF} -t ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print \$0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=\$0;next;}{entry = entry \"\n\" \$0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff"
+                          if ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSE_REF} -t ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=$0;next;}{entry = entry "\n" $0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff; then
+                            echo "CMD: `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}"
+                            `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}
+                            rm ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta
+                            echo ${lib} >> ${RES}/mitochondrion_nt_done.log
+                          else
+                            echo ${lib} >> ${RES}/mitochondrion_nt_error.log
+                          fi
+                        else
+                          echo "WARN: No hits were detected when mapping ${lib} into mitochondrial genomes"
+                          echo ${lib} >> ${RES}/Mapping/mitochondrion_contig_errors.log
+                          continue
+                        fi
+                      else
+                        echo "WARN: error in selection of contigs into close related genomes for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
+                        continue
+                      fi
+                    fi
+                  else
+                    mkdir -p ${RES}/Mapping/nucrdna
+                    echo "INFO: Selection of contigs in $lib assemblies according to mitochondrial and ribosomal origin"
+                    echo "*** Extraction of close genomes ***"
+                    echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${MITO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MITO_SIZE_MIN} -M ${MITO_SIZE_MAX}"
+                    `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${MITO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MITO_SIZE_MIN} -M ${MITO_SIZE_MAX}
+                    echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${NRDNA_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${NRDNA_SIZE_MIN} -M ${NRDNA_SIZE_MAX}"
+                    `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${NRDNA_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${NRDNA_SIZE_MIN} -M ${NRDNA_SIZE_MAX}
+                    CLOSE_MITO_GENOME=${RES}/references/close_mitochondrion.fa
+                    CLOSE_GENOME=${RES}/references/close_nucrdna.fa
+                    if [ -s ${CLOSE_MITO_GENOME} ] && [ -s ${CLOSE_GENOME} ]; then
+                      echo "CMD: ${BLASTDB} -in ${CLOSE_MITO_GENOME} -dbtype nucl"
+                      ${BLASTDB} -in ${CLOSE_MITO_GENOME} -dbtype nucl
+                      echo "CMD: ${BLASTDB} -in ${CLOSE_GENOME} -dbtype nucl"
+                      ${BLASTDB} -in ${CLOSE_GENOME} -dbtype nucl
+                      echo "*** Mapping of contigs into close genomes ***"
+                      echo "CMD: ${BLASTN} -db ${CLOSE_MITO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split(\$1,a,\"_\")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib}"
+                      ${BLASTN} -db ${CLOSE_MITO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib}
+                      echo "CMD: ${BLASTN} -db ${CLOSE_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split(\$1,a,\"_\")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib}"
+                      ${BLASTN} -db ${CLOSE_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib}
+                      if [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ] && [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                        echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                        `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                      elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                      else
+                        echo "WARN: error in selection of contigs for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
+                        continue
+                      fi
+                      rm ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ${CLOSE_MITO_GENOME} ${CLOSE_GENOME} ${CLOSE_MITO_GENOME}.* ${CLOSE_GENOME}.*
+                      if [ -s ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info ]; then
+                        echo "*** mapping and extraction of assemblies into reference ***"
+                        awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $file | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info - > ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta
+                        echo "CMD: ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSE_REF} -t ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print \$0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=\$0;next;}{entry = entry \"\n\" \$0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff"
+                        if ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSE_REF} -t ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=$0;next;}{entry = entry "\n" $0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff; then
+                          echo "CMD: `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}"
+                          `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}
+                          rm ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta
+                          echo ${lib} >> ${RES}/mitochondrion_nt_done.log
+                        else
+                          echo ${lib} >> ${RES}/mitochondrion_nt_error.log
+                        fi
+                      else
+                        echo "WARN: No hits were detected when mapping ${lib} into mitochondrial genomes"
+                        echo ${lib} >> ${RES}/Mapping/mitochondrion_contig_errors.log
+                        continue
+                      fi
+                    else
+                      echo "WARN: error in selection of contigs into close related genomes for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
+                      continue
+                    fi
+                  fi
+                fi
+              fi
+            else
+              echo "WARN: error to extract close sequences into ${CLOSE_REF} database"
+              echo ${lib} >> ${RES}/mitochondrion_nt_error.log
+              continue
+            fi
+          fi
+        else
+          echo "*** make formatted reference on the closest taxa from the database ***"
+          echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${MITO_REF_NT} -q ${lib} -o ${RES}/references/ --target ${target}"
+          `dirname $0`/src/ExtractRef_nucluce.py -in ${MITO_REF_NT} -q ${lib} -o ${RES}/references/ --target ${target}
+          CLOSE_REF=${RES}/references/close_${target}.fa
+          if [ -s ${CLOSE_REF} ]; then
+            if [ -s ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info ]; then
+              echo "*** mapping and extraction of assemblies into reference ***"
+              awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $file | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info - > ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta
+              echo "CMD: ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSE_REF} -t ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print \$0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=\$0;next;}{entry = entry \"\n\" \$0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff"
+              if ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSE_REF} -t ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=$0;next;}{entry = entry "\n" $0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff; then
+                if [ ${PLANT_MODEL} == "yes" ]; then
+                  echo "CMD: `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}"
+                  `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}
+                  rm ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta
+                  echo ${lib} >> ${RES}/mitochondrion_nt_done.log
+                else
+                  echo "CMD: `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}"
+                  `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}
+                  rm ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta
+                  echo ${lib} >> ${RES}/mitochondrion_nt_done.log
+                fi
+              else
+                echo ${lib} >> ${RES}/mitochondrion_nt_error.log
+              fi
+            else
+              if [ ${PLANT_MODEL} == "yes" ]; then
+                if [ -s ${RES}/Mapping/selection_contigs_done.log ]; then
+                  if grep -Fxq "${lib}" ${RES}/Mapping/selection_contigs_done.log; then
+                    echo "WARN: $lib has not mitochondrial contigs into assemblies"
+                    echo ${lib} >> ${RES}/Mapping/mitochondrion_contig_errors.log
+                    continue
+                  else
+                    mkdir -p ${RES}/Mapping/chloroplast
+                    mkdir -p ${RES}/Mapping/nucrdna
+                    echo "INFO: Selection of contigs in $lib assemblies according to mitochondrial, chloroplastic and ribosomal origin"
+                    echo "*** Extraction of close genomes ***"
+                    echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${CHLORO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${CHLORO_SIZE_MIN} -M ${CHLORO_SIZE_MAX}"
+                    `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${CHLORO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${CHLORO_SIZE_MIN} -M ${CHLORO_SIZE_MAX}
+                    echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${MITO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MITO_SIZE_MIN} -M ${MITO_SIZE_MAX}"
+                    `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${MITO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MITO_SIZE_MIN} -M ${MITO_SIZE_MAX}
+                    echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${NRDNA_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${NRDNA_SIZE_MIN} -M ${NRDNA_SIZE_MAX}"
+                    `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${NRDNA_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${NRDNA_SIZE_MIN} -M ${NRDNA_SIZE_MAX}
+                    CLOSE_CHLORO_GENOME=${RES}/references/close_chloroplast.fa
+                    CLOSE_MITO_GENOME=${RES}/references/close_mitochondrion.fa
+                    CLOSE_GENOME=${RES}/references/close_nucrdna.fa
+                    if [ -s ${CLOSE_CHLORO_GENOME} ] && [ -s ${CLOSE_MITO_GENOME} ] && [ -s ${CLOSE_GENOME} ]; then
+                      echo "CMD: ${BLASTDB} -in ${CLOSE_CHLORO_GENOME} -dbtype nucl"
+                      ${BLASTDB} -in ${CLOSE_CHLORO_GENOME} -dbtype nucl
+                      echo "CMD: ${BLASTDB} -in ${CLOSE_MITO_GENOME} -dbtype nucl"
+                      ${BLASTDB} -in ${CLOSE_MITO_GENOME} -dbtype nucl
+                      echo "CMD: ${BLASTDB} -in ${CLOSE_GENOME} -dbtype nucl"
+                      ${BLASTDB} -in ${CLOSE_GENOME} -dbtype nucl
+                      echo "*** Mapping of contigs into close genomes ***"
+                      echo "CMD: ${BLASTN} -db ${CLOSE_CHLORO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split(\$1,a,\"_\")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib}"
+                      ${BLASTN} -db ${CLOSE_CHLORO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib}
+                      echo "CMD: ${BLASTN} -db ${CLOSE_MITO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split(\$1,a,\"_\")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib}"
+                      ${BLASTN} -db ${CLOSE_MITO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib}
+                      echo "CMD: ${BLASTN} -db ${CLOSE_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split(\$1,a,\"_\")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib}"
+                      ${BLASTN} -db ${CLOSE_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib}
+                      if [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ] && [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                        echo "CMD: `dirname $0`/src/SelectContigs_chloro-mito-rdna.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                        `dirname $0`/src/SelectContigs_chloro-mito-rdna.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                        echo "CMD: `dirname $0`/src/SelectContigs_organelles.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                        `dirname $0`/src/SelectContigs_organelles.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ] && [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                        echo "CMD: `dirname $0`/src/SelectContigs_chloro-rdna.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --rdna ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_rdna ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                        `dirname $0`/src/SelectContigs_chloro-rdna.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                        echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                        `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info
+                        echo "WARN: no mtDNA and rDNA contigs found for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                        echo "WARN: no mtDNA and cpDNA contigs found for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                        echo "WARN: no cpDNA and rDNA contigs found for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      else
+                        echo "WARN: error in selection of contigs for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
+                        continue
+                      fi
+                      rm ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ${CLOSE_CHLORO_GENOME} ${CLOSE_MITO_GENOME} ${CLOSE_GENOME} ${CLOSE_CHLORO_GENOME}.* ${CLOSE_MITO_GENOME}.* ${CLOSE_GENOME}.*
+                      if [ -s ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info ]; then
+                        echo "*** mapping and extraction of assemblies into reference ***"
+                        awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $file | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info - > ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta
+                        echo "CMD: ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSE_REF} -t ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print \$0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=\$0;next;}{entry = entry \"\n\" \$0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff"
+                        if ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSE_REF} -t ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=$0;next;}{entry = entry "\n" $0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff; then
+                          echo "CMD: `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}"
+                          `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}
+                          rm ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta
+                          echo ${lib} >> ${RES}/mitochondrion_nt_done.log
+                        else
+                          echo ${lib} >> ${RES}/mitochondrion_nt_error.log
+                        fi
+                      else
+                        echo "WARN: No hits were detected when mapping ${lib} into mitochondrial genomes"
+                        echo ${lib} >> ${RES}/Mapping/mitochondrion_contig_errors.log
+                        continue
+                      fi
+                    else
+                      echo "WARN: error in selection of contigs into close related genomes for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
+                      continue
+                    fi
+                  fi
+                else
+                  mkdir -p ${RES}/Mapping/chloroplast
+                  mkdir -p ${RES}/Mapping/nucrdna
+                  echo "INFO: Selection of contigs in $lib assemblies according to mitochondrial, chloroplastic and ribosomal origin"
+                  echo "*** Extraction of close genomes ***"
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${CHLORO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${CHLORO_SIZE_MIN} -M ${CHLORO_SIZE_MAX}"
+                  `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${CHLORO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${CHLORO_SIZE_MIN} -M ${CHLORO_SIZE_MAX}
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${MITO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MITO_SIZE_MIN} -M ${MITO_SIZE_MAX}"
+                  `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${MITO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MITO_SIZE_MIN} -M ${MITO_SIZE_MAX}
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${NRDNA_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${NRDNA_SIZE_MIN} -M ${NRDNA_SIZE_MAX}"
+                  `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${NRDNA_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${NRDNA_SIZE_MIN} -M ${NRDNA_SIZE_MAX}
+                  CLOSE_CHLORO_GENOME=${RES}/references/close_chloroplast.fa
+                  CLOSE_MITO_GENOME=${RES}/references/close_mitochondrion.fa
+                  CLOSE_GENOME=${RES}/references/close_nucrdna.fa
+                  if [ -s ${CLOSE_CHLORO_GENOME} ] && [ -s ${CLOSE_MITO_GENOME} ] && [ -s ${CLOSE_GENOME} ]; then
+                    echo "CMD: ${BLASTDB} -in ${CLOSE_CHLORO_GENOME} -dbtype nucl"
+                    ${BLASTDB} -in ${CLOSE_CHLORO_GENOME} -dbtype nucl
+                    echo "CMD: ${BLASTDB} -in ${CLOSE_MITO_GENOME} -dbtype nucl"
+                    ${BLASTDB} -in ${CLOSE_MITO_GENOME} -dbtype nucl
+                    echo "CMD: ${BLASTDB} -in ${CLOSE_GENOME} -dbtype nucl"
+                    ${BLASTDB} -in ${CLOSE_GENOME} -dbtype nucl
+                    echo "*** Mapping of contigs into close genomes ***"
+                    echo "CMD: ${BLASTN} -db ${CLOSE_CHLORO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split(\$1,a,\"_\")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib}"
+                    ${BLASTN} -db ${CLOSE_CHLORO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib}
+                    echo "CMD: ${BLASTN} -db ${CLOSE_MITO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split(\$1,a,\"_\")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib}"
+                    ${BLASTN} -db ${CLOSE_MITO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib}
+                    echo "CMD: ${BLASTN} -db ${CLOSE_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split(\$1,a,\"_\")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib}"
+                    ${BLASTN} -db ${CLOSE_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib}
+                    if [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ] && [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                      echo "CMD: `dirname $0`/src/SelectContigs_chloro-mito-rdna.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                      `dirname $0`/src/SelectContigs_chloro-mito-rdna.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                      echo "CMD: `dirname $0`/src/SelectContigs_organelles.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                      `dirname $0`/src/SelectContigs_organelles.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ] && [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                      echo "CMD: `dirname $0`/src/SelectContigs_chloro-rdna.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --rdna ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_rdna ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                      `dirname $0`/src/SelectContigs_chloro-rdna.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                      echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                      `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info
+                      echo "WARN: no mtDNA and rDNA contigs found for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                      echo "WARN: no mtDNA and cpDNA contigs found for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                      echo "WARN: no cpDNA and rDNA contigs found for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    else
+                      echo "WARN: error in selection of contigs for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
+                      continue
+                    fi
+                    rm ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ${CLOSE_CHLORO_GENOME} ${CLOSE_MITO_GENOME} ${CLOSE_GENOME} ${CLOSE_CHLORO_GENOME}.* ${CLOSE_MITO_GENOME}.* ${CLOSE_GENOME}.*
+                    if [ -s ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info ]; then
+                      echo "*** mapping and extraction of assemblies into reference ***"
+                      awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $file | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info - > ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta
+                      echo "CMD: ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSE_REF} -t ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print \$0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=\$0;next;}{entry = entry \"\n\" \$0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff"
+                      if ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSE_REF} -t ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=$0;next;}{entry = entry "\n" $0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff; then
+                        echo "CMD: `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}"
+                        `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}
+                        rm ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta
+                        echo ${lib} >> ${RES}/mitochondrion_nt_done.log
+                      else
+                        echo ${lib} >> ${RES}/mitochondrion_nt_error.log
+                      fi
+                    else
+                      echo "WARN: No hits were detected when mapping ${lib} into mitochondrial genomes"
+                      echo ${lib} >> ${RES}/Mapping/mitochondrion_contig_errors.log
+                      continue
+                    fi
+                  else
+                    echo "WARN: error in selection of contigs into close related genomes for ${lib}"
+                    echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
+                    continue
+                  fi
+                fi
+              else
+                if [ -s ${RES}/Mapping/selection_contigs_done.log ]; then
+                  if grep -Fxq "${lib}" ${RES}/Mapping/selection_contigs_done.log; then
+                    echo "WARN: $lib has not mitochondrial contigs into assemblies"
+                    echo ${lib} >> ${RES}/Mapping/mitochondrion_contig_errors.log
+                    continue
+                  else
+                    mkdir -p ${RES}/Mapping/nucrdna
+                    echo "INFO: Selection of contigs in $lib assemblies according to mitochondrial and ribosomal origin"
+                    echo "*** Extraction of close genomes ***"
+                    echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${MITO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MITO_SIZE_MIN} -M ${MITO_SIZE_MAX}"
+                    `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${MITO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MITO_SIZE_MIN} -M ${MITO_SIZE_MAX}
+                    echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${NRDNA_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${NRDNA_SIZE_MIN} -M ${NRDNA_SIZE_MAX}"
+                    `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${NRDNA_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${NRDNA_SIZE_MIN} -M ${NRDNA_SIZE_MAX}
+                    CLOSE_MITO_GENOME=${RES}/references/close_mitochondrion.fa
+                    CLOSE_GENOME=${RES}/references/close_nucrdna.fa
+                    if [ -s ${CLOSE_MITO_GENOME} ] && [ -s ${CLOSE_GENOME} ]; then
+                      echo "CMD: ${BLASTDB} -in ${CLOSE_MITO_GENOME} -dbtype nucl"
+                      ${BLASTDB} -in ${CLOSE_MITO_GENOME} -dbtype nucl
+                      echo "CMD: ${BLASTDB} -in ${CLOSE_GENOME} -dbtype nucl"
+                      ${BLASTDB} -in ${CLOSE_GENOME} -dbtype nucl
+                      echo "*** Mapping of contigs into close genomes ***"
+                      echo "CMD: ${BLASTN} -db ${CLOSE_MITO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split(\$1,a,\"_\")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib}"
+                      ${BLASTN} -db ${CLOSE_MITO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib}
+                      echo "CMD: ${BLASTN} -db ${CLOSE_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split(\$1,a,\"_\")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib}"
+                      ${BLASTN} -db ${CLOSE_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib}
+                      if [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ] && [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                        echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                        `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                      elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                      else
+                        echo "WARN: error in selection of contigs for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
+                        continue
+                      fi
+                      rm ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ${CLOSE_MITO_GENOME} ${CLOSE_GENOME} ${CLOSE_MITO_GENOME}.* ${CLOSE_GENOME}.*
+                      if [ -s ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info ]; then
+                        echo "*** mapping and extraction of assemblies into reference ***"
+                        awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $file | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info - > ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta
+                        echo "CMD: ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSE_REF} -t ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print \$0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=\$0;next;}{entry = entry \"\n\" \$0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff"
+                        if ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSE_REF} -t ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=$0;next;}{entry = entry "\n" $0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff; then
+                          echo "CMD: `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}"
+                          `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}
+                          rm ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta
+                          echo ${lib} >> ${RES}/mitochondrion_nt_done.log
+                        else
+                          echo ${lib} >> ${RES}/mitochondrion_nt_error.log
+                        fi
+                      else
+                        echo "WARN: No hits were detected when mapping ${lib} into mitochondrial genomes"
+                        echo ${lib} >> ${RES}/Mapping/mitochondrion_contig_errors.log
+                        continue
+                      fi
+                    else
+                      echo "WARN: error in selection of contigs close related genomes for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
+                      continue
+                    fi
+                  fi
+                else
+                  mkdir -p ${RES}/Mapping/nucrdna
+                  echo "INFO: Selection of contigs in $lib assemblies according to mitochondrial and ribosomal origin"
+                  echo "*** Extraction of close genomes ***"
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${MITO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MITO_SIZE_MIN} -M ${MITO_SIZE_MAX}"
+                  `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${MITO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MITO_SIZE_MIN} -M ${MITO_SIZE_MAX}
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${NRDNA_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${NRDNA_SIZE_MIN} -M ${NRDNA_SIZE_MAX}"
+                  `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${NRDNA_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${NRDNA_SIZE_MIN} -M ${NRDNA_SIZE_MAX}
+                  CLOSE_MITO_GENOME=${RES}/references/close_mitochondrion.fa
+                  CLOSE_GENOME=${RES}/references/close_nucrdna.fa
+                  if [ -s ${CLOSE_MITO_GENOME} ] && [ -s ${CLOSE_GENOME} ]; then
+                    echo "CMD: ${BLASTDB} -in ${CLOSE_MITO_GENOME} -dbtype nucl"
+                    ${BLASTDB} -in ${CLOSE_MITO_GENOME} -dbtype nucl
+                    echo "CMD: ${BLASTDB} -in ${CLOSE_GENOME} -dbtype nucl"
+                    ${BLASTDB} -in ${CLOSE_GENOME} -dbtype nucl
+                    echo "*** Mapping of contigs into close genomes ***"
+                    echo "CMD: ${BLASTN} -db ${CLOSE_MITO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split(\$1,a,\"_\")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib}"
+                    ${BLASTN} -db ${CLOSE_MITO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib}
+                    echo "CMD: ${BLASTN} -db ${CLOSE_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split(\$1,a,\"_\")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib}"
+                    ${BLASTN} -db ${CLOSE_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib}
+                    if [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ] && [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                      echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                      `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                    elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                    else
+                      echo "WARN: error in selection of contigs for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
+                      continue
+                    fi
+                    rm ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ${CLOSE_MITO_GENOME} ${CLOSE_GENOME} ${CLOSE_MITO_GENOME}.* ${CLOSE_GENOME}.*
+                    if [ -s ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info ]; then
+                      echo "*** mapping and extraction of assemblies into reference ***"
+                      awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $file | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info - > ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta
+                      echo "CMD: ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSE_REF} -t ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print \$0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=\$0;next;}{entry = entry \"\n\" \$0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff"
+                      if ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSE_REF} -t ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=$0;next;}{entry = entry "\n" $0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff; then
+                        echo "CMD: `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}"
+                        `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta -g ${RES}/Mapping/mitochondrion/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${MITO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}
+                        rm ${RES}/Mapping/mitochondrion/contigs_mito_${lib}.fasta
+                        echo ${lib} >> ${RES}/mitochondrion_nt_done.log
+                      else
+                        echo ${lib} >> ${RES}/mitochondrion_nt_error.log
+                      fi
+                    else
+                      echo "WARN: No hits were detected when mapping ${lib} into mitochondrial genomes"
+                      echo ${lib} >> ${RES}/Mapping/mitochondrion_contig_errors.log
+                      continue
+                    fi
+                  else
+                    echo "WARN: error in selection of contigs into close related genomes for ${lib}"
+                    echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
+                    continue
+                  fi
+                fi
+              fi
+            fi
+          else
+            echo "WARN: error to extract close sequences into ${CLOSE_REF} database"
+            echo ${lib} >> ${RES}/mitochondrion_nt_error.log
+            continue
+          fi
+        fi
+      else
+        echo "no assemblies done for $lib"
+        echo ${lib} >> ${RES}/mitochondrion_nt_error.log
+      fi
+		done <${SAMPLES}
+    end=`date +%s`
+    runtime=$( echo "$end - $start" | bc -l )
+    hours=$((runtime / 3600))
+    minutes=$(( (runtime % 3600) / 60 ))
+    seconds=$(( (runtime % 3600) % 60 ))
+    echo "INFO: time ellapsed for $mode step: $hours:$minutes:$seconds (hh:mm:ss)"
+		echo "STATUS: done"
     echo ""
 		exit 0
 
@@ -2337,7 +3030,7 @@ mkdir -p ${RES}/Extraction
         echo "no assemblies done for $lib"
         echo ${lib} >> ${RES}/nucleus_nt_error.log
       fi
-		done <${LIST_FILES}
+		done <${SAMPLES}
     end=`date +%s`
     runtime=$( echo "$end - $start" | bc -l )
     hours=$((runtime / 3600))
@@ -2438,7 +3131,7 @@ mkdir -p ${RES}/Extraction
         echo "no assemblies done for $lib"
         echo ${lib} >> ${RES}/nucleus_aa_error.log
       fi
-		done <${LIST_FILES}
+		done <${SAMPLES}
     end=`date +%s`
     runtime=$( echo "$end - $start" | bc -l )
     hours=$((runtime / 3600))
@@ -2463,14 +3156,14 @@ mkdir -p ${RES}/Extraction
 		do
 			lib=`echo ${f} | awk '{print $1}'`
       echo $lib >> ${RES}/Statistics/samples.tmp
-    done<${LIST_FILES}
+    done<${SAMPLES}
 
     taxalist=${RES}/Statistics/samples.tmp
 
     echo "CMD: `dirname $0`/src/StatAssemblies.py -p ${RES}/Assembly/Samples/filtered/ -t $taxalist -o ${RES}/Statistics/"
     `dirname $0`/src/StatAssemblies.py -p ${RES}/Assembly/Samples/filtered/ -t $taxalist -o ${RES}/Statistics/
-    echo "CMD: `dirname $0`/src/StatConta.py -p ${RES}/Assembly/Samples/log/ -t $taxalist -d `dirname $0`/ressources/rRNA_database/ -o ${RES}/Statistics/"
-    `dirname $0`/src/StatConta.py -p ${RES}/Assembly/Samples/log/ -t $taxalist -d `dirname $0`/ressources/rRNA_database/ -o ${RES}/Statistics/
+    echo "CMD: `dirname $0`/src/StatConta.py -p ${RES}/Assembly/Samples/log/ -t $taxalist -d `dirname $0`/resources/rRNA_database/ -o ${RES}/Statistics/"
+    `dirname $0`/src/StatConta.py -p ${RES}/Assembly/Samples/log/ -t $taxalist -d `dirname $0`/resources/rRNA_database/ -o ${RES}/Statistics/
 
     rm ${RES}/Statistics/samples.tmp
 
@@ -2523,8 +3216,8 @@ mkdir -p ${RES}/Extraction
           else
             :
           fi
-          echo "CMD: `dirname $0`/src/SelecTaxa.py --inpath $inpath --outpath ${RES}/Selection -t ${TAXALIST} -e ${EXTENSION} --threads ${THREADS}"
-          `dirname $0`/src/SelecTaxa.py --inpath $inpath --outpath ${RES}/Selection -t ${TAXALIST} -e fa --threads ${THREADS}
+          echo "CMD: `dirname $0`/src/SelecTaxa.py --inpath $inpath --outpath ${RES}/Selection -t ${TAXA_ALN} -e ${EXTENSION} --threads ${THREADS}"
+          `dirname $0`/src/SelecTaxa.py --inpath $inpath --outpath ${RES}/Selection -t ${TAXA_ALN} -e fa --threads ${THREADS}
 
           echo "INFO: Alignment of each gene"
           alinpath=${RES}/Selection/${element}/
@@ -2568,11 +3261,11 @@ mkdir -p ${RES}/Extraction
         fi
         alnfiles=${RES}/Selection/Alignment/
         if [ ${TRIMMING} == 'on' ]; then
-          echo "CMD: `dirname $0`/src/ConcatSeq.py -p ${alnfiles} --pathfind -o ${RES}/Selection/concatenated -t ${TAXALIST} --missingfract ${MISSING_RATIO} --target ${listpath} --trim -g ${GENES_TO_CONCAT}"
-          `dirname $0`/src/ConcatSeq.py -p ${alnfiles} --pathfind -o ${RES}/Selection/concatenated -t ${TAXALIST} --missingfract ${MISSING_RATIO} --target ${listpath} --trim -g ${GENES_TO_CONCAT}
+          echo "CMD: `dirname $0`/src/ConcatSeq.py -p ${alnfiles} --pathfind -o ${RES}/Selection/concatenated -t ${TAXA_ALN} --missingfract ${MISSING_RATIO} --target ${listpath} --trim -g ${GENES_TO_CONCAT}"
+          `dirname $0`/src/ConcatSeq.py -p ${alnfiles} --pathfind -o ${RES}/Selection/concatenated -t ${TAXA_ALN} --missingfract ${MISSING_RATIO} --target ${listpath} --trim -g ${GENES_TO_CONCAT}
         else
-          echo "CMD: `dirname $0`/src/ConcatSeq.py -p ${alnfiles} --pathfind -o ${RES}/Selection/concatenated -t ${TAXALIST} --missingfract ${MISSING_RATIO} --target ${listpath} -g ${GENES_TO_CONCAT}"
-          `dirname $0`/src/ConcatSeq.py -p ${alnfiles} --pathfind -o ${RES}/Selection/concatenated -t ${TAXALIST} --missingfract ${MISSING_RATIO} --target ${listpath} -g ${GENES_TO_CONCAT}
+          echo "CMD: `dirname $0`/src/ConcatSeq.py -p ${alnfiles} --pathfind -o ${RES}/Selection/concatenated -t ${TAXA_ALN} --missingfract ${MISSING_RATIO} --target ${listpath} -g ${GENES_TO_CONCAT}"
+          `dirname $0`/src/ConcatSeq.py -p ${alnfiles} --pathfind -o ${RES}/Selection/concatenated -t ${TAXA_ALN} --missingfract ${MISSING_RATIO} --target ${listpath} -g ${GENES_TO_CONCAT}
         fi
     else
       for element in "${target[@]}";
@@ -2618,7 +3311,7 @@ mkdir -p ${RES}/Extraction
       else
         :
       fi
-      awk '{print $1}' ${LIST_FILES} > ${RES}/Alignment/taxalist
+      awk '{print $1}' ${SAMPLES} > ${RES}/Alignment/taxalist
       TAXALIST=${RES}/Alignment/taxalist
       alnfiles=${RES}/Alignment/
       if [ ${TRIMMING} == 'on' ]; then
@@ -3106,7 +3799,7 @@ mkdir -p ${RES}/Extraction
         echo "no assemblies done for $lib"
         echo ${lib} >> ${RES}/chloroplast_rRNA_error.log
       fi
-    done <${LIST_FILES}
+    done <${SAMPLES}
     end=`date +%s`
     runtime=$( echo "$end - $start" | bc -l )
     hours=$((runtime / 3600))
@@ -3533,7 +4226,7 @@ mkdir -p ${RES}/Extraction
         echo "no assemblies done for $lib"
         echo ${lib} >> ${RES}/chloroplast_tRNA_error.log
       fi
-    done <${LIST_FILES}
+    done <${SAMPLES}
     end=`date +%s`
     runtime=$( echo "$end - $start" | bc -l )
     hours=$((runtime / 3600))
@@ -4000,7 +4693,7 @@ mkdir -p ${RES}/Extraction
         echo "no assemblies done for $lib"
         echo ${lib} >> ${RES}/chloroplast_CDS_error.log
       fi
-    done <${LIST_FILES}
+    done <${SAMPLES}
     end=`date +%s`
     runtime=$( echo "$end - $start" | bc -l )
     hours=$((runtime / 3600))
@@ -4677,7 +5370,7 @@ mkdir -p ${RES}/Extraction
         echo "no assemblies done for $lib"
         echo ${lib} >> ${RES}/nucrdna_error.log
       fi
-    done <${LIST_FILES}
+    done <${SAMPLES}
     end=`date +%s`
     runtime=$( echo "$end - $start" | bc -l )
     hours=$((runtime / 3600))
@@ -4687,6 +5380,441 @@ mkdir -p ${RES}/Extraction
     echo "STATUS: done"
     echo ""
     exit 0
+
+  elif [ $mode == 'capture' ] && [ $target == 'chloroplast_nt' ]; then
+		echo "INFO: Free-mode of cpDNA sequence capture from assemblies"
+    mkdir -p ${RES}/Mapping/chloroplast
+    mkdir -p ${RES}/Mapping/mitochondrion
+    mkdir -p ${RES}/Mapping/nucrdna
+    mkdir -p ${RES}/references
+    start=$(date +%s)
+    #for f in `find ${RES}/Assembly/Samples/ -type f -name \*.fa`;
+    while read f;
+		do
+			#lib=`basename $f | perl -pe 's/\.fa//'`
+      lib=`echo ${f} | awk '{print $1}'`
+      file=${RES}/Assembly/Samples/filtered/${lib}.fa
+      if [ -s $file ]; then
+        if [ -s ${RES}/chloroplast_nt_done.log ]; then
+          if grep -Fxq "${lib}" ${RES}/chloroplast_nt_done.log; then
+            echo "WARN: $lib already processed"
+            continue
+          else
+            echo "*** make formatted reference on the closest taxa from the database ***"
+            echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${CHLORO_REF_NT} -q ${lib} -o ${RES}/references/ --target ${target}"
+            `dirname $0`/src/ExtractRef_nucluce.py -in ${CHLORO_REF_NT} -q ${lib} -o ${RES}/references/ --target ${target}
+            CLOSE_REF=${RES}/references/close_${target}.fa
+            if [ -s ${CLOSE_REF} ]; then
+              if [ -s ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info ]; then
+                echo "*** mapping and extraction of assemblies into reference ***"
+                awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $file | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info - > ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta
+                echo "CMD: ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSE_REF} -t ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print \$0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=\$0;next;}{entry = entry \"\n\" \$0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/chloroplast/out_nt_${lib}.gff"
+                if ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSE_REF} -t ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=$0;next;}{entry = entry "\n" $0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/chloroplast/out_nt_${lib}.gff; then
+                  echo "CMD: `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta -g ${RES}/Mapping/chloroplast/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${CHLORO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}"
+                  `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta -g ${RES}/Mapping/chloroplast/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${CHLORO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}
+                  rm ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta
+                  echo ${lib} >> ${RES}/chloroplast_nt_done.log
+                else
+                  echo ${lib} >> ${RES}/chloroplast_nt_error.log
+                fi
+              else
+                if [ -s ${RES}/Mapping/selection_contigs_done.log ]; then
+                  if grep -Fxq "${lib}" ${RES}/Mapping/selection_contigs_done.log; then
+                    echo "WARN: $lib has not chloroplastic contigs into assemblies"
+                    echo ${lib} >> ${RES}/Mapping/chloroplast_contig_errors.log
+                    continue
+                  else
+                    mkdir -p ${RES}/Mapping/nucrdna
+                    mkdir -p ${RES}/Mapping/mitochondrion
+                    echo "INFO: Selection of contigs in $lib assemblies according to mitochondrial, chloroplastic and ribosomal origin"
+                    echo "*** Extraction of close genomes ***"
+                    echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${CHLORO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${CHLORO_SIZE_MIN} -M ${CHLORO_SIZE_MAX}"
+                    `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${CHLORO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${CHLORO_SIZE_MIN} -M ${CHLORO_SIZE_MAX}
+                    echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${MITO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MITO_SIZE_MIN} -M ${MITO_SIZE_MAX}"
+                    `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${MITO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MITO_SIZE_MIN} -M ${MITO_SIZE_MAX}
+                    echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${NRDNA_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${NRDNA_SIZE_MIN} -M ${NRDNA_SIZE_MAX}"
+                    `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${NRDNA_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${NRDNA_SIZE_MIN} -M ${NRDNA_SIZE_MAX}
+                    CLOSE_CHLORO_GENOME=${RES}/references/close_chloroplast.fa
+                    CLOSE_MITO_GENOME=${RES}/references/close_mitochondrion.fa
+                    CLOSE_GENOME=${RES}/references/close_nucrdna.fa
+                    if [ -s ${CLOSE_CHLORO_GENOME} ] && [ -s ${CLOSE_MITO_GENOME} ] && [ -s ${CLOSE_GENOME} ]; then
+                      echo "CMD: ${BLASTDB} -in ${CLOSE_CHLORO_GENOME} -dbtype nucl"
+                      ${BLASTDB} -in ${CLOSE_CHLORO_GENOME} -dbtype nucl
+                      echo "CMD: ${BLASTDB} -in ${CLOSE_MITO_GENOME} -dbtype nucl"
+                      ${BLASTDB} -in ${CLOSE_MITO_GENOME} -dbtype nucl
+                      echo "CMD: ${BLASTDB} -in ${CLOSE_GENOME} -dbtype nucl"
+                      ${BLASTDB} -in ${CLOSE_GENOME} -dbtype nucl
+                      echo "*** Mapping of contigs into close genomes ***"
+                      echo "CMD: ${BLASTN} -db ${CLOSE_CHLORO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split(\$1,a,\"_\")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib}"
+                			${BLASTN} -db ${CLOSE_CHLORO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib}
+                      echo "CMD: ${BLASTN} -db ${CLOSE_MITO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split(\$1,a,\"_\")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib}"
+                			${BLASTN} -db ${CLOSE_MITO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib}
+                      echo "CMD: ${BLASTN} -db ${CLOSE_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split(\$1,a,\"_\")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib}"
+                			${BLASTN} -db ${CLOSE_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib}
+                      if [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ] && [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                        echo "CMD: `dirname $0`/src/SelectContigs_chloro-mito-rdna.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                        `dirname $0`/src/SelectContigs_chloro-mito-rdna.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                        echo "CMD: `dirname $0`/src/SelectContigs_organelles.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                        `dirname $0`/src/SelectContigs_organelles.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ] && [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                        echo "CMD: `dirname $0`/src/SelectContigs_chloro-rdna.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --rdna ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_rdna ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                        `dirname $0`/src/SelectContigs_chloro-rdna.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                        echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                        `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info
+                        echo "WARN: no mtDNA and rDNA contigs found for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                        echo "WARN: no mtDNA and cpDNA contigs found for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                        awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                        echo "WARN: no cpDNA and rDNA contigs found for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                      else
+                        echo "WARN: error in selection of contigs for ${lib}"
+                        echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
+                        continue
+                      fi
+                      rm ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ${CLOSE_CHLORO_GENOME} ${CLOSE_MITO_GENOME} ${CLOSE_GENOME} ${CLOSE_CHLORO_GENOME}.* ${CLOSE_MITO_GENOME}.* ${CLOSE_GENOME}.*
+                      if [ -s ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info ]; then
+                        echo "*** mapping and extraction of assemblies into reference ***"
+                        awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $file | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info - > ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta
+                        echo "CMD: ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSE_REF} -t ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print \$0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=\$0;next;}{entry = entry \"\n\" \$0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/chloroplast/out_nt_${lib}.gff"
+                        if ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSE_REF} -t ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=$0;next;}{entry = entry "\n" $0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/chloroplast/out_nt_${lib}.gff; then
+                          echo "CMD: `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta -g ${RES}/Mapping/chloroplast/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${CHLORO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}"
+                          `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta -g ${RES}/Mapping/chloroplast/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${CHLORO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}
+                          rm ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta
+                          echo ${lib} >> ${RES}/chloroplast_nt_done.log
+                        else
+                          echo ${lib} >> ${RES}/chloroplast_nt_error.log
+                        fi
+                      else
+                        echo "WARN: No hits were detected when mapping ${lib} into chloroplastic genomes"
+                        echo ${lib} >> ${RES}/Mapping/chloroplast_contig_errors.log
+                        continue
+                      fi
+                    else
+                      echo "WARN: error in selection of contigs into close related genomes for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
+                      continue
+                    fi
+                  fi
+                else
+                  mkdir -p ${RES}/Mapping/nucrdna
+                  mkdir -p ${RES}/Mapping/mitochondrion
+                  echo "INFO: Selection of contigs in $lib assemblies according to mitochondrial, chloroplastic and ribosomal origin"
+                  echo "*** Extraction of close genomes ***"
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${CHLORO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${CHLORO_SIZE_MIN} -M ${CHLORO_SIZE_MAX}"
+                  `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${CHLORO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${CHLORO_SIZE_MIN} -M ${CHLORO_SIZE_MAX}
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${MITO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MITO_SIZE_MIN} -M ${MITO_SIZE_MAX}"
+                  `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${MITO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MITO_SIZE_MIN} -M ${MITO_SIZE_MAX}
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${NRDNA_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${NRDNA_SIZE_MIN} -M ${NRDNA_SIZE_MAX}"
+                  `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${NRDNA_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${NRDNA_SIZE_MIN} -M ${NRDNA_SIZE_MAX}
+                  CLOSE_CHLORO_GENOME=${RES}/references/close_chloroplast.fa
+                  CLOSE_MITO_GENOME=${RES}/references/close_mitochondrion.fa
+                  CLOSE_GENOME=${RES}/references/close_nucrdna.fa
+                  if [ -s ${CLOSE_CHLORO_GENOME} ] && [ -s ${CLOSE_MITO_GENOME} ] && [ -s ${CLOSE_GENOME} ]; then
+                    echo "CMD: ${BLASTDB} -in ${CLOSE_CHLORO_GENOME} -dbtype nucl"
+                    ${BLASTDB} -in ${CLOSE_CHLORO_GENOME} -dbtype nucl
+                    echo "CMD: ${BLASTDB} -in ${CLOSE_MITO_GENOME} -dbtype nucl"
+                    ${BLASTDB} -in ${CLOSE_MITO_GENOME} -dbtype nucl
+                    echo "CMD: ${BLASTDB} -in ${CLOSE_GENOME} -dbtype nucl"
+                    ${BLASTDB} -in ${CLOSE_GENOME} -dbtype nucl
+                    echo "*** Mapping of contigs into close genomes ***"
+                    echo "CMD: ${BLASTN} -db ${CLOSE_CHLORO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split(\$1,a,\"_\")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib}"
+                    ${BLASTN} -db ${CLOSE_CHLORO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib}
+                    echo "CMD: ${BLASTN} -db ${CLOSE_MITO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split(\$1,a,\"_\")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib}"
+                    ${BLASTN} -db ${CLOSE_MITO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib}
+                    echo "CMD: ${BLASTN} -db ${CLOSE_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split(\$1,a,\"_\")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib}"
+                    ${BLASTN} -db ${CLOSE_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib}
+                    if [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ] && [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                      echo "CMD: `dirname $0`/src/SelectContigs_chloro-mito-rdna.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                      `dirname $0`/src/SelectContigs_chloro-mito-rdna.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                      echo "CMD: `dirname $0`/src/SelectContigs_organelles.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                      `dirname $0`/src/SelectContigs_organelles.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ] && [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                      echo "CMD: `dirname $0`/src/SelectContigs_chloro-rdna.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --rdna ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_rdna ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                      `dirname $0`/src/SelectContigs_chloro-rdna.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                      echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                      `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info
+                      echo "WARN: no mtDNA and rDNA contigs found for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                      echo "WARN: no mtDNA and cpDNA contigs found for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                      echo "WARN: no cpDNA and rDNA contigs found for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    else
+                      echo "WARN: error in selection of contigs for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
+                      continue
+                    fi
+                    rm ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ${CLOSE_CHLORO_GENOME} ${CLOSE_MITO_GENOME} ${CLOSE_GENOME} ${CLOSE_CHLORO_GENOME}.* ${CLOSE_MITO_GENOME}.* ${CLOSE_GENOME}.*
+                    if [ -s ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info ]; then
+                      echo "*** mapping and extraction of assemblies into reference ***"
+                      awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $file | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info - > ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta
+                      echo "CMD: ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSE_REF} -t ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print \$0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=\$0;next;}{entry = entry \"\n\" \$0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/chloroplast/out_nt_${lib}.gff"
+                      if ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSE_REF} -t ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=$0;next;}{entry = entry "\n" $0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/chloroplast/out_nt_${lib}.gff; then
+                        echo "CMD: `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta -g ${RES}/Mapping/chloroplast/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${CHLORO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}"
+                        `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta -g ${RES}/Mapping/chloroplast/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${CHLORO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}
+                        rm ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta
+                        echo ${lib} >> ${RES}/chloroplast_nt_done.log
+                      else
+                        echo ${lib} >> ${RES}/chloroplast_nt_error.log
+                      fi
+                    else
+                      echo "WARN: No hits were detected when mapping ${lib} into chloroplastic genomes"
+                      echo ${lib} >> ${RES}/Mapping/chloroplast_contig_errors.log
+                      continue
+                    fi
+                  else
+                    echo "WARN: error in selection of contigs into close related genomes for ${lib}"
+                    echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
+                    continue
+                  fi
+                fi
+              fi
+            else
+              echo "WARN: error to extract close sequences into ${CLOSE_REF} database"
+              echo ${lib} >> ${RES}/chloroplast_nt_error.log
+              continue
+            fi
+          fi
+        else
+          echo "*** make formatted reference on the closest taxa from the database ***"
+            echo "CMD: `dirname $0`/src/ExtractRef_nucluce.py -in ${CHLORO_REF_NT} -q ${lib} -o ${RES}/references/ --target ${target}"
+            `dirname $0`/src/ExtractRef_nucluce.py -in ${CHLORO_REF_NT} -q ${lib} -o ${RES}/references/ --target ${target}
+            CLOSE_REF=${RES}/references/close_${target}.fa
+          if [ -s ${CLOSE_REF} ]; then
+            if [ -s ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info ]; then
+              echo "*** mapping and extraction of assemblies into reference ***"
+              awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $file | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info - > ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta
+              echo "CMD: ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSE_REF} -t ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print \$0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=\$0;next;}{entry = entry \"\n\" \$0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/chloroplast/out_nt_${lib}.gff"
+              if ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSE_REF} -t ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=$0;next;}{entry = entry "\n" $0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/chloroplast/out_nt_${lib}.gff; then
+                echo "CMD: `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta -g ${RES}/Mapping/chloroplast/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${CHLORO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}"
+                `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta -g ${RES}/Mapping/chloroplast/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${CHLORO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}
+                rm ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta
+                echo ${lib} >> ${RES}/chloroplast_nt_done.log
+              else
+                echo ${lib} >> ${RES}/chloroplast_nt_error.log
+              fi
+            else
+              if [ -s ${RES}/Mapping/selection_contigs_done.log ]; then
+                if grep -Fxq "${lib}" ${RES}/Mapping/selection_contigs_done.log; then
+                  echo "WARN: $lib has not chloroplastic contigs into assemblies"
+                  echo ${lib} >> ${RES}/Mapping/chloroplast_contig_errors.log
+                  continue
+                else
+                  mkdir -p ${RES}/Mapping/nucrdna
+                  mkdir -p ${RES}/Mapping/mitochondrion
+                  echo "INFO: Selection of contigs in $lib assemblies according to mitochondrial, chloroplastic and ribosomal origin"
+                  echo "*** Extraction of close genomes ***"
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${CHLORO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${CHLORO_SIZE_MIN} -M ${CHLORO_SIZE_MAX}"
+                  `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${CHLORO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${CHLORO_SIZE_MIN} -M ${CHLORO_SIZE_MAX}
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${MITO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MITO_SIZE_MIN} -M ${MITO_SIZE_MAX}"
+                  `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${MITO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MITO_SIZE_MIN} -M ${MITO_SIZE_MAX}
+                  echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${NRDNA_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${NRDNA_SIZE_MIN} -M ${NRDNA_SIZE_MAX}"
+                  `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${NRDNA_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${NRDNA_SIZE_MIN} -M ${NRDNA_SIZE_MAX}
+                  CLOSE_CHLORO_GENOME=${RES}/references/close_chloroplast.fa
+                  CLOSE_MITO_GENOME=${RES}/references/close_mitochondrion.fa
+                  CLOSE_GENOME=${RES}/references/close_nucrdna.fa
+                  if [ -s ${CLOSE_CHLORO_GENOME} ] && [ -s ${CLOSE_MITO_GENOME} ] && [ -s ${CLOSE_GENOME} ]; then
+                    echo "CMD: ${BLASTDB} -in ${CLOSE_CHLORO_GENOME} -dbtype nucl"
+                    ${BLASTDB} -in ${CLOSE_CHLORO_GENOME} -dbtype nucl
+                    echo "CMD: ${BLASTDB} -in ${CLOSE_MITO_GENOME} -dbtype nucl"
+                    ${BLASTDB} -in ${CLOSE_MITO_GENOME} -dbtype nucl
+                    echo "CMD: ${BLASTDB} -in ${CLOSE_GENOME} -dbtype nucl"
+                    ${BLASTDB} -in ${CLOSE_GENOME} -dbtype nucl
+                    echo "*** Mapping of contigs into close genomes ***"
+                    echo "CMD: ${BLASTN} -db ${CLOSE_CHLORO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split(\$1,a,\"_\")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib}"
+                    ${BLASTN} -db ${CLOSE_CHLORO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib}
+                    echo "CMD: ${BLASTN} -db ${CLOSE_MITO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split(\$1,a,\"_\")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib}"
+                    ${BLASTN} -db ${CLOSE_MITO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib}
+                    echo "CMD: ${BLASTN} -db ${CLOSE_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split(\$1,a,\"_\")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib}"
+                    ${BLASTN} -db ${CLOSE_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib}
+                    if [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ] && [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                      echo "CMD: `dirname $0`/src/SelectContigs_chloro-mito-rdna.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                      `dirname $0`/src/SelectContigs_chloro-mito-rdna.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                      echo "CMD: `dirname $0`/src/SelectContigs_organelles.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                      `dirname $0`/src/SelectContigs_organelles.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ] && [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                      echo "CMD: `dirname $0`/src/SelectContigs_chloro-rdna.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --rdna ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_rdna ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                      `dirname $0`/src/SelectContigs_chloro-rdna.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                      echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                      `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info
+                      echo "WARN: no mtDNA and rDNA contigs found for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                      echo "WARN: no mtDNA and cpDNA contigs found for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                      awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                      echo "WARN: no cpDNA and rDNA contigs found for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                    else
+                      echo "WARN: error in selection of contigs for ${lib}"
+                      echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
+                      continue
+                    fi
+                    rm ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ${CLOSE_CHLORO_GENOME} ${CLOSE_MITO_GENOME} ${CLOSE_GENOME} ${CLOSE_CHLORO_GENOME}.* ${CLOSE_MITO_GENOME}.* ${CLOSE_GENOME}.*
+                    if [ -s ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info ]; then
+                      echo "*** mapping and extraction of assemblies into reference ***"
+                      awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $file | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info - > ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta
+                      echo "CMD: ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSE_REF} -t ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print \$0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=\$0;next;}{entry = entry \"\n\" \$0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/chloroplast/out_nt_${lib}.gff"
+                      if ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSE_REF} -t ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=$0;next;}{entry = entry "\n" $0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/chloroplast/out_nt_${lib}.gff; then
+                        echo "CMD: `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta -g ${RES}/Mapping/chloroplast/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${CHLORO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}"
+                        `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta -g ${RES}/Mapping/chloroplast/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${CHLORO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}
+                        rm ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta
+                        echo ${lib} >> ${RES}/chloroplast_nt_done.log
+                      else
+                        echo ${lib} >> ${RES}/chloroplast_nt_error.log
+                      fi
+                    else
+                      echo "WARN: No hits were detected when mapping ${lib} into chloroplastic genomes"
+                      echo ${lib} >> ${RES}/Mapping/chloroplast_contig_errors.log
+                      continue
+                    fi
+                  else
+                    echo "WARN: error in selection of contigs into close related genomes for ${lib}"
+                    echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
+                    continue
+                  fi
+                fi
+              else
+                mkdir -p ${RES}/Mapping/nucrdna
+                mkdir -p ${RES}/Mapping/mitochondrion
+                echo "INFO: Selection of contigs in $lib assemblies according to mitochondrial, chloroplastic and ribosomal origin"
+                echo "*** Extraction of close genomes ***"
+                echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${CHLORO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${CHLORO_SIZE_MIN} -M ${CHLORO_SIZE_MAX}"
+                `dirname $0`/src/ExtractGenome.py -in ${CHLORO_ANNOTATIONS} --compartment chloroplast -fmt ${CHLORO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${CHLORO_SIZE_MIN} -M ${CHLORO_SIZE_MAX}
+                echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${MITO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MITO_SIZE_MIN} -M ${MITO_SIZE_MAX}"
+                `dirname $0`/src/ExtractGenome.py -in ${MITO_ANNOTATIONS} --compartment mitochondrion -fmt ${MITO_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${MITO_SIZE_MIN} -M ${MITO_SIZE_MAX}
+                echo "CMD: `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${NRDNA_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${NRDNA_SIZE_MIN} -M ${NRDNA_SIZE_MAX}"
+                `dirname $0`/src/ExtractGenome.py -in ${NRDNA_ANNOTATIONS} --compartment nucrdna -fmt ${NRDNA_DB_FMT} -q ${lib} -o ${RES}/references/ -m ${NRDNA_SIZE_MIN} -M ${NRDNA_SIZE_MAX}
+                CLOSE_CHLORO_GENOME=${RES}/references/close_chloroplast.fa
+                CLOSE_MITO_GENOME=${RES}/references/close_mitochondrion.fa
+                CLOSE_GENOME=${RES}/references/close_nucrdna.fa
+                if [ -s ${CLOSE_CHLORO_GENOME} ] && [ -s ${CLOSE_MITO_GENOME} ] && [ -s ${CLOSE_GENOME} ]; then
+                  echo "CMD: ${BLASTDB} -in ${CLOSE_CHLORO_GENOME} -dbtype nucl"
+                  ${BLASTDB} -in ${CLOSE_CHLORO_GENOME} -dbtype nucl
+                  echo "CMD: ${BLASTDB} -in ${CLOSE_MITO_GENOME} -dbtype nucl"
+                  ${BLASTDB} -in ${CLOSE_MITO_GENOME} -dbtype nucl
+                  echo "CMD: ${BLASTDB} -in ${CLOSE_GENOME} -dbtype nucl"
+                  ${BLASTDB} -in ${CLOSE_GENOME} -dbtype nucl
+                  echo "*** Mapping of contigs into close genomes ***"
+                  echo "CMD: ${BLASTN} -db ${CLOSE_CHLORO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split(\$1,a,\"_\")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib}"
+                  ${BLASTN} -db ${CLOSE_CHLORO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib}
+                  echo "CMD: ${BLASTN} -db ${CLOSE_MITO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split(\$1,a,\"_\")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib}"
+                  ${BLASTN} -db ${CLOSE_MITO_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib}
+                  echo "CMD: ${BLASTN} -db ${CLOSE_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split(\$1,a,\"_\")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib}"
+                  ${BLASTN} -db ${CLOSE_GENOME} -query $file -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn | awk '!/^#/ {print}' | awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print}' > ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib}
+                  if [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ] && [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                    echo "CMD: `dirname $0`/src/SelectContigs_chloro-mito-rdna.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                    `dirname $0`/src/SelectContigs_chloro-mito-rdna.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                    echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                  elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                    echo "CMD: `dirname $0`/src/SelectContigs_organelles.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                    `dirname $0`/src/SelectContigs_organelles.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                    echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                  elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ] && [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                    echo "CMD: `dirname $0`/src/SelectContigs_chloro-rdna.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --rdna ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_rdna ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                    `dirname $0`/src/SelectContigs_chloro-rdna.py --chloro ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --out_chloro ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                    echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                  elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ] && [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                    echo "CMD: `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info"
+                    `dirname $0`/src/SelectContigs_mitordna.py --rdna ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} --mito ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} --out_rdna ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info --out_mito ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                    echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                  elif [ -s ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ]; then
+                    awk '{print $1}' ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} | sort | uniq > ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info
+                    echo "WARN: no mtDNA and rDNA contigs found for ${lib}"
+                    echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                  elif [ -s ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ]; then
+                    awk '{print $1}' ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} | sort | uniq > ${RES}/Mapping/nucrdna/${lib}.contigs_nucrdna.info
+                    echo "WARN: no mtDNA and cpDNA contigs found for ${lib}"
+                    echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                  elif [ -s ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ]; then
+                    awk '{print $1}' ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} | sort | uniq > ${RES}/Mapping/mitochondrion/${lib}.contigs_mito.info
+                    echo "WARN: no cpDNA and rDNA contigs found for ${lib}"
+                    echo ${lib} >> ${RES}/Mapping/selection_contigs_done.log
+                  else
+                    echo "WARN: error in selection of contigs for ${lib}"
+                    echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
+                    continue
+                  fi
+                  rm ${RES}/Mapping/chloroplast/matches_chlorogenome_${lib} ${RES}/Mapping/mitochondrion/matches_mitogenome_${lib} ${RES}/Mapping/nucrdna/matches_nucrdnagenome_${lib} ${CLOSE_CHLORO_GENOME} ${CLOSE_MITO_GENOME} ${CLOSE_GENOME} ${CLOSE_CHLORO_GENOME}.* ${CLOSE_MITO_GENOME}.* ${CLOSE_GENOME}.*
+                  if [ -s ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info ]; then
+                    echo "*** mapping and extraction of assemblies into reference ***"
+                    awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $file | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/chloroplast/${lib}.contigs_chloro.info - > ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta
+                    echo "CMD: ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSE_REF} -t ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print \$0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=\$0;next;}{entry = entry \"\n\" \$0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/chloroplast/out_nt_${lib}.gff"
+                    if ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSE_REF} -t ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=$0;next;}{entry = entry "\n" $0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/chloroplast/out_nt_${lib}.gff; then
+                      echo "CMD: `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta -g ${RES}/Mapping/chloroplast/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${CHLORO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}"
+                      `dirname $0`/src/ExoGFF_homolog.py -i ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta -g ${RES}/Mapping/chloroplast/out_nt_${lib}.gff -m ${target} -o ${RES}/Extraction/ -n ${lib} -l ${MINLENGTH} -t ${CHLORO_TYPE} -c ${COVERAGE} -cl ${MINCONTLENGTH} --threads ${THREADS} -s ${CLOSE_REF} -rp ${REFPCT} --cov_cutoff ${COVCUTOFF} --orfcov ${ORFCOV}
+                      rm ${RES}/Mapping/chloroplast/contigs_chloro_${lib}.fasta
+                      echo ${lib} >> ${RES}/chloroplast_nt_done.log
+                    else
+                      echo ${lib} >> ${RES}/chloroplast_nt_error.log
+                    fi
+                  else
+                    echo "WARN: No hits were detected when mapping ${lib} into chloroplastic genomes"
+                    echo ${lib} >> ${RES}/Mapping/chloroplast_contig_errors.log
+                    continue
+                  fi
+                else
+                  echo "WARN: error in selection of contigs into close related genomes for ${lib}"
+                  echo ${lib} >> ${RES}/Mapping/selection_contigs_errors.log
+                  continue
+                fi
+              fi
+            fi
+          else
+            echo "WARN: error to extract close sequences into ${CLOSE_REF} database"
+            echo ${lib} >> ${RES}/chloroplast_nt_error.log
+            continue
+          fi
+        fi
+      else
+        echo "no assemblies done for $lib"
+        echo ${lib} >> ${RES}/chloroplast_nt_error.log
+      fi
+    done <${SAMPLES}
+    end=`date +%s`
+    runtime=$( echo "$end - $start" | bc -l )
+    hours=$((runtime / 3600))
+    minutes=$(( (runtime % 3600) / 60 ))
+    seconds=$(( (runtime % 3600) % 60 ))
+    echo "INFO: time ellapsed for $mode step: $hours:$minutes:$seconds (hh:mm:ss)"
+		echo "STATUS: done"
+    echo ""
+		exit 0
 
   elif [ $mode == 'checking' ]; then
 
@@ -4710,8 +5838,8 @@ mkdir -p ${RES}/Extraction
     done
 
     echo "INFO: selection of best hits accession for $listbarcodes blast"
-    echo "CMD: `dirname $0`/src/BestHits.py -o ${RES}/Errors/ -b $listbarcodes -t ${TAXALIST}"
-    `dirname $0`/src/BestHits.py -o ${RES}/Errors/ -b $listbarcodes -t ${TAXALIST}
+    echo "CMD: `dirname $0`/src/BestHits.py -o ${RES}/Errors/ -b $listbarcodes -t ${TAXA_CHECK}"
+    `dirname $0`/src/BestHits.py -o ${RES}/Errors/ -b $listbarcodes -t ${TAXA_CHECK}
 
     echo "INFO: corresponding between accessions and taxid"
     for element in "${BARCODES[@]}"; do
@@ -4724,11 +5852,11 @@ mkdir -p ${RES}/Extraction
     echo "INFO: taxids comparison at the family level between query and best hits sequences"
 
     if [ ${FAMILIES_LOCAL} == 'on' ]; then
-      echo "CMD: `dirname $0`/src/TaxIDCompare_missingtaxid.py --accession ${RES}/Errors/blast.accessions -o ${RES}/Errors/ -b $listbarcodes -t ${TAXALIST} --families ${CORRESPONDING_FAMILIES} --local > ${RES}/Errors/ValidationSamples.out"
-      `dirname $0`/src/TaxIDCompare_missingtaxid.py --accession ${RES}/Errors/blast.accessions -o ${RES}/Errors/ -b $listbarcodes -t ${TAXALIST} --families ${CORRESPONDING_FAMILIES} --local > ${RES}/Errors/ValidationSamples.out
+      echo "CMD: `dirname $0`/src/TaxIDCompare_missingtaxid.py --accession ${RES}/Errors/blast.accessions -o ${RES}/Errors/ -b $listbarcodes -t ${TAXA_CHECK} --families ${CORRESPONDING_FAMILIES} --local > ${RES}/Errors/ValidationSamples.out"
+      `dirname $0`/src/TaxIDCompare_missingtaxid.py --accession ${RES}/Errors/blast.accessions -o ${RES}/Errors/ -b $listbarcodes -t ${TAXA_CHECK} --families ${CORRESPONDING_FAMILIES} --local > ${RES}/Errors/ValidationSamples.out
     else
-      echo "CMD: `dirname $0`/src/TaxIDCompare_missingtaxid.py --accession ${RES}/Errors/blast.accessions -o ${RES}/Errors/ -b $listbarcodes -t ${TAXALIST} > ${RES}/Errors/ValidationSamples.out"
-      `dirname $0`/src/TaxIDCompare_missingtaxid.py --accession ${RES}/Errors/blast.accessions -o ${RES}/Errors/ -b $listbarcodes -t ${TAXALIST} > ${RES}/Errors/ValidationSamples.out
+      echo "CMD: `dirname $0`/src/TaxIDCompare_missingtaxid.py --accession ${RES}/Errors/blast.accessions -o ${RES}/Errors/ -b $listbarcodes -t ${TAXA_CHECK} > ${RES}/Errors/ValidationSamples.out"
+      `dirname $0`/src/TaxIDCompare_missingtaxid.py --accession ${RES}/Errors/blast.accessions -o ${RES}/Errors/ -b $listbarcodes -t ${TAXA_CHECK} > ${RES}/Errors/ValidationSamples.out
     fi
 
     end=`date +%s`
