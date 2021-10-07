@@ -451,7 +451,7 @@ user$: (orthoskim-env) ./orthoskim -m database -t mitochondrion -c config_orthos
 user$: (orthoskim-env) ./orthoskim -m database -t nucrdna -c config_orthoskim.txt
 ```
 
-`>` **parameters used **
+`>` **parameters used**
 + annotation files and respective formats
 ```
 MITO_ANNOTATIONS=~/ORTHOSKIM-master/data/mitochondrion_viridiplantae.gb              ## [13] input mtDNA Annotations file (in .gb or .embl)
@@ -721,7 +721,7 @@ user$: (orthoskim-env) ./orthoskim -m alignment -t chloroplast_CDS -t chloroplas
 ```
 >**Note:** Here, we used multiple targets with the `-t option` to align CDS, rRNA and tRNA sequences in a single run.
 
-`>` **parameters used **
+`>` **parameters used**
 
 ```
 SELECTION=on                                                                         ## [55] selection of taxa for the alignment: [on/off]
@@ -732,7 +732,7 @@ MISSING_RATIO=1.0                                                               
 GENES_TO_CONCAT=~/ORTHOSKIM-master/ressources/listGenes_To_Concat.tab                ## [60] file with selected genes for the alignment (each line corresponds to one gene)
 ```
 
-`>` **output files **
+`>` **output files**
 
 ORTHOSKIM produces a concatenated alignment of sequences along with a partition file under a RAxML-style format suitable for phylogenetic inferences within the `/Working_directory/Assembly/` or `/Working_directory/Selection/` subdirectory (if a selection of taxa is made). For such needs, users have to choose which sequences will be concatenated from a given list (list stated in l. 57 of the config file). A file with informations about gappy or missing data is also produced by library.
 
