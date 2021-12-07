@@ -8,9 +8,7 @@ import fnmatch
 
 
 
-parser = argparse.ArgumentParser(description='Creation of parameters table for assembly path analysis according to annotated chloroplasts previously assembled.\
- Output format: (1) chloroplast file name; (2) Genus of species sample; (3) sample name; (4) forward reads, (5) reverse reads, (6) Output path for assemblies samples subdirectories\
- Script was writen by C. Pouchon (2019).')
+parser = argparse.ArgumentParser(description='creation of the sample table for phyloskims users')
 parser.add_argument("-i","--infile", help="input file list of assembled annotated chloroplasts",
                     type=str)
 parser.add_argument("-p","--path", help="searching path of annotated chloroplasts",

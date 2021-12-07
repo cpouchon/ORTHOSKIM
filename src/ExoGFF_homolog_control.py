@@ -26,6 +26,8 @@ parser.add_argument("-n","--namesample", help="sample name used in sequence head
                     type=str)
 parser.add_argument("-g","--gfftab", help="input gff table from exonerate alignment",
                     type=str)
+parser.add_argument("--genetic_code", help="NCBI genetic code number used for DNA translation",
+                    type=int)
 parser.add_argument("-clt","--control", help="input gff table from exonerate alignment to seeds from other organelle (mitochondrial or chloroplastic)",
                     type=str)
 parser.add_argument("-t","--typeofseq", help="type of sequence to extract",
@@ -339,9 +341,9 @@ def GeneExtraction(genenumber):
     cond_orf=0
 
     if typeseq=="exon" and (model=="chloroplast_CDS" or model=="mitochondrion_CDS" or model=="busco" or model=="nucleus_aa"):
-        tseq=Seq(newseq).translate()
+        tseq=Seq(newseq).translate(table=genet_code)
         if "*" in tseq:
-            seqframes=[Seq(newseq).translate(),Seq(newseq[1:len(newseq)]).translate(),Seq(newseq[2:len(newseq)]).translate()]
+            seqframes=[Seq(newseq).translate(table=genet_code),Seq(newseq[1:len(newseq)]).translate(table=genet_code),Seq(newseq[2:len(newseq)]).translate(table=genet_code)]
             frame_select=0
             len_orf=0
             orf_select=""
@@ -485,9 +487,9 @@ def GeneExtraction(genenumber):
                                     extract=str(Seq(dna[posmin-1:posmax]))
                                 exon_concat.append(extract)
                 exon_seq="".join(exon_concat)
-                tseq=Seq(exon_seq).translate()
+                tseq=Seq(exon_seq).translate(table=genet_code)
                 if "*" in tseq:
-                    seqframes=[Seq(exon_seq).translate(),Seq(exon_seq[1:len(exon_seq)]).translate(),Seq(exon_seq[2:len(exon_seq)]).translate()]
+                    seqframes=[Seq(exon_seq).translate(table=genet_code),Seq(exon_seq[1:len(exon_seq)]).translate(table=genet_code),Seq(exon_seq[2:len(exon_seq)]).translate(table=genet_code)]
                     frame_select=0
                     len_orf=0
                     orf_select=""
@@ -531,9 +533,9 @@ def GeneExtraction(genenumber):
                 else:
                     newseq2=newseq
             else:
-                tseq=Seq(newseq).translate()
+                tseq=Seq(newseq).translate(table=genet_code)
                 if "*" in tseq:
-                    seqframes=[Seq(newseq).translate(),Seq(newseq[1:len(newseq)]).translate(),Seq(newseq[2:len(newseq)]).translate()]
+                    seqframes=[Seq(newseq).translate(table=genet_code),Seq(newseq[1:len(newseq)]).translate(table=genet_code),Seq(newseq[2:len(newseq)]).translate(table=genet_code)]
                     frame_select=0
                     len_orf=0
                     orf_select=""
@@ -717,6 +719,7 @@ refcond=args.refpct
 control=args.control
 option_cutoff=args.cov_cutoff
 orfcond=args.orfcov
+genet_code=args.genetic_code
 
 stored={}
 stat_stored={}
