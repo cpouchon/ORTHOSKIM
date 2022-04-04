@@ -26,7 +26,9 @@ parser.add_argument("--target", help="list of targeted gene directory",
                     type=str)
 parser.add_argument("-g","--genes", help="list of gene to include in the final concatenated file",
                     type=str)
-parser.add_argument("--trim", help="[mode] if alignments files were trimmed, genes are collected in trim/ folder in rigth target. Otherwise, they are collected in files/",
+parser.add_argument("--trim", help="[mode] if alignments files were trimmed",
+                    action="store_true")
+parser.add_argument("--clean", help="[mode] if alignment files were cleaned from paralogous sequences",
                     action="store_true")
 parser.add_argument("--missingfract", help="maximal missing data threshold allowed to consider final sequence (e.g. 0.5 meaning that final sequence has fewer than 0.5 of missing data)",
                      type=float,default=None)
@@ -70,6 +72,12 @@ if args.pathfind:
             for r, d, f in path_to_seek:
                 for file in f:
                     if str("."+"trim") in file:
+                        in_files.append(os.path.join(r, file))
+        elif args.clean:
+            path_to_seek=os.walk(os.path.join(path,p,"clean"))
+            for r, d, f in path_to_seek:
+                for file in f:
+                    if str("."+"fa") in file:
                         in_files.append(os.path.join(r, file))
         else:
             path_to_seek=os.walk(os.path.join(path,p,"files"))

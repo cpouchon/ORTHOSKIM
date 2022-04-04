@@ -83,8 +83,6 @@ O       o O       o O       o
 o       O o       O o       O
 "
 
-mkdir -p ${RES}/Assembly/Samples
-mkdir -p ${RES}/Extraction
 
   if [ $mode == 'phyloskim_indexing' ]; then
 		echo "INFO: indexing of annotation files"
@@ -235,6 +233,7 @@ mkdir -p ${RES}/Extraction
 
 	elif [ $mode == 'assembly' ] && [ $target == 'spades' ]; then
 		echo "INFO: SPAdes assembly run"
+    mkdir -p ${RES}/Assembly/Samples
     mkdir -p ${RES}/Assembly/SPADES
     start=$(date +%s)
 		while read f;
@@ -279,6 +278,7 @@ mkdir -p ${RES}/Extraction
 
   elif [ $mode == 'assembly' ] && [ $target == 'rnaspades' ]; then
     echo "INFO: RNASPAdes assembly run"
+    mkdir -p ${RES}/Assembly/Samples
     mkdir -p ${RES}/Assembly/RNASPADES
     start=$(date +%s)
     while read f;
@@ -324,17 +324,12 @@ mkdir -p ${RES}/Extraction
 	elif [ $mode == 'capture' ] && [ $target == 'busco' ]; then
 		echo "INFO: capture of BUSCO markers from assemblies"
     start=$(date +%s)
-		mkdir -p ${RES}/Mapping/busco
-		echo "*** make DIAMOND formatted reference database ***"
-		refdb=${BUSCO_REF/.fasta/}
-    echo "CMD: ${DIAMOND} makedb --in ${BUSCO_REF} -d ${refdb}"
-		${DIAMOND} makedb --in ${BUSCO_REF} -d ${refdb} --threads ${THREADS}
+    mkdir -p ${RES}/Mapping/busco
+    mkdir -p ${RES}/Mapping/tmp
 		echo "*** mapping and extraction of assemblies into reference ***"
-		#for f in `find ${RES}/Assembly/Samples/ -type f -name \*.fa`;
     while read f;
 		do
 			lib=`echo ${f} | awk '{print $1}'`
-			#lib=`basename $f | perl -pe 's/\.fa//'`
       file=${RES}/Assembly/Samples/filtered/${lib}.fa
       if [ -s $file ]; then
         if [ -s ${RES}/busco_done.log ]; then
@@ -342,9 +337,12 @@ mkdir -p ${RES}/Extraction
             echo "WARN: $lib already processed"
             continue
           else
-            echo "CMD: ${DIAMOND} blastx --outfmt 6 qseqid sseqid pident length mismatch gapopen qframe qstart qend sstart send evalue bitscore slen -d ${refdb} -q ${file} -o ${RES}/Mapping/busco/matches_${lib} --evalue ${EVALUE} --threads ${THREADS} --sensitive"
-      			${DIAMOND} blastx --outfmt 6 qseqid sseqid pident length mismatch gapopen qframe qstart qend sstart send evalue bitscore slen -d ${refdb} -q ${file} -o ${RES}/Mapping/busco/matches_${lib} --evalue ${EVALUE} --threads ${THREADS} --sensitive
-      			awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print $1}' ${RES}/Mapping/busco/matches_${lib} | sort | uniq > ${RES}/Mapping/busco/hits_${lib}
+            cp $file ${RES}/Mapping/tmp
+            echo "CMD: ${BLASTDB} -in ${RES}/Mapping/tmp/${lib}.fa -dbtype nucl"
+            ${BLASTDB} -in ${RES}/Mapping/tmp/${lib}.fa -dbtype nucl
+            echo "CMD: ${TBLASTN} -db ${RES}/Mapping/tmp/${lib}.fa -query ${BUSCO_REF} -out ${RES}/Mapping/busco/matches_${lib} -evalue ${EVALUE} -max_target_seqs ${MAX_SEQS} -num_threads ${THREADS} -outfmt 7 -task tblastn"
+            ${TBLASTN} -db ${RES}/Mapping/tmp/${lib}.fa -query ${BUSCO_REF} -out ${RES}/Mapping/busco/matches_${lib} -evalue ${EVALUE} -max_target_seqs ${MAX_SEQS} -num_threads ${THREADS} -outfmt 7 -task tblastn
+            awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($2,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print $2}' ${RES}/Mapping/busco/matches_${lib} | sort | uniq > ${RES}/Mapping/busco/hits_${lib}
             if [ -s ${RES}/Mapping/busco/hits_${lib} ]; then
               awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $file | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/busco/hits_${lib} - > ${RES}/Mapping/busco/contigs_hits_${lib}.fasta
               echo "CMD: ${EXONERATE} --model protein2genome -q ${BUSCO_REF} -t ${RES}/Mapping/busco/contigs_hits_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=$0;next;}{entry = entry "\n" $0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/busco/out_${lib}.gff"
@@ -363,9 +361,12 @@ mkdir -p ${RES}/Extraction
             fi
           fi
         else
-          echo "CMD: ${DIAMOND} blastx --outfmt 6 qseqid sseqid pident length mismatch gapopen qframe qstart qend sstart send evalue bitscore slen -d ${refdb} -q ${file} -o ${RES}/Mapping/busco/matches_${lib} --evalue ${EVALUE} --threads ${THREADS} --sensitive"
-    			${DIAMOND} blastx --outfmt 6 qseqid sseqid pident length mismatch gapopen qframe qstart qend sstart send evalue bitscore slen -d ${refdb} -q ${file} -o ${RES}/Mapping/busco/matches_${lib} --evalue ${EVALUE} --threads ${THREADS} --sensitive
-    			awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print $1}' ${RES}/Mapping/busco/matches_${lib} | sort | uniq > ${RES}/Mapping/busco/hits_${lib}
+          cp $file ${RES}/Mapping/tmp
+          echo "CMD: ${BLASTDB} -in ${RES}/Mapping/tmp/${lib}.fa -dbtype nucl"
+          ${BLASTDB} -in ${RES}/Mapping/tmp/${lib}.fa -dbtype nucl
+          echo "CMD: ${TBLASTN} -db ${RES}/Mapping/tmp/${lib}.fa -query ${BUSCO_REF} -out ${RES}/Mapping/busco/matches_${lib} -evalue ${EVALUE} -max_target_seqs ${MAX_SEQS} -num_threads ${THREADS} -outfmt 7 -task tblastn"
+          ${TBLASTN} -db ${RES}/Mapping/tmp/${lib}.fa -query ${BUSCO_REF} -out ${RES}/Mapping/busco/matches_${lib} -evalue ${EVALUE} -max_target_seqs ${MAX_SEQS} -num_threads ${THREADS} -outfmt 7 -task tblastn
+          awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($2,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print $2}' ${RES}/Mapping/busco/matches_${lib} | sort | uniq > ${RES}/Mapping/busco/hits_${lib}
           if [ -s ${RES}/Mapping/busco/hits_${lib} ]; then
             awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $file | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/busco/hits_${lib} - > ${RES}/Mapping/busco/contigs_hits_${lib}.fasta
             echo "CMD: ${EXONERATE} --model protein2genome -q ${BUSCO_REF} -t ${RES}/Mapping/busco/contigs_hits_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print $0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=$0;next;}{entry = entry "\n" $0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/busco/out_${lib}.gff"
@@ -388,6 +389,7 @@ mkdir -p ${RES}/Extraction
         echo ${lib} >> ${RES}/busco_error.log
       fi
 		done <${SAMPLES}
+    rm -rf ${RES}/Mapping/tmp
     end=`date +%s`
     runtime=$( echo "$end - $start" | bc -l )
     hours=$((runtime / 3600))
@@ -786,6 +788,7 @@ mkdir -p ${RES}/Extraction
 
   elif [ $mode == 'capture' ] && [ $target == 'mitochondrion_rRNA' ]; then
     echo "INFO: Capture of mitchondrial rRNA from assemblies"
+    mkdir -p ${RES}/Extraction
     mkdir -p ${RES}/Mapping/mitochondrion
     mkdir -p ${RES}/references
     start=$(date +%s)
@@ -1519,6 +1522,7 @@ mkdir -p ${RES}/Extraction
 		exit 0
 
   elif [ $mode == 'capture' ] && [ $target == 'mitochondrion_CDS' ]; then
+    mkdir -p ${RES}/Extraction
     echo "INFO: Capture of mitchondrial CDS from assemblies"
     mkdir -p ${RES}/Mapping/mitochondrion
     mkdir -p ${RES}/references
@@ -2253,6 +2257,7 @@ mkdir -p ${RES}/Extraction
 
   elif [ $mode == 'capture' ] && [ $target == 'mitochondrion_nt' ]; then
     echo "INFO: Free-mode of mtDNA sequence capture from assemblies"
+    mkdir -p ${RES}/Extraction
     mkdir -p ${RES}/Mapping/mitochondrion
     mkdir -p ${RES}/references
     start=$(date +%s)
@@ -2944,13 +2949,13 @@ mkdir -p ${RES}/Extraction
 
   elif [ $mode == 'capture' ] && [ $target == 'nucleus_nt' ]; then
     echo "INFO: Capture of nuclear genes from assemblies"
+    mkdir -p ${RES}/Extraction
     mkdir -p ${RES}/Mapping/nucleus
     mkdir -p ${RES}/references
+    mkdir -p ${RES}/Mapping/tmp
     start=$(date +%s)
-    #for f in `find ${RES}/Assembly/Samples/ -type f -name \*.fa`;
     while read f;
 		do
-      #lib=`basename $f | perl -pe 's/\.fa//'`
       lib=`echo ${f} | awk '{print $1}'`
       file=${RES}/Assembly/Samples/filtered/${lib}.fa
       if [ -s $file ]; then
@@ -2964,12 +2969,13 @@ mkdir -p ${RES}/Extraction
             `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_NT_REF} -q ${lib} -o ${RES}/references/ --target ${target}
             CLOSE_REF=${RES}/references/close_${target}.fa
             if [ -s ${CLOSE_REF} ]; then
-              echo "CMD: ${BLASTDB} -in ${CLOSE_REF} -dbtype nucl"
-              ${BLASTDB} -in ${CLOSE_REF} -dbtype nucl
+              cp $file ${RES}/Mapping/tmp
+              echo "CMD: ${BLASTDB} -in ${RES}/Mapping/tmp/${lib}.fa -dbtype nucl"
+              ${BLASTDB} -in ${RES}/Mapping/tmp/${lib}.fa -dbtype nucl
               echo "*** mapping and extraction of assemblies into reference ***"
-              echo "CMD: ${BLASTN} -db ${CLOSE_REF} -query $file -out ${RES}/Mapping/nucleus/matches_nucleus_nt_${lib} -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn"
-        			${BLASTN} -db ${CLOSE_REF} -query $file -out ${RES}/Mapping/nucleus/matches_nucleus_nt_${lib} -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn
-        			awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print $1}' ${RES}/Mapping/nucleus/matches_nucleus_nt_${lib} | sort | uniq > ${RES}/Mapping/nucleus/hits_nucleus_nt_${lib}
+              echo "CMD: ${BLASTN} -db ${RES}/Mapping/tmp/${lib}.fa -query ${CLOSE_REF} -out ${RES}/Mapping/nucleus/matches_nucleus_nt_${lib} -evalue ${EVALUE} -max_target_seqs ${MAX_SEQS} -num_threads ${THREADS} -outfmt 7 -task blastn"
+              ${BLASTN} -db ${RES}/Mapping/tmp/${lib}.fa -query ${CLOSE_REF} -out ${RES}/Mapping/nucleus/matches_nucleus_nt_${lib} -evalue ${EVALUE} -max_target_seqs ${MAX_SEQS} -num_threads ${THREADS} -outfmt 7 -task blastn
+              awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($2,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print $2}' ${RES}/Mapping/nucleus/matches_nucleus_nt_${lib} | sort | uniq > ${RES}/Mapping/nucleus/hits_nucleus_nt_${lib}
               if [ -s ${RES}/Mapping/nucleus/hits_nucleus_nt_${lib} ]; then
                 awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $file | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/nucleus/hits_nucleus_nt_${lib} - > ${RES}/Mapping/nucleus/contigs_hits_nucleus_nt_${lib}.fasta
                 echo "CMD: ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSE_REF} -t ${RES}/Mapping/nucleus/contigs_hits_nucleus_nt_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print \$0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=\$0;next;}{entry = entry \"\n\" \$0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/nucleus/out_nucleus_nt_${lib}.gff"
@@ -2998,12 +3004,13 @@ mkdir -p ${RES}/Extraction
           `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_NT_REF} -q ${lib} -o ${RES}/references/ --target ${target}
           CLOSE_REF=${RES}/references/close_${target}.fa
           if [ -s ${CLOSE_REF} ]; then
-            echo "CMD: ${BLASTDB} -in ${CLOSE_REF} -dbtype nucl"
-            ${BLASTDB} -in ${CLOSE_REF} -dbtype nucl
+            cp $file ${RES}/Mapping/tmp
+            echo "CMD: ${BLASTDB} -in ${RES}/Mapping/tmp/${lib}.fa -dbtype nucl"
+            ${BLASTDB} -in ${RES}/Mapping/tmp/${lib}.fa -dbtype nucl
             echo "*** mapping and extraction of assemblies into reference ***"
-            echo "CMD: ${BLASTN} -db ${CLOSE_REF} -query $file -out ${RES}/Mapping/nucleus/matches_nucleus_nt_${lib} -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn"
-            ${BLASTN} -db ${CLOSE_REF} -query $file -out ${RES}/Mapping/nucleus/matches_nucleus_nt_${lib} -evalue ${EVALUE} -num_threads ${THREADS} -outfmt 7 -task blastn
-            awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print $1}' ${RES}/Mapping/nucleus/matches_nucleus_nt_${lib} | sort | uniq > ${RES}/Mapping/nucleus/hits_nucleus_nt_${lib}
+            echo "CMD: ${BLASTN} -db ${RES}/Mapping/tmp/${lib}.fa -query ${CLOSE_REF} -out ${RES}/Mapping/nucleus/matches_nucleus_nt_${lib} -evalue ${EVALUE} -max_target_seqs ${MAX_SEQS} -num_threads ${THREADS} -outfmt 7 -task blastn"
+            ${BLASTN} -db ${RES}/Mapping/tmp/${lib}.fa -query ${CLOSE_REF} -out ${RES}/Mapping/nucleus/matches_nucleus_nt_${lib} -evalue ${EVALUE} -max_target_seqs ${MAX_SEQS} -num_threads ${THREADS} -outfmt 7 -task blastn
+            awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($2,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print $2}' ${RES}/Mapping/nucleus/matches_nucleus_nt_${lib} | sort | uniq > ${RES}/Mapping/nucleus/hits_nucleus_nt_${lib}
             if [ -s ${RES}/Mapping/nucleus/hits_nucleus_nt_${lib} ]; then
               awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $file | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/nucleus/hits_nucleus_nt_${lib} - > ${RES}/Mapping/nucleus/contigs_hits_nucleus_nt_${lib}.fasta
               echo "CMD: ${EXONERATE} --model genome2genome -s ${EXO_SCORE} -q ${CLOSE_REF} -t ${RES}/Mapping/nucleus/contigs_hits_nucleus_nt_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print \$0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=\$0;next;}{entry = entry \"\n\" \$0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/nucleus/out_nucleus_nt_${lib}.gff"
@@ -3031,6 +3038,7 @@ mkdir -p ${RES}/Extraction
         echo ${lib} >> ${RES}/nucleus_nt_error.log
       fi
 		done <${SAMPLES}
+    rm -rf ${RES}/Mapping/tmp
     end=`date +%s`
     runtime=$( echo "$end - $start" | bc -l )
     hours=$((runtime / 3600))
@@ -3043,13 +3051,13 @@ mkdir -p ${RES}/Extraction
 
   elif [ $mode == 'capture' ] && [ $target == 'nucleus_aa' ]; then
     echo "INFO: Capture of nuclear loci from assemblies"
+    mkdir -p ${RES}/Extraction
     mkdir -p ${RES}/Mapping/nucleus
     mkdir -p ${RES}/references
+    mkdir -p ${RES}/Mapping/tmp
     start=$(date +%s)
-    #for f in `find ${RES}/Assembly/Samples/ -type f -name \*.fa`;
     while read f;
 		do
-      #lib=`basename $f | perl -pe 's/\.fa//'`
       lib=`echo ${f} | awk '{print $1}'`
       file=${RES}/Assembly/Samples/filtered/${lib}.fa
       if [ -s $file ]; then
@@ -3063,13 +3071,12 @@ mkdir -p ${RES}/Extraction
             `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_AA_REF} -q ${lib} -o ${RES}/references/ --target ${target}
             CLOSE_REF=${RES}/references/close_${target}.fa
             if [ -s ${CLOSE_REF} ]; then
-              refdb=${CLOSE_REF/.fa/}
-              echo "CMD: ${DIAMOND} makedb --in ${CLOSE_REF} -d ${refdb}"
-          		${DIAMOND} makedb --in ${CLOSE_REF} -d ${refdb} --threads ${THREADS}
-              echo "*** mapping and extraction of assemblies into reference ***"
-              echo "CMD: ${DIAMOND} blastx --outfmt 6 qseqid sseqid pident length mismatch gapopen qframe qstart qend sstart send evalue bitscore slen -d ${refdb} -q $file -o ${RES}/Mapping/nucleus/matches_nucleus_aa_${lib} --evalue ${EVALUE} --threads ${THREADS} --sensitive"
-        			${DIAMOND} blastx --outfmt 6 qseqid sseqid pident length mismatch gapopen qframe qstart qend sstart send evalue bitscore slen -d ${refdb} -q $file -o ${RES}/Mapping/nucleus/matches_nucleus_aa_${lib} --evalue ${EVALUE} --threads ${THREADS} --sensitive
-        			awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print $1}' ${RES}/Mapping/nucleus/matches_nucleus_aa_${lib} | sort | uniq > ${RES}/Mapping/nucleus/hits_nucleus_aa_${lib}
+              cp $file ${RES}/Mapping/tmp
+              echo "CMD: ${BLASTDB} -in ${RES}/Mapping/tmp/${lib}.fa -dbtype nucl"
+              ${BLASTDB} -in ${RES}/Mapping/tmp/${lib}.fa -dbtype nucl
+              echo "CMD: ${TBLASTN} -db ${RES}/Mapping/tmp/${lib}.fa -query ${CLOSE_REF} -out ${RES}/Mapping/nucleus/matches_nucleus_aa_${lib} -evalue ${EVALUE} -max_target_seqs ${MAX_SEQS} -num_threads ${THREADS} -outfmt 7 -task tblastn"
+              ${TBLASTN} -db ${RES}/Mapping/tmp/${lib}.fa -query ${CLOSE_REF} -out ${RES}/Mapping/nucleus/matches_nucleus_aa_${lib} -evalue ${EVALUE} -max_target_seqs ${MAX_SEQS} -num_threads ${THREADS} -outfmt 7 -task tblastn
+              awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($2,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print $2}' ${RES}/Mapping/nucleus/matches_nucleus_aa_${lib} | sort | uniq > ${RES}/Mapping/nucleus/hits_nucleus_aa_${lib}
               if [ -s ${RES}/Mapping/nucleus/hits_nucleus_aa_${lib} ]; then
                 awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $file | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/nucleus/hits_nucleus_aa_${lib} - > ${RES}/Mapping/nucleus/contigs_hits_nucleus_aa_${lib}.fasta
                 echo "CMD: ${EXONERATE} --model protein2genome -q ${CLOSE_REF} -t ${RES}/Mapping/nucleus/contigs_hits_nucleus_aa_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print \$0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=\$0;next;}{entry = entry \"\n\" \$0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/nucleus/out_nucleus_aa_${lib}.gff"
@@ -3098,13 +3105,12 @@ mkdir -p ${RES}/Extraction
           `dirname $0`/src/ExtractRef_nucluce.py -in ${NUC_AA_REF} -q ${lib} -o ${RES}/references/ --target ${target}
           CLOSE_REF=${RES}/references/close_${target}.fa
           if [ -s ${CLOSE_REF} ]; then
-            refdb=${CLOSE_REF/.fa/}
-            echo "CMD: ${DIAMOND} makedb --in ${CLOSE_REF} -d ${refdb}"
-            ${DIAMOND} makedb --in ${CLOSE_REF} -d ${refdb} --threads ${THREADS}
-            echo "*** mapping and extraction of assemblies into reference ***"
-            echo "CMD: ${DIAMOND} blastx --outfmt 6 qseqid sseqid pident length mismatch gapopen qframe qstart qend sstart send evalue bitscore slen -d ${refdb} -q $file -o ${RES}/Mapping/nucleus/matches_nucleus_aa_${lib} --evalue ${EVALUE} --threads ${THREADS} --sensitive"
-            ${DIAMOND} blastx --outfmt 6 qseqid sseqid pident length mismatch gapopen qframe qstart qend sstart send evalue bitscore slen -d ${refdb} -q $file -o ${RES}/Mapping/nucleus/matches_nucleus_aa_${lib} --evalue ${EVALUE} --threads ${THREADS} --sensitive
-            awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($1,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print $1}' ${RES}/Mapping/nucleus/matches_nucleus_aa_${lib} | sort | uniq > ${RES}/Mapping/nucleus/hits_nucleus_aa_${lib}
+            cp $file ${RES}/Mapping/tmp
+            echo "CMD: ${BLASTDB} -in ${RES}/Mapping/tmp/${lib}.fa -dbtype nucl"
+            ${BLASTDB} -in ${RES}/Mapping/tmp/${lib}.fa -dbtype nucl
+            echo "CMD: ${TBLASTN} -db ${RES}/Mapping/tmp/${lib}.fa -query ${CLOSE_REF} -out ${RES}/Mapping/nucleus/matches_nucleus_aa_${lib} -evalue ${EVALUE} -max_target_seqs ${MAX_SEQS} -num_threads ${THREADS} -outfmt 7 -task tblastn"
+            ${TBLASTN} -db ${RES}/Mapping/tmp/${lib}.fa -query ${CLOSE_REF} -out ${RES}/Mapping/nucleus/matches_nucleus_aa_${lib} -evalue ${EVALUE} -max_target_seqs ${MAX_SEQS} -num_threads ${THREADS} -outfmt 7 -task tblastn
+            awk -v COV=${COVERAGE} -v MLEN=${MINCONTLENGTH} '{split($2,a,"_")}{if(a[6]>=COV && a[4]>=MLEN) print $2}' ${RES}/Mapping/nucleus/matches_nucleus_aa_${lib} | sort | uniq > ${RES}/Mapping/nucleus/hits_nucleus_aa_${lib}
             if [ -s ${RES}/Mapping/nucleus/hits_nucleus_aa_${lib} ]; then
               awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' $file | perl -pe 's@>@@' | awk ' NR==FNR {a[$1]=$1;next} {if($1 in a) {print ">"$1"\n"$NF}}' ${RES}/Mapping/nucleus/hits_nucleus_aa_${lib} - > ${RES}/Mapping/nucleus/contigs_hits_nucleus_aa_${lib}.fasta
               echo "CMD: ${EXONERATE} --model protein2genome -q ${CLOSE_REF} -t ${RES}/Mapping/nucleus/contigs_hits_nucleus_aa_${lib}.fasta --showquerygff yes --showtargetgff yes --showvulgar no --showcigar no --showalignment no | awk '!/^Hostname:|^Command line:|^-- completed exonerate analysis|#/ {print \$0}' | awk '/Target/ { if (ok) print entry; ok=1;entry=\$0;next;}{entry = entry \"\n\" \$0;}/intron\t-/{ok=0;}END{if (ok) print entry;}' > ${RES}/Mapping/nucleus/out_nucleus_aa_${lib}.gff"
@@ -3132,6 +3138,7 @@ mkdir -p ${RES}/Extraction
         echo ${lib} >> ${RES}/nucleus_aa_error.log
       fi
 		done <${SAMPLES}
+    rm -rf ${RES}/Mapping/tmp
     end=`date +%s`
     runtime=$( echo "$end - $start" | bc -l )
     hours=$((runtime / 3600))
@@ -3206,122 +3213,84 @@ mkdir -p ${RES}/Extraction
     echo "INFO: Alignment of taxa from genes capture"
     start=$(date +%s)
     listpath=`echo ${target[@]} | perl -pe 's/ /,/g'`
-    if [ ${SELECTION} == 'on' ]; then
-        for element in "${target[@]}";
-        do
-          echo "INFO: selection of taxa for alignment"
-          inpath=${RES}/Extraction/${element}/
-          if [ -d ${RES}/Selection/${element} ]; then
-            rm -rf ${RES}/Selection/${element}
-          else
-            :
-          fi
-          echo "CMD: `dirname $0`/src/SelecTaxa.py --inpath $inpath --outpath ${RES}/Selection -t ${TAXA_ALN} -e ${EXTENSION} --threads ${THREADS}"
-          `dirname $0`/src/SelecTaxa.py --inpath $inpath --outpath ${RES}/Selection -t ${TAXA_ALN} -e fa --threads ${THREADS}
-
-          echo "INFO: Alignment of each gene"
-          alinpath=${RES}/Selection/${element}/
-          if [ -d ${RES}/Selection/Alignment/${element}/ ]; then
-            echo "WARN: previous alignments files have been located and deleted for the $element target"
-            rm -rf ${RES}/Selection/Alignment/${element}/
-            mkdir -p ${RES}/Selection/Alignment/${element}/files/
-            mkdir -p ${RES}/Selection/Alignment/${element}/trim/
-          else
-            mkdir -p ${RES}/Selection/Alignment/${element}/files/
-            mkdir -p ${RES}/Selection/Alignment/${element}/trim/
-          fi
-
-          for f in `find ${alinpath} -type f -name \*.fa`;
-          do
-            if [[ "$f" != *"-like"* ]]; then
-              condnum=$(grep -c ">" $f)
-              if [[ $condnum -gt 1 ]]; then
-                echo "CMD: $MAFFT --auto --thread ${THREADS} --adjustdirectionaccurately $f > ${RES}/Selection/Alignment/${element}/files/$(basename $f)"
-                $MAFFT --auto --thread ${THREADS} --adjustdirectionaccurately $f > ${RES}/Selection/Alignment/${element}/files/$(basename $f)
-                if [ ${TRIMMING} == 'on' ]; then
-                  echo "INFO: automated alignment trimming is performed"
-                  echo "CMD: $TRIMAL -in ${RES}/Selection/Alignment/${element}/files/$(basename $f) -${TRIMMODE} -out ${RES}/Selection/Alignment/${element}/trim/$(basename $f | perl -pe 's/.fa/.trim/')"
-                  $TRIMAL -in ${RES}/Selection/Alignment/${element}/files/$(basename $f) -${TRIMMODE} -out ${RES}/Selection/Alignment/${element}/trim/$(basename $f | perl -pe 's/.fa/.trim/')
-                else
-                  :
-                fi
-              else
-                echo "WARN: only 1 sequence found in $f"
-              fi
-            else
-              :
-            fi
-          done
-        done
-        echo "INFO: concatenation of alignments"
-        if [ -f ${RES}/Selection/concatenated.fa ]; then
-          rm ${RES}/Selection/concatenated.*
-        else
-          :
-        fi
-        alnfiles=${RES}/Selection/Alignment/
-        if [ ${TRIMMING} == 'on' ]; then
-          echo "CMD: `dirname $0`/src/ConcatSeq.py -p ${alnfiles} --pathfind -o ${RES}/Selection/concatenated -t ${TAXA_ALN} --missingfract ${MISSING_RATIO} --target ${listpath} --trim -g ${GENES_TO_CONCAT}"
-          `dirname $0`/src/ConcatSeq.py -p ${alnfiles} --pathfind -o ${RES}/Selection/concatenated -t ${TAXA_ALN} --missingfract ${MISSING_RATIO} --target ${listpath} --trim -g ${GENES_TO_CONCAT}
-        else
-          echo "CMD: `dirname $0`/src/ConcatSeq.py -p ${alnfiles} --pathfind -o ${RES}/Selection/concatenated -t ${TAXA_ALN} --missingfract ${MISSING_RATIO} --target ${listpath} -g ${GENES_TO_CONCAT}"
-          `dirname $0`/src/ConcatSeq.py -p ${alnfiles} --pathfind -o ${RES}/Selection/concatenated -t ${TAXA_ALN} --missingfract ${MISSING_RATIO} --target ${listpath} -g ${GENES_TO_CONCAT}
-        fi
-    else
-      for element in "${target[@]}";
-      do
-        echo "INFO: No selection of taxa is made for alignment"
-        echo "INFO: Alignment of each gene"
-        alinpath=${RES}/Extraction/${element}/
-        if [ -d ${RES}/Alignment/${element}/ ]; then
-          echo "WARN: previous alignments files have been located and deleted for the $element target."
-          rm -rf ${RES}/Alignment/${element}/
-          mkdir -p ${RES}/Alignment/${element}/files/
-          mkdir -p ${RES}/Alignment/${element}/trim/
-        else
-          mkdir -p ${RES}/Alignment/${element}/files/
-          mkdir -p ${RES}/Alignment/${element}/trim/
-        fi
-
-        for f in `find ${alinpath} -type f -name \*.fa`;
-        do
-          if [[ "$f" != *"-like"* ]]; then
-            condnum=$(grep -c ">" $f)
-            if [[ $condnum -gt 1 ]]; then
-              echo "CMD: $MAFFT --auto --thread ${THREADS} --adjustdirectionaccurately $f > ${RES}/Alignment/${element}/files/$(basename $f)"
-              $MAFFT --auto --thread ${THREADS} --adjustdirectionaccurately $f > ${RES}/Alignment/${element}/files/$(basename $f)
-              if [ ${TRIMMING} == 'on' ]; then
-                echo "INFO: automated alignment trimming is performed"
-                echo "CMD: $TRIMAL -in ${RES}/Alignment/${element}/files/$(basename $f) -${TRIMMODE} -out ${RES}/Alignment/${element}/trim/$(basename $f | perl -pe 's/.fa/.trim/')"
-                $TRIMAL -in ${RES}/Alignment/${element}/files/$(basename $f) -${TRIMMODE} -out ${RES}/Alignment/${element}/trim/$(basename $f | perl -pe 's/.fa/.trim/')
-              else
-                :
-              fi
-            else
-              echo "WARN: only 1 sequence found in $f"
-            fi
-          else
-            :
-          fi
-        done
-      done
-      echo "INFO: concatenation of alignments"
-      if [ -f ${RES}/Alignment/concatenated.fa ]; then
-        rm ${RES}/Alignment/concatenated.*
+    for element in "${target[@]}";
+    do
+      inpath=${RES}/Extraction/${element}/
+      if [ -d ${RES}/${element} ]; then
+        rm -rf ${RES}/${element}
       else
         :
       fi
-      awk '{print $1}' ${SAMPLES} > ${RES}/Alignment/taxalist
-      TAXALIST=${RES}/Alignment/taxalist
-      alnfiles=${RES}/Alignment/
-      if [ ${TRIMMING} == 'on' ]; then
-        echo "CMD: `dirname $0`/src/ConcatSeq.py -p ${alnfiles} --pathfind -o ${RES}/Alignment/concatenated -t ${TAXALIST} --missingfract ${MISSING_RATIO} --target ${listpath} --trim -g ${GENES_TO_CONCAT}"
-        `dirname $0`/src/ConcatSeq.py -p ${alnfiles} --pathfind -o ${RES}/Alignment/concatenated -t ${TAXALIST} --missingfract ${MISSING_RATIO} --target ${listpath} --trim -g ${GENES_TO_CONCAT}
+      echo "CMD: `dirname $0`/src/SelecTaxa.py --inpath $inpath --outpath ${RES}/Selection -t ${TAXA_ALN} -e ${EXTENSION} --threads ${THREADS}"
+      `dirname $0`/src/SelecTaxa.py --inpath $inpath --outpath ${RES}/Alignment -t ${TAXA_ALN} -e fa --threads ${THREADS}
+
+      echo "INFO: gene alignment"
+      alinpath=${RES}/Alignment/${element}/
+      if [ -d ${RES}/Alignment/alignments/${element}/ ]; then
+        echo "WARN: previous alignments files have been located and deleted for the $element target"
+        rm -rf ${RES}/Alignment/alignments/${element}/
+        mkdir -p ${RES}/Alignment/alignments/${element}/files/
+        mkdir -p ${RES}/Alignment/alignments/${element}/trim/
       else
-        echo "CMD: `dirname $0`/src/ConcatSeq.py -p ${alnfiles} --pathfind -o ${RES}/Alignment/concatenated -t ${TAXALIST} --missingfract ${MISSING_RATIO} --target ${listpath} -g ${GENES_TO_CONCAT}"
-        `dirname $0`/src/ConcatSeq.py -p ${alnfiles} --pathfind -o ${RES}/Alignment/concatenated -t ${TAXALIST} --missingfract ${MISSING_RATIO} --target ${listpath} -g ${GENES_TO_CONCAT}
-      echo "STATUS: done"
+        mkdir -p ${RES}/Alignment/alignments/${element}/files/
+        mkdir -p ${RES}/Alignment/alignments/${element}/trim/
       fi
+
+      for f in `find ${alinpath} -type f -name \*.fa`;
+      do
+        if [[ "$f" != *"-like"* ]]; then
+          condnum=$(grep -c ">" $f)
+          if [[ $condnum -gt 1 ]]; then
+            echo "CMD: $MAFFT --auto --thread ${THREADS} --adjustdirectionaccurately $f > ${RES}/Alignment/alignments/${element}/files/$(basename $f)"
+            $MAFFT --auto --thread ${THREADS} --adjustdirectionaccurately $f > ${RES}/Alignment/alignments/${element}/files/$(basename $f)
+            if [ ${TRIMMING} == 'on' ]; then
+              echo "INFO: automated alignment trimming is performed"
+              echo "CMD: $TRIMAL -in ${RES}/Alignment/${element}/files/$(basename $f) -${TRIMMODE} -out ${RES}/Alignment/alignments/${element}/trim/$(basename $f | perl -pe 's/.fa/.trim/')"
+              $TRIMAL -in ${RES}/Alignment/${element}/files/$(basename $f) -${TRIMMODE} -out ${RES}/Alignment/alignments/${element}/trim/$(basename $f | perl -pe 's/.fa/.trim/')
+            else
+              :
+            fi
+          else
+            echo "WARN: only 1 sequence found in $f"
+          fi
+        else
+          :
+        fi
+      done
+    done
+    if [ ${PARALOG_FILT} == 'on' ]; then
+      echo "INFO: identification and filtering of paralogous sequences"
+      for element in "${target[@]}";
+      do
+        if [ ${TRIMMING} == 'on' ]; then
+          f_path=${RES}/Alignment/alignments/${element}/trim
+          `dirname $0`/src/FilterParalog.py -i ${inpath} -c 0.5 -e trim -q ${CONSENSUS_LEVEL} -o ${RES}/Alignment/alignments/${element}/clean -w ${WINDOW_SIZE} -p ${WINDOW_PSITE}
+        else
+          f_path=${RES}/Alignment/alignments/${element}/files
+          `dirname $0`/src/FilterParalog.py -i ${inpath} -c 0.5 -e fa -q ${CONSENSUS_LEVEL} -o ${RES}/Alignment/alignments/${element}/clean -w ${WINDOW_SIZE} -p ${WINDOW_PSITE}
+        fi
+      done
+    else
+      :
+    fi
+    echo "INFO: concatenation of alignments"
+    if [ -f ${RES}/concatenated.fa ]; then
+      rm ${RES}/concatenated.*
+    else
+      :
+    fi
+    alnfiles=${RES}/Alignment/alignments/
+    if [ ${PARALOG_FILT} == 'on' ]; then
+      echo "CMD: `dirname $0`/src/ConcatSeq.py -p ${alnfiles} --pathfind -o ${RES}/concatenated -t ${TAXA_ALN} --missingfract ${MISSING_RATIO} --target ${listpath} --clean -g ${GENES_TO_CONCAT}"
+      `dirname $0`/src/ConcatSeq.py -p ${alnfiles} --pathfind -o ${RES}/concatenated -t ${TAXA_ALN} --missingfract ${MISSING_RATIO} --target ${listpath} --clean -g ${GENES_TO_CONCAT}
+    else
+        if [ ${TRIMMING} == 'on' ]; then
+          echo "CMD: `dirname $0`/src/ConcatSeq.py -p ${alnfiles} --pathfind -o ${RES}/concatenated -t ${TAXA_ALN} --missingfract ${MISSING_RATIO} --target ${listpath} --trim -g ${GENES_TO_CONCAT}"
+          `dirname $0`/src/ConcatSeq.py -p ${alnfiles} --pathfind -o ${RES}/concatenated -t ${TAXA_ALN} --missingfract ${MISSING_RATIO} --target ${listpath} --trim -g ${GENES_TO_CONCAT}
+        else
+          echo "CMD: `dirname $0`/src/ConcatSeq.py -p ${alnfiles} --pathfind -o ${RES}/concatenated -t ${TAXA_ALN} --missingfract ${MISSING_RATIO} --target ${listpath} -g ${GENES_TO_CONCAT}"
+          `dirname $0`/src/ConcatSeq.py -p ${alnfiles} --pathfind -o ${RES}/concatenated -t ${TAXA_ALN} --missingfract ${MISSING_RATIO} --target ${listpath} -g ${GENES_TO_CONCAT}
+        fi
     fi
     end=`date +%s`
     runtime=$( echo "$end - $start" | bc -l )
@@ -3335,6 +3304,7 @@ mkdir -p ${RES}/Extraction
 
   elif [ $mode == 'capture' ] && [ $target == 'chloroplast_rRNA' ]; then
 		echo "INFO: Capture of chloroplast rRNA from assemblies"
+    mkdir -p ${RES}/Extraction
     mkdir -p ${RES}/Mapping/chloroplast
     mkdir -p ${RES}/Mapping/mitochondrion
     mkdir -p ${RES}/Mapping/nucrdna
@@ -3812,6 +3782,7 @@ mkdir -p ${RES}/Extraction
 
   elif [ $mode == 'capture' ] && [ $target == 'chloroplast_tRNA' ]; then
 		echo "INFO: Capture of chloroplast tRNA from assemblies"
+    mkdir -p ${RES}/Extraction
     mkdir -p ${RES}/Mapping/chloroplast
     mkdir -p ${RES}/Mapping/mitochondrion
     mkdir -p ${RES}/Mapping/nucrdna
@@ -4239,6 +4210,7 @@ mkdir -p ${RES}/Extraction
 
   elif [ $mode == 'capture' ] && [ $target == 'chloroplast_CDS' ]; then
 		echo "INFO: Capture of chloroplast CDS from assemblies"
+    mkdir -p ${RES}/Extraction
 		mkdir -p ${RES}/Mapping/chloroplast
     mkdir -p ${RES}/Mapping/mitochondrion
     mkdir -p ${RES}/Mapping/nucrdna
@@ -4706,6 +4678,7 @@ mkdir -p ${RES}/Extraction
 
   elif [ $mode == 'capture' ] && [ $target == 'nucrdna' ]; then
     echo "INFO: Capture of rDNA from assemblies"
+    mkdir -p ${RES}/Extraction
     mkdir -p ${RES}/Mapping/nucrdna
     mkdir -p ${RES}/references
     #for f in `find ${RES}/Assembly/Samples/ -type f -name \*.fa`;
@@ -5383,6 +5356,7 @@ mkdir -p ${RES}/Extraction
 
   elif [ $mode == 'capture' ] && [ $target == 'chloroplast_nt' ]; then
 		echo "INFO: Free-mode of cpDNA sequence capture from assemblies"
+    mkdir -p ${RES}/Extraction
     mkdir -p ${RES}/Mapping/chloroplast
     mkdir -p ${RES}/Mapping/mitochondrion
     mkdir -p ${RES}/Mapping/nucrdna
@@ -5829,36 +5803,25 @@ mkdir -p ${RES}/Extraction
     for element in "${BARCODES[@]}"; do
       echo "INFO: blast of $element into NCBI database"
       if [ ${DB_LOCAL} == 'on' ]; then
-        echo "CMD: ${BLASTN} -db ${BLAST_NT_DB} -query ${RES}/Extraction/${BARCODES_TYPE}/${element}.fa -out ${RES}/Errors/blast_${element}.out -max_target_seqs 10 -outfmt "6 qseqid sacc score pident qcovs" -evalue 1e-5 -num_threads ${THREADS} -best_hit_overhang 0.1 -best_hit_score_edge 0.1"
-        ${BLASTN} -db ${BLAST_NT_DB} -query ${RES}/Extraction/${BARCODES_TYPE}/${element}.fa -out ${RES}/Errors/blast_${element}.out -max_target_seqs 10 -outfmt "6 qseqid sacc score pident qcovs" -evalue 1e-5 -num_threads ${THREADS} -best_hit_overhang 0.1 -best_hit_score_edge 0.1
+        echo "CMD: ${BLASTN} -db ${BLAST_NT_DB} -query ${RES}/Extraction/${BARCODES_TYPE}/${element}.fa -out ${RES}/Errors/blast_${element}.out -max_target_seqs ${MAX_SEQS} -outfmt "6 qseqid sacc score pident qcovs staxids" -evalue 1e-5 -num_threads ${THREADS} -best_hit_overhang 0.1 -best_hit_score_edge 0.1"
+        ${BLASTN} -db ${BLAST_NT_DB} -query ${RES}/Extraction/${BARCODES_TYPE}/${element}.fa -out ${RES}/Errors/blast_${element}.out -max_target_seqs ${MAX_SEQS} -outfmt "6 qseqid sacc score pident qcovs staxids" -evalue 1e-5 -num_threads ${THREADS} -best_hit_overhang 0.1 -best_hit_score_edge 0.1
       else
-        echo "CMD: ${BLASTN} -db nt -query ${RES}/Extraction/${BARCODES_TYPE}/${element}.fa -out ${RES}/Errors/blast_${element}.out -max_target_seqs 10 -outfmt "6 qseqid sacc score pident qcovs" -evalue 1e-5 -num_threads ${THREADS} -best_hit_overhang 0.1 -best_hit_score_edge 0.1 -remote"
-        ${BLASTN} -db nt -query ${RES}/Extraction/${BARCODES_TYPE}/${element}.fa -out ${RES}/Errors/blast_${element}.out -max_target_seqs 10 -outfmt "6 qseqid sacc score pident qcovs" -evalue 1e-5 -num_threads ${THREADS} -best_hit_overhang 0.1 -best_hit_score_edge 0.1 -remote
+        echo "CMD: ${BLASTN} -db nt -query ${RES}/Extraction/${BARCODES_TYPE}/${element}.fa -out ${RES}/Errors/blast_${element}.out -max_target_seqs ${MAX_SEQS} -outfmt "6 qseqid sacc score pident qcovs staxids" -evalue 1e-5 -best_hit_overhang 0.1 -best_hit_score_edge 0.1 -remote"
+        ${BLASTN} -db nt -query ${RES}/Extraction/${BARCODES_TYPE}/${element}.fa -out ${RES}/Errors/blast_${element}.out -max_target_seqs ${MAX_SEQS} -outfmt "6 qseqid sacc score pident qcovs staxids" -evalue 1e-5 -best_hit_overhang 0.1 -best_hit_score_edge 0.1 -remote
       fi
     done
-
     echo "INFO: selection of best hits accession for $listbarcodes blast"
     echo "CMD: `dirname $0`/src/BestHits.py -o ${RES}/Errors/ -b $listbarcodes -t ${TAXA_CHECK}"
     `dirname $0`/src/BestHits.py -o ${RES}/Errors/ -b $listbarcodes -t ${TAXA_CHECK}
 
-    echo "INFO: corresponding between accessions and taxid"
-    for element in "${BARCODES[@]}"; do
-      awk 'NR==FNR{a[$2]; next} {for (i in a) if (index($0, i)) print $0}' ${RES}/Errors/${element}_besthits.out ${BLAST_NT_ACCESSION_TAXID} >> ${RES}/Errors/tmp.accessions
-    done
-
-    cat ${RES}/Errors/tmp.accessions | sort | uniq > ${RES}/Errors/blast.accessions
-    rm ${RES}/Errors/tmp.accessions
-
     echo "INFO: taxids comparison at the family level between query and best hits sequences"
-
     if [ ${FAMILIES_LOCAL} == 'on' ]; then
-      echo "CMD: `dirname $0`/src/TaxIDCompare_missingtaxid.py --accession ${RES}/Errors/blast.accessions -o ${RES}/Errors/ -b $listbarcodes -t ${TAXA_CHECK} --families ${CORRESPONDING_FAMILIES} --local > ${RES}/Errors/ValidationSamples.out"
-      `dirname $0`/src/TaxIDCompare_missingtaxid.py --accession ${RES}/Errors/blast.accessions -o ${RES}/Errors/ -b $listbarcodes -t ${TAXA_CHECK} --families ${CORRESPONDING_FAMILIES} --local > ${RES}/Errors/ValidationSamples.out
+      echo "CMD: `dirname $0`/src/TaxIDCompare_missingtaxid.py -o ${RES}/Errors/ -b $listbarcodes -t ${TAXA_CHECK} --families ${CORRESPONDING_FAMILIES} --local > ${RES}/Errors/ValidationSamples.out"
+      `dirname $0`/src/TaxIDCompare_missingtaxid.py -o ${RES}/Errors/ -b $listbarcodes -t ${TAXA_CHECK} --families ${CORRESPONDING_FAMILIES} --local > ${RES}/Errors/ValidationSamples.out
     else
-      echo "CMD: `dirname $0`/src/TaxIDCompare_missingtaxid.py --accession ${RES}/Errors/blast.accessions -o ${RES}/Errors/ -b $listbarcodes -t ${TAXA_CHECK} > ${RES}/Errors/ValidationSamples.out"
-      `dirname $0`/src/TaxIDCompare_missingtaxid.py --accession ${RES}/Errors/blast.accessions -o ${RES}/Errors/ -b $listbarcodes -t ${TAXA_CHECK} > ${RES}/Errors/ValidationSamples.out
+      echo "CMD: `dirname $0`/src/TaxIDCompare_missingtaxid.py -o ${RES}/Errors/ -b $listbarcodes -t ${TAXA_CHECK} > ${RES}/Errors/ValidationSamples.out"
+      `dirname $0`/src/TaxIDCompare_missingtaxid.py -o ${RES}/Errors/ -b $listbarcodes -t ${TAXA_CHECK} > ${RES}/Errors/ValidationSamples.out
     fi
-
     end=`date +%s`
     runtime=$( echo "$end - $start" | bc -l )
     hours=$((runtime / 3600))

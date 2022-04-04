@@ -4,21 +4,19 @@ ORTHOSKIM is a pipeline providing different tools to  capture targeted sequences
 
 The sequence capture strategy can be aimed to chloroplast (cpDNA), mitochondrial (mtDNA), ribosomal (rDNA), nuclear (nuDNA) or BUSCO-type markers on any coding or non-coding sequences.
 
-This software was developed under the [PhyloAlps project](https://www.france-genomique.org/projet/phyloalps/).
-
- ORTHOSKIM is a command-line program, that needs to be run from a terminal/console, by calling different tasks, called 'modes', along with an other parameter corresponding to specific 'targets' (see Figure 1). ORTHOSKIM can be parameterized in order to:
- 1. produce the sequence references databases (purple arrrows in Figure 1) for cpDNA, mtDNA and rDNA targets
+ ORTHOSKIM is a command-line program that needs to be run from a terminal/console, by calling different tasks, called 'modes', along with another parameter corresponding to specific 'targets' (see Figure 1). ORTHOSKIM can be parameterized in order to:
+ 1. produce the sequence references databases (purple arrows in Figure 1) for cpDNA, mtDNA and rDNA targets
  2. perform the contigs assemblies and cleaning from whole sequencing reads (green arrows)
  3. capture the targeted sequences from mapping of contigs on the closest reference (step 3, blue arrows)
  4. get multiple alignment of these sequences between libraries, suitable for phylogenetic inferences (orange arrows).
 
 <b>ORTHOSKIM flowchart</b>
 ![Fig.1. ORTHOSKIM worflow](./resources/img/orthoskim_workflow.png)
->**Fig. 1. ORTHOSKIM workflow**. Yellow boxes represents data that needs to be provided by users. To capture any of the chloroplast, ribosomal or mitochondrial sequences, users have to provide each of the three/two annotation genome files if plant/non-plant models are analyzed (see Pipeline description section).
+>**Fig. 1. ORTHOSKIM workflow**. Yellow boxes represent data that needs to be provided by users. To capture any of the chloroplast, ribosomal or mitochondrial sequences, users have to provide each of the three/two annotation genome files if plant/non-plant models are analyzed (see Pipeline description section).
 
 
 **Citation:**
-<br/>Pouchon et al. *in prep.* ORTHOSKIM: in silico sequence capture from genomic and transcriptomic libraries for phylogenomic and barcoding applications.</font>  
+<br/>Pouchon, C., Boyer, F., Roquet, C., Denoeud, F., Chave, J., Coissac, E., Alsos, I.G., Consortium, T.P., Consortium, T.P., & Lavergne, S. 2022. [ORTHOSKIM](https://doi.org/10.1111/1755-0998.13584): In silico sequence capture from genomic and transcriptomic libraries for phylogenomic and barcoding applications. Molecular Ecology Resources n/a. https://doi.org/10.1111/1755-0998.13584.</font>  
 
 
 License: GPL https://www.gnu.org/licenses/gpl-3.0.html
@@ -30,6 +28,7 @@ License: GPL https://www.gnu.org/licenses/gpl-3.0.html
 3. [How to run ORTHOSKIM](#3-how-to-run-orthoskim)
 4. [How to collect annotations](#4-how-to-collect-annotations)
 5. [How to collect seed sequences for annotations](#5-how-to-collect-seed-sequences-for-annotations)
+6. [Recommendations for hybrid enrichment libraries](#6-recommendations-for-hybrid-enrichment-libraries)
 6. [Tutorial](#6-tutorial)
 7. [Additional modes for PhyloDB users](#7-additional-modes-for-Phylodb-users)
 8. [Funding](#8-funding)  
@@ -53,13 +52,13 @@ ORTHOSKIM package is create with the *orthoskim-env.yml* file provided:
 
 ```
 user$: cd ./ORTHOSKIM-master/
-user$: conda env create --prefix your_path_to_install --file orthoskim-env.yml
+user$: conda env create --prefix /your_path_to_install/orthoskim-env --file orthoskim-env.yml
 ```
 
 Such package has then to be activated/deactivated when running ORTHOSKIM:
 
 ```
-user$: conda activate orthoskim-env
+user$: conda activate /your_path_to_install/orthoskim-env
 user$: (orthoskim-env) ./ORTHOSKIM-master/orthoskim
 user$: conda deactivate
 ```
@@ -87,17 +86,17 @@ EVALUE=0.00001                                                                  
 THREADS=15                                                                           ## [4] number of threads to use for multithreading steps
 VERBOSE=0                                                                            ## [5] set verbose to TRUE (1) or FALSE (0)
 PLANT_MODEL=yes                                                                      ## [6] plant model analyzed (yes/no)
-GENETIC_CODE=1                                                                       ## [7] NCBI genetic code number used for DNA translation (eg. 1: standard genetic code, 2: Vertebrate Mitochondrial Code...). Codes are available at https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi
-SAMPLES=~/ORTHOSKIM-master/ressources/listSamples.tab                                ## [8] samples file. Specific format required:  (1) sample name with Genus_species_(subsp)_taxid_attributes; (2) path to forward reads; (3) path to reverse reads; (4) [additional for phyloskims users] chloroplast annotations
+GENETIC_CODE=1                                                                       ## [7] NCBI genetic code number used for DNA translation (e.g. 1: standard genetic code, 2: Vertebrate Mitochondrial Code...). Codes are available at https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi
+SAMPLES=~/ORTHOSKIM-master/resources/listSamples.tab                                 ## [8] samples file. Specific format required:  (1) sample name with Genus_species_(subsp)_taxid_attributes; (2) path to forward reads; (3) path to reverse reads; (4) [additional for phyloskims users] chloroplast annotations
 
 # [assembly] mode ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 MEMORY=30                                                                            ## [9] max memory used in assembly
 KMER=55                                                                              ## [10] K-mer size used in assembly with single (here 55) or range values (as 21,33,55). Note: less than 128
 
 # [filtering] mode: Filtering for contaminants in assemblies
-SIMILARITY_CONTA_THSLD=65                                                            ## [11] similarity threshold (%) used to check contaminants. We recommend to keep a low threshold as sequence are filtered according to their taxId (e.g. 65, meaning that only hits with a least 65% of similarity are used).
+SIMILARITY_CONTA_THSLD=65                                                            ## [11] similarity threshold (%) used to check contaminants. We recommend keeping a low threshold as sequence are filtered according to their taxId (e.g. 65, meaning that only hits with a least 65% of similarity are used).
 MAPPING_CONTA_LENGTH=50                                                              ## [12] minimal mapping length. As for the threshold, we recommend to keep a low value here (e.g. 50).
-TAXONOMIC_PHYLUM_EXPECTED=Embryophyta                                                ## [13] taxonomic phylum expected for contigs (e.g. "Embryophyta","Viridiplantae" for plants, otherwise "Eumetazoa","Arthropoda","Annelida","Mollusca" etc); Note: "Animalia" is not allowed. Please check the taxonomy provided in the ~/ORTHOSKIM-master/ressources/rRNA_database_taxonomy.txt file.
+TAXONOMIC_PHYLUM_EXPECTED=Embryophyta                                                ## [13] taxonomic phylum expected for contigs (e.g. "Embryophyta","Viridiplantae" for plants, otherwise "Eumetazoa","Arthropoda","Annelida","Mollusca" etc); Note: "Animalia" is not allowed. Please check the taxonomy provided in the ~/ORTHOSKIM-master/resources/rRNA_database_taxonomy.txt file.
 
 # [database] mode: sequences of reference -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 MITO_ANNOTATIONS=~/ORTHOSKIM-master/data/mitochondrion_viridiplantae.gb              ## [14] input mtDNA Annotations file (in .gb or .embl)
@@ -122,82 +121,86 @@ MINCONTLENGTH=500                                                               
 EXO_SCORE=50                                                                         ## [31] minimal mapping score. We recommend to not set too high values (if the targeted sequence length is short) as a selection is done for the best alignments.
 COVCUTOFF=on                                                                         ## [32] coverage cut-off option for organelles (cpDNA, mtDNA): [on/off] - cut-off done according to a standard deviations approach from the mean contig coverage weighted by the reconstructed size of the organelles.
 ORFCOV=0.8                                                                           ## [33] minimal fraction of captured sequences covered by the longest open reading frame (ORF). For example, 0.8 means that 80% of the captured sequence has to be covered by an ORF.
+MAX_SEQS=2                                                                           ## [34] maximal number of contigs per reference used in BLAST for the pre-selection of contigs in the nucleus and busco modes. To speed up the capture in these modes, only one or two contig(s) can be preselected for each reference.
 
 #---------  [busco] target --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-BUSCO_REF=~/ORTHOSKIM-master/data/BUSCO_viridiplantae.fa                             ## [34] BUSCO reference sequences FASTA file.
-BUSCO_TYPE=exon                                                                      ## [35] region of reference captured: [exon,intron,all]
+BUSCO_REF=~/ORTHOSKIM-master/data/BUSCO_viridiplantae.fa                             ## [35] BUSCO reference sequences FASTA file.
+BUSCO_TYPE=exon                                                                      ## [36] region of reference captured: [exon,intron,all]
 
 #---------  [nuclear] target ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-NUC_NT_REF=~/ORTHOSKIM-master/data/nucleusNT_unaligned.fa                            ## [36] nuclear reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
-NUC_AA_REF=~/ORTHOSKIM-master/data/nucleusAA_unaligned.fa                            ## [37] nuclear reference sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
-NUC_TYPE=exon                                                                        ## [38] region of reference captured: [exon,intron,all]
+NUC_NT_REF=~/ORTHOSKIM-master/data/nucleusNT_unaligned.fa                            ## [37] nuclear reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+NUC_AA_REF=~/ORTHOSKIM-master/data/nucleusAA_unaligned.fa                            ## [38] nuclear reference sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
+NUC_TYPE=exon                                                                        ## [39] region of reference captured: [exon,intron,all]
 
 #---------  [mitochondrion] target -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-SEEDS_MITO_CDS=~/ORTHOSKIM-master/ressources/mitoCDS.seeds                           ## [39] mtDNA CDS seeds sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
-SEEDS_MITO_rRNA=~/ORTHOSKIM-master/ressources/mitorRNA.seeds                         ## [40] mtDNA rRNA seeds sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
-MITO_REF_CDS=~/ORTHOSKIM-master/data/mit_CDS_unaligned.fa                            ## [41] mtDNA CDS reference sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
-MITO_REF_rRNA=~/ORTHOSKIM-master/data/mit_rRNA_unaligned.fa                          ## [42] mtDNA rRNA reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
-MITO_REF_NT=~/ORTHOSKIM-master/data/mit_nt_custom.fa                                 ## [43] mtDNA custom reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
-MITO_TYPE=exon                                                                       ## [44] region of reference captured: [exon,intron,all]
+SEEDS_MITO_CDS=~/ORTHOSKIM-master/resources/mitoCDS.seeds                            ## [40] mtDNA CDS seeds sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
+SEEDS_MITO_rRNA=~/ORTHOSKIM-master/resources/mitorRNA.seeds                          ## [41] mtDNA rRNA seeds sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+MITO_REF_CDS=~/ORTHOSKIM-master/data/mit_CDS_unaligned.fa                            ## [42] mtDNA CDS reference sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
+MITO_REF_rRNA=~/ORTHOSKIM-master/data/mit_rRNA_unaligned.fa                          ## [43] mtDNA rRNA reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+MITO_REF_NT=~/ORTHOSKIM-master/data/mit_nt_custom.fa                                 ## [44] mtDNA custom reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+MITO_TYPE=exon                                                                       ## [45] region of reference captured: [exon,intron,all]
 
 #--------- [chloroplast] target ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-SEEDS_CHLORO_CDS=~/ORTHOSKIM-master/ressources/chloroCDS.seeds                       ## [45] cpDNA CDS seeds sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
-SEEDS_CHLORO_rRNA=~/ORTHOSKIM-master/ressources/chlororRNA.seeds                     ## [46] cpDNA rRNA seeds sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
-SEEDS_CHLORO_tRNA=~/ORTHOSKIM-master/ressources/chlorotRNA.seeds                     ## [47] cpDNA tRNA seeds sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names, with the anticodon in the name (e.g. trnL-UAA_taxid_genus_species)
-CHLORO_REF_CDS=~/ORTHOSKIM-master/data/chloro_CDS_unaligned.fa                       ## [48] cpDNA CDS reference sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
-CHLORO_REF_rRNA=~/ORTHOSKIM-master/data/chloro_rRNA_unaligned.fa                     ## [49] cpDNA rRNA gene reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
-CHLORO_REF_tRNA=~/ORTHOSKIM-master/data/chloro_tRNA_unaligned.fa                     ## [50] cpDNA tRNA gene reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
-CHLORO_REF_NT=~/ORTHOSKIM-master/data/chloro_nt_custom.fa                            ## [51] cpDNA custom reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
-CHLORO_TYPE=exon                                                                     ## [52] region of reference captured: [exon,intron,all]
+SEEDS_CHLORO_CDS=~/ORTHOSKIM-master/resources/chloroCDS.seeds                        ## [46] cpDNA CDS seeds sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
+SEEDS_CHLORO_rRNA=~/ORTHOSKIM-master/resources/chlororRNA.seeds                      ## [47] cpDNA rRNA seeds sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+SEEDS_CHLORO_tRNA=~/ORTHOSKIM-master/resources/chlorotRNA.seeds                      ## [48] cpDNA tRNA seeds sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names, with the anticodon in the name (e.g. trnL-UAA_taxid_genus_species)
+CHLORO_REF_CDS=~/ORTHOSKIM-master/data/chloro_CDS_unaligned.fa                       ## [49] cpDNA CDS reference sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
+CHLORO_REF_rRNA=~/ORTHOSKIM-master/data/chloro_rRNA_unaligned.fa                     ## [50] cpDNA rRNA gene reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+CHLORO_REF_tRNA=~/ORTHOSKIM-master/data/chloro_tRNA_unaligned.fa                     ## [51] cpDNA tRNA gene reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+CHLORO_REF_NT=~/ORTHOSKIM-master/data/chloro_nt_custom.fa                            ## [52] cpDNA custom reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+CHLORO_TYPE=exon                                                                     ## [53] region of reference captured: [exon,intron,all]
 
 #--------- [nucrdna] target --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-SEEDS_NRDNA=~/ORTHOSKIM-master/ressources/nucrdna.seeds                              ## [53] rDNA rRNA seeds sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
-NRDNA_REF=~/ORTHOSKIM-master/data/nucrdna_rRNA_unaligned.fa                          ## [54] rDNA rRNA reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
-NRDNA_TYPE=exon                                                                      ## [55] region of reference captured: [exon,intron,all]
+SEEDS_NRDNA=~/ORTHOSKIM-master/resources/nucrdna.seeds                               ## [54] rDNA rRNA seeds sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+NRDNA_REF=~/ORTHOSKIM-master/data/nucrdna_rRNA_unaligned.fa                          ## [55] rDNA rRNA reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+NRDNA_TYPE=exon                                                                      ## [56] region of reference captured: [exon,intron,all]
 
 # [alignment] mode -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-SELECTION=on                                                                         ## [56] selection of taxa for the alignment: [on/off]
-TAXA_ALN=~/ORTHOSKIM-master/ressources/selTaxa_Primulaceae.tab                       ## [57] file with selected taxa (file with with each line corresponding to one taxon)
-TRIMMING=on                                                                          ## [58] alignment trimming option using trimAl: [on/off]
-TRIMMODE=automated1                                                                  ## [59] trimming mode of trimAl: [automated1,gappyout,strictplus]. See trimAl documentation.
-MISSING_RATIO=1.0                                                                    ## [60] maximal threshold of missing data allowed in the final matrix (e.g. 0.5 means that final sequence has fewer than 50% of missing data). Taxa that not passed this threshold are removed.
-GENES_TO_CONCAT=~/ORTHOSKIM-master/ressources/listGenes_To_Concat.tab                ## [61] file with selected genes for the alignment (each line corresponds to one gene)
+TAXA_ALN=~/ORTHOSKIM-master/resources/selTaxa_Primulaceae.tab                        ## [58] file with selected taxa (file with each line corresponding to one taxon)
+TRIMMING=on                                                                          ## [59] alignment trimming option using trimAl: [on/off]
+TRIMMODE=automated1                                                                  ## [60] trimming mode of trimAl: [automated1,gappyout,strictplus]. See trimAl documentation.
+PARALOG_FILT=on                                                                      ## [61] filtering paralogs mode: [on,off]
+CONSENSUS_LEVEL=family                                                               ## [62] Taxonomic level of the consensus for paralog identification: [order, family, genus]
+WINDOW_SIZE=20                                                                       ## [63] sliding window size (e.g. 20 nt)
+WINDOW_PSITE=5                                                                       ## [64] maximal number of polymorphic sites within the sliding window allowed. All sequences with more than <WINDOW_PSITE> will be removed.
+MISSING_RATIO=1.0                                                                    ## [65] maximal threshold of missing data allowed in the final matrix (e.g. 0.5 means that final sequence has fewer than 50% of missing data). Taxa that not passed this threshold are removed.
+GENES_TO_CONCAT=~/ORTHOSKIM-master/resources/listGenes_To_Concat.tab                 ## [66] file with selected genes for the alignment (each line corresponds to one gene)
 
 # [checking] mode -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-BARCODES=( matK rbcL )                                                               ## [62] list of sequences used for the taxonomic checking. Users have to respect spaces between sequence names. If only one gene, set BARCODES=( matK ). We recommend to use only genes that are widely represented in the NCBI database (e.g. traditional barcodes).
-BARCODES_TYPE=chloroplast_CDS                                                        ## [63] ORTHOSKIM targets including these genes [chloroplast_CDS, chloroplast_rRNA, chloroplast_tRNA, chloroplast_nt, mitochondrion_CDS, mitochondrion_rRNA, mitochondrion_nt,nuleus_aa, nucleus_nt, busco, nucrdna]
-DB_LOCAL=off                                                                         ## [64] option to run BLAST locally by using the NCBI nt database, which has previously to be downloaded: [on/off]. Otherwise, NCBI server will be used.
-BLAST_NT_DB=~/path_to_ntdb/nt                                                        ## [65] local NCBI nt database files if DB_LOCAL=on
-BLAST_NT_ACCESSION_TAXID=/bettik/pouchon/blastDB/nucl_gb.accession2taxid             ## [66] file with the matches between the NCBI accessions and taxids. Such file needs to be downloaded on the NCBI.
-TAXA_CHECK=~/ORTHOSKIM-master/ressources/selTaxa_Primulaceae.tab                     ## [67] file with selected taxa for the taxonomic checking (each line corresponding to one taxon)
-FAMILIES_LOCAL=off                                                                   ## [68] option to use a local list of taxonomic families, when query taxIDs are not yet included in the NBCI taxonomy: [on/off]. If this option is used, the CORRESPONDING_FAMILIES file needs to be given.
-CORRESPONDING_FAMILIES=ecofind_out.tab                                               ## [69] table with query taxID and corresponding family (with space separator)
+BARCODES=( matK rbcL )                                                               ## [67] list of sequences used for the taxonomic checking. Users have to respect spaces between sequence names. If only one gene, set BARCODES=( matK ). We recommend to use only genes that are widely represented in the NCBI database (e.g. traditional barcodes).
+BARCODES_TYPE=chloroplast_CDS                                                        ## [68] ORTHOSKIM targets including these genes [chloroplast_CDS, chloroplast_rRNA, chloroplast_tRNA, chloroplast_nt, mitochondrion_CDS, mitochondrion_rRNA, mitochondrion_nt,nuleus_aa, nucleus_nt, busco, nucrdna]
+DB_LOCAL=off                                                                         ## [65] option to run BLAST locally by using the NCBI nt database, which has previously to be downloaded: [on/off]. Otherwise, NCBI server will be used.
+BLAST_NT_DB=~/path_to_ntdb/nt                                                        ## [66] local NCBI nt database files if DB_LOCAL=on
+TAXA_CHECK=~/ORTHOSKIM-master/resources/selTaxa_Primulaceae.tab                      ## [68] file with selected taxa for the taxonomic checking (each line corresponding to one taxon)
+FAMILIES_LOCAL=off                                                                   ## [69] option to use a local list of taxonomic families, when query taxIDs are not yet included in the NBCI taxonomy: [on/off]. If this option is used, the CORRESPONDING_FAMILIES file needs to be given.
+CORRESPONDING_FAMILIES=ecofind_out.tab                                               ## [70] table with query taxID and corresponding family (with space separator)
 
 # only for phyloskims users --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-CHLORO_GENES=~/ORTHOSKIM-master/ressources/listGenes.chloro                          ## [70] list of cpDNA genes. Table format: $1=type (CDS,rRNA,tRNA), $2=genename. This file can be modified by adding/removing specific lines.
-MITO_GENES=~/ORTHOSKIM-master/ressources/listGenes.mito                              ## [71] list of mtDNA genes. Table format: $1=type (CDS,rRNA,tRNA), $2=genename. This file can be modified by adding/removing specific lines.
-NRDNA_GENES=~/ORTHOSKIM-master/ressources/listGenes.rdna                             ## [72] list of rDNA genes. Table format: $1=type (rRNA,misc_RNA), $2=genename. This file can be modified by adding/removing specific lines.
+CHLORO_GENES=~/ORTHOSKIM-master/resources/listGenes.chloro                           ## [71] list of cpDNA genes. Table format: $1=type (CDS,rRNA,tRNA), $2=genename. This file can be modified by adding/removing specific lines.
+MITO_GENES=~/ORTHOSKIM-master/resources/listGenes.mito                               ## [72] list of mtDNA genes. Table format: $1=type (CDS,rRNA,tRNA), $2=genename. This file can be modified by adding/removing specific lines.
+NRDNA_GENES=~/ORTHOSKIM-master/resources/listGenes.rdna                              ## [73] list of rDNA genes. Table format: $1=type (rRNA,misc_RNA), $2=genename. This file can be modified by adding/removing specific lines.
+
 ```
 
 ### 2.2. Dependencies
 
 The path to all dependencies which are required in ORTHOSKIM must be supplied in the *tools.sh* file.
 
-To retrieve dependencies, once the orthoskim-env is activate, please use:
+To retrieve dependencies, once the orthoskim-env is activated, please use:
 
 ```
 user$: conda activate orthoskim-env
-user$: (orthoskim-env) which diamond spades.py exonerate makeblastdb blastn mafft trimal
-/home/charles/.conda/envs/orthoskim-env/bin/diamond
+user$: (orthoskim-env) which diamond spades.py exonerate makeblastdb blastn mafft trimal tblastn
 /home/charles/.conda/envs/orthoskim-env/bin/spades.py
 /home/charles/.conda/envs/orthoskim-env/bin/exonerate
 /home/charles/.conda/envs/orthoskim-env/bin/makeblastdb
 /home/charles/.conda/envs/orthoskim-env/bin/blastn
 /home/charles/.conda/envs/orthoskim-env/bin/mafft
 /home/charles/.conda/envs/orthoskim-env/bin/trimal
+/home/charles/.conda/envs/orthoskim-env/bin/tblastn
 ```
 
-Paths to dependencies are then filled on the *tools.sh* file using following command:
+Paths to dependencies are then filled on the *tools.sh* file using the following command:
 
 ```
 user$: nano tools.sh
@@ -206,12 +209,12 @@ user$: nano tools.sh
 #!/bin/bash
 
 SPADES=/home/charles/.conda/envs/orthoskim-env/bin/spades.py
-DIAMOND=/home/charles/.conda/envs/orthoskim-env/bin/diamond
 EXONERATE=/home/charles/.conda/envs/orthoskim-env/bin/exonerate
 BLASTDB=/home/charles/.conda/envs/orthoskim-env/bin/makeblastdb
 BLASTN=/home/charles/.conda/envs/orthoskim-env/bin/blastn
 MAFFT=/home/charles/.conda/envs/orthoskim-env/bin/mafft
 TRIMAL=/home/charles/.conda/envs/orthoskim-env/bin/trimal
+TBLASTN=/home/charles/.conda/envs/orthoskim-env/bin/tblastn
 ```
 
 
@@ -219,10 +222,10 @@ TRIMAL=/home/charles/.conda/envs/orthoskim-env/bin/trimal
 ### 2.3. Sample file
 
 
-A sample file, indicating the libraries used, must be supplied in the **config** file at line **7**:
+A sample file, indicating the libraries used, must be supplied in the **config** file at line **8**:
 
 ```
-SAMPLES=~/ORTHOSKIM-master/ressources/listSamples.tab                                ## [7] samples file. Specific format required:  (1) sample name with Genus_species_(subsp)_taxid_attributes; (2) path to forward reads; (3) path to reverse reads; (4) [additional for phyloskims users] chloroplast annotations
+SAMPLES=~/ORTHOSKIM-master/resources/listSamples.tab                                ## [8] samples file. Specific format required:  (1) sample name with Genus_species_(subsp)_taxid_attributes; (2) path to forward reads; (3) path to reverse reads; (4) [additional for phyloskims users] chloroplast annotations
 ```
 
 This tab must contain for each library the following columns :
@@ -238,13 +241,13 @@ Veronica_crassifolia_996476_CAR009639_BGN_NFI   /Users/pouchonc/PhyloAlps/CDS/Ve
 Androsace_helvetica_199610_CLA000520_BGN_ETA    /Users/pouchonc/PhyloAlps/CDS/Androsace_helvetica:199610/BGN_ETAOSW_2_1_C8MR2ACXX.IND13_clean.fastq.gz  /Users/pouchonc/PhyloAlps/CDS/Androsace_helvetica:199610/BGN_ETAOSW_2_2_C8MR2ACXX.IND13_clean.fastq.gz
 ```
 
-### 2.4. References files (database)
+### 2.4. Reference files (database)
 
 ORTHOSKIM uses a multi-taxa bank of reference sequences to capture targeted markers into assemblies.
 
 The reference input files required for each type of the target sequences are displayed by yellow boxes in the flowchart (Fig.1.) and summarized in this table:
 
-| Targets - types (AA/NT) | capture targets (-t) | input ref. | input seeds | additionnal files |
+| Targets - types (AA/NT) | capture targets (-t) | input ref. | input seeds | additional files |
 |---|---|---|---|---|
 | cpDNA - coding CDS (AA)  | chloroplast_CDS | cpDNA annotation file (multiple accessions) | CDS fasta file | mtDNA: annotation file + seeds (CDS, rRNA);  rDNA: annotation file |
 | cpDNA - coding rRNA (NT) | chloroplast_rRNA | cpDNA annotation file (multiple accessions) | rRNA fasta file | mtDNA: annotation file + seeds (CDS, rRNA);  rDNA: annotation file |
@@ -263,7 +266,7 @@ The reference input files required for each type of the target sequences are dis
 
 User has to provide their own reference sequence database, consisting on a multi-fasta file of the queried regions with amino-acid sequences (AA) for the ‘nucleus_aa’ target of the capture mode (suitable for coding sequences), or nucleotide sequences (NT) for the ‘nucleus_nt’ target (for non-coding sequences).
 
-Sequence names needs to be compliant with the ORTHOSKIM nomenclature: `>genename_taxid_Genus_species_other-arguments"` (*e.g.* *>cox1_3702_Arabidopsis_thaliana* for cox1 gene)
+Sequence names need to be compliant with the ORTHOSKIM nomenclature: `>genename_taxid_Genus_species_other-arguments"` (*e.g.* *>cox1_3702_Arabidopsis_thaliana* for cox1 gene)
 
 
 **Examples of *nucleus_aa***:
@@ -284,20 +287,20 @@ TCTTTCCAGGAACTAGAACAAATGAAGGAACGAGCAAAACAGATGCAGCTGCCACCAGTATATACAGGAAAGTGGGCCAG
 CTTTTTTTTAATGCAGGTCCTGGTATTGGTGGAGACTATGGTCCGTATCGGCAATCTGAAAGAAATATCTTGTACAAACAATATGCTGAGAAGCTTTTAAAGTCTGGTCATGTTTATCGTTGCTTTTGTTCTAATGAGGAACTGGAAAAAATGAAGGAGATTGCAAAGTTAAAACAACTGCCTCCAGTGTACACTGGGAAGTGGGCCAACGCCACAGATGAGGAAGTGGAAGAAAAACTGGAGGAGGGAACCCCTTACACATACCGATTTCGAGTGCCCAATGAAGGAAGGTTGCAGATTGATGACCTTATTCGGGGAGAGGTTAGTTGGAGCTTGGACACACTTGGGGATTTTGTGATAATGAGAAGCAATGGACAACCCGTTTACAACTTTTGTGTCACCATTGATGATGCTACCATGGCTATCTCGCATGTTATAAGAGCAGAAGAGCATTTACCAAATACACTAAGGCAAGCACTAATATATAAGGCTCTTGGATTCCAAATGCCTTACTTTGCACATGTTTCTTTAATTCTTGCACCTGATCGGAGCAAACTTTCTAAACGGCATGGTGCAACTTCAGTGGGTCAGTTCAGGGAGATGGGATATCTGCCCCAGGCAATGGTGAACTATCTAGCACTGCTGGGTTGGGGTGATGGTACCGAAAATGAGTTCTTTACTCTAGATCAACTGGTTGAAAAGTTTTCAATTGACCGCGTCAACAAGAGTGGAGCCATTTTTGATTCAACCAAATTAAGGTGGATGAATGGTCAGCATTTAAGAGCTCTTTCCTCAGAAGAATTGACCAAGCTTATTGGTCAGCGCTGGAAGAGC
 ```
 
-Paths to these reference sequences are set in the **config** file at lines **36-37**:
+Paths to these reference sequences are set in the **config** file at lines **37-38**:
 
 ```
-NUC_NT_REF=~/ORTHOSKIM-master/data/nucleusNT_unaligned.fa                            ## [36] nuclear reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
-NUC_AA_REF=~/ORTHOSKIM-master/data/nucleusAA_unaligned.fa                            ## [37] nuclear reference sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
+NUC_NT_REF=~/ORTHOSKIM-master/data/nucleusNT_unaligned.fa                            ## [37] nuclear reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+NUC_AA_REF=~/ORTHOSKIM-master/data/nucleusAA_unaligned.fa                            ## [38] nuclear reference sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
 ```
 
 
 #### 2.4.2. BUSCO targets
 
-For the *busco* target, ORTHOSKIM uses the [BUSCO](https://busco.ezlab.org) dataset of amino acid ancestral sequences variants, called *ancestral_variants* in the BUSCO sets. The location of the reference busco sequences has to be set in the line **34** of the **config** file.
+For the *busco* target, ORTHOSKIM uses the [BUSCO](https://busco.ezlab.org) dataset of amino acid ancestral sequences variants, called *ancestral_variants* in the BUSCO sets. The location of the reference busco sequences has to be set in the line **35** of the **config** file.
 
 ```
-BUSCO_REF=~/ORTHOSKIM-master/data/BUSCO_viridiplantae.fa                             ## [34] BUSCO reference sequences FASTA file.
+BUSCO_REF=~/ORTHOSKIM-master/data/BUSCO_viridiplantae.fa                             ## [35] BUSCO reference sequences FASTA file.
 ```
 
 Here, an overview of the busco sequences needed:
@@ -320,11 +323,11 @@ For all cpDNA, mtDNA and rDNA target sequences, the database is built (using the
 
 > **Note:** It is important to note that each of the three annotation files has to be collected for plant models, or both mtDNA and rDNA annotation files for other organisms, even if a single region is targeted (*e.g.* cpDNA sequences), as such files are also used to assign the genomic assemblies to the cpDNA, mtDNA or rDNA regions.
 
-By default, ORTHOSKIM is supplied with a large enough reference sequence database for the study of green plants (i.e. Viridiplantaeae) genome skimming datasets: the BUSCO plant set (viridiplantaeae_odb10), 353 ultra-conserved elements designed for angiosperms (UCE, Johnson et al., 2018),which can be used as ‘nucleus_nt’ references, and a collection of annotations for plant cpDNA, mtDNA and rDNA genomic regions collected from the NCBI. For any other eukaryotic taxa, please to respect the input file formats and requirements.
+By default, ORTHOSKIM is supplied with a large enough reference sequence database for the study of green plants (i.e. Viridiplantaeae) genome skimming datasets: the BUSCO plant set (viridiplantaeae_odb10), 353 ultra-conserved elements set designed for angiosperms (UCE, Johnson et al., 2018; McLay et al. 2021), which can be used as ‘nucleus_nt’ references, and a collection of annotations for plant cpDNA, mtDNA and rDNA genomic regions collected from the NCBI. For any other eukaryotic taxa, please to respect the input file formats and requirements.
 
 **Annotation files:**
 
-As a taxonomic selection is done according to the queried taxon, we recommend to include as many divergent taxa as possible in the annotation files. These files, in *EMBL* or *GENBANK* format, can be collected directly from the [NCBI](https://www.ncbi.nlm.nih.gov/genbank/). Please see the section [How to collect annotations (cpDNA, mtDNA, rDNA)](#4-how-to-collect-annotations-(cpdna,-mtdna,-rdna).
+As a taxonomic selection is done according to the queried taxon, we recommend including as many divergent taxa as possible in the annotation files. These files, in *EMBL* or *GENBANK* format, can be collected directly from the [NCBI](https://www.ncbi.nlm.nih.gov/genbank/). Please see the section [How to collect annotations (cpDNA, mtDNA, rDNA)](#4-how-to-collect-annotations-(cpdna,-mtdna,-rdna).
 
 Annotations files, and their formats, are given in the **config** files at lines **14-19**:
 ```
@@ -339,20 +342,20 @@ CHLORO_DB_FMT=genbank                                                           
 
 **Seed files:**
 
-For both cpDNA and mtDNA, seed files are given separately for the targeted coding (CDS) genes, with amino-acid sequences, and for the non-coding RNA genes, with nucleotide sequences. Moreover, user has to provide a seed sequence file for the chloroplast trnL-UAA gene, a traditional plant barcode, as it is also captured for plant models. Concerning the rDNA, the three rRNA genes sequences (*i.e.* rrn18S, rrn5.8S and rrn26S) have to be included on the corresponding seed file. ORTHOSKIM next designs probes from these rRNA genes for both seeds and references, allowing the identification and the capture of the two internal transcribed spacer regions (ITS1 and ITS2).
+For both cpDNA and mtDNA, seed files are given separately for the targeted coding (CDS) genes, with amino-acid sequences, and for the non-coding RNA genes, with nucleotide sequences. Moreover, the user has to provide a seed sequence file for the chloroplast trnL-UAA gene, a traditional plant barcode, as it is also captured for plant models. Concerning the rDNA, the three rRNA genes sequences (*i.e.* rrn18S, rrn5.8S and rrn26S) have to be included on the corresponding seed file. ORTHOSKIM next designs probes from these rRNA genes for both seeds and references, allowing the identification and the capture of the two internal transcribed spacer regions (ITS1 and ITS2).
 Please see the section [How to collect seeds for annotations](#3-pipeline-description).
 
-Seeds are given in config file lines **39-40**,**45-47**,**53**:
+Seeds are given in config file lines **40-41**,**46-48**,**54**:
 
 ```
-SEEDS_MITO_CDS=~/ORTHOSKIM-master/ressources/mitoCDS.seeds                           ## [39] mtDNA CDS seeds sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
-SEEDS_MITO_rRNA=~/ORTHOSKIM-master/ressources/mitorRNA.seeds                         ## [40] mtDNA rRNA seeds sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+SEEDS_MITO_CDS=~/ORTHOSKIM-master/resources/mitoCDS.seeds                           ## [40] mtDNA CDS seeds sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
+SEEDS_MITO_rRNA=~/ORTHOSKIM-master/resources/mitorRNA.seeds                         ## [41] mtDNA rRNA seeds sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
 ...
-SEEDS_CHLORO_CDS=~/ORTHOSKIM-master/ressources/chloroCDS.seeds                       ## [45] cpDNA CDS seeds sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
-SEEDS_CHLORO_rRNA=~/ORTHOSKIM-master/ressources/chlororRNA.seeds                     ## [46] cpDNA rRNA seeds sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
-SEEDS_CHLORO_tRNA=~/ORTHOSKIM-master/ressources/chlorotRNA.seeds                     ## [47] cpDNA tRNA seeds sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names, with the anticodon in the name (e.g. trnL-UAA_taxid_genus_species)
+SEEDS_CHLORO_CDS=~/ORTHOSKIM-master/resources/chloroCDS.seeds                       ## [46] cpDNA CDS seeds sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
+SEEDS_CHLORO_rRNA=~/ORTHOSKIM-master/resources/chlororRNA.seeds                     ## [47] cpDNA rRNA seeds sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+SEEDS_CHLORO_tRNA=~/ORTHOSKIM-master/resources/chlorotRNA.seeds                     ## [48] cpDNA tRNA seeds sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names, with the anticodon in the name (e.g. trnL-UAA_taxid_genus_species)
 ...
-SEEDS_NRDNA=~/ORTHOSKIM-master/ressources/nucrdna.seeds                              ## [53] rDNA rRNA seeds sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+SEEDS_NRDNA=~/ORTHOSKIM-master/resources/nucrdna.seeds                              ## [54] rDNA rRNA seeds sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
 ```
 
 
@@ -369,22 +372,22 @@ MTAILERRESESLWGRFCNWITSTENRLYIGWFGVLMIPTLLTATSVFIIAFIAAPPVDIDGIREPVSGSLLYGNNIISG
 MCHFRTQENKDFTFSSNRISIQMDKFQGYLEFDGARQQSFLYPLFFREYIYVLAYDHGLNRLNRNRYIFLENADYDKKYSSLITKRLILRMYEQNRLIIPTKDVNQNSFLGHTSLFYYQMISVLFAVIVEIPFSLRLGSSFQGKQLKKSYNLQSIHSIFPFLEDKLGHFNYVLDVLIPYPIHLEILVQTLRYRVKDASSLHFFRFCLYEYCNWKNFYIKKKSILNPRFFLFLYNSHVCEYESIFFFLRKRSSHLRSTSYEVLFERIVFYGKIHHFFKVFVNNFPAILGLLKDPFIHYVRYHGRCILATKDTPLLMNKWKYYFVNLWQCYFSVWFQSQKVNINQLSKDNLEFLGYLSSLRLNPLVVRSQMLENSFLIDNVRIKLDSKIPISSIIGSLAKDKFCNVLGHPISKATWTDSSDSDILNRFVRICRNISHYYSGSSKKKNLYRIKYILRLCCVKTLARKHKSTVRTFLKRLGSGLLEEFLTGEDQVLSLIFPRSYYASKRLYRVRIWYLDILYLNDLVNHE
 ```
 
-The resulting reference sequence database consists in a multi-FASTA file for each type of gene sequence (*i.e.* CDS, rRNA and tRNA), generated with amino-acid sequences for CDS and nucleotide sequences for rRNA and tRNA genes.
+The resulting reference sequence database consists of a multi-FASTA file for each type of gene sequence (*i.e.* CDS, rRNA and tRNA), generated with amino-acid sequences for CDS and nucleotide sequences for rRNA and tRNA genes.
 
 Output files are given in the **config** file at lines :
 
 ```
-MITO_REF_CDS=~/ORTHOSKIM-master/data/mit_CDS_unaligned.fa                            ## [41] mtDNA CDS reference sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
-MITO_REF_rRNA=~/ORTHOSKIM-master/data/mit_rRNA_unaligned.fa                          ## [42] mtDNA rRNA reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+MITO_REF_CDS=~/ORTHOSKIM-master/data/mit_CDS_unaligned.fa                            ## [42] mtDNA CDS reference sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
+MITO_REF_rRNA=~/ORTHOSKIM-master/data/mit_rRNA_unaligned.fa                          ## [43] mtDNA rRNA reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
 ...
-CHLORO_REF_CDS=~/ORTHOSKIM-master/data/chloro_CDS_unaligned.fa                       ## [48] cpDNA CDS reference sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
-CHLORO_REF_rRNA=~/ORTHOSKIM-master/data/chloro_rRNA_unaligned.fa                     ## [49] cpDNA rRNA gene reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
-CHLORO_REF_tRNA=~/ORTHOSKIM-master/data/chloro_tRNA_unaligned.fa                     ## [50] cpDNA tRNA gene reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+CHLORO_REF_CDS=~/ORTHOSKIM-master/data/chloro_CDS_unaligned.fa                       ## [49] cpDNA CDS reference sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
+CHLORO_REF_rRNA=~/ORTHOSKIM-master/data/chloro_rRNA_unaligned.fa                     ## [50] cpDNA rRNA gene reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+CHLORO_REF_tRNA=~/ORTHOSKIM-master/data/chloro_tRNA_unaligned.fa                     ## [51] cpDNA tRNA gene reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
 ...
-NRDNA_REF=~/ORTHOSKIM-master/data/nucrdna_rRNA_unaligned.fa                          ## [54] rDNA rRNA reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+NRDNA_REF=~/ORTHOSKIM-master/data/nucrdna_rRNA_unaligned.fa                          ## [55] rDNA rRNA reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
 ```
 
-Here, an output example of CDS bank generated from the mitonchondrial annotations (*i.e.* using the mode `-m database` and the target `-t mitochondrion`).
+Here, an output example of CDS bank generated from the mitochondrial annotations (*i.e.* using the mode `-m database` and the target `-t mitochondrion`).
 ```
 user$: (orthoskim-env) head ~/OrthoSkim/data/mit_CDS_unaligned.fa
 >cox2_103999_Codonopsis_lanceolata
@@ -401,12 +404,12 @@ MRLYIIGILAKILGIIIPLLLGVAFLVLAERKIMASMQRRKGPNVVGLFGLLQPLADGLKLMIKEPILPSSANLFIFLMA
 
 **Custom modes:**
 
-Two free capture modes, working with any reference sequences, were also implemented for cpDNA and mtDNA (`-t chloroplast_nt` and `-t mitochondrion_nt` capture targets) that can be easily used to capture intergenic regions. For this purpose, a custom reference database has to be supplied in the **config** file for each of two modes (lines **43** and **51**), consisting on a multi-taxon FASTA file with nucleotide sequences of targeting regions and sequence names compliant with the ORTHOSKIM nomenclature.
+Two free capture modes, working with any reference sequences, were also implemented for cpDNA and mtDNA (`-t chloroplast_nt` and `-t mitochondrion_nt` capture targets) that can be easily used to capture intergenic regions. For this purpose, a custom reference database has to be supplied in the **config** file for each of two modes (lines **44** and **52**), consisting of a multi-taxon FASTA file with nucleotide sequences of targeting regions and sequence names compliant with the ORTHOSKIM nomenclature.
 
 ```
-MITO_REF_NT=~/ORTHOSKIM-master/data/mit_nt_custom.fa                                 ## [43] mtDNA custom reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+MITO_REF_NT=~/ORTHOSKIM-master/data/mit_nt_custom.fa                                 ## [44] mtDNA custom reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
 ...
-CHLORO_REF_NT=~/ORTHOSKIM-master/data/chloro_nt_custom.fa                            ## [51] cpDNA custom reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+CHLORO_REF_NT=~/ORTHOSKIM-master/data/chloro_nt_custom.fa                            ## [52] cpDNA custom reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
 ```
 
 
@@ -420,7 +423,7 @@ user$: (orthoskim-env) ./orthoskim -h
 ```
 
 
-After edition of the *tools.sh* and *config_orthoskim.txt* files (with all required files and formats), ORTHOSKIM is called step by step within the conda environment with a `-m mode`, `-c config_file.txt` and specific `-t targets`.
+After editing the *tools.sh* and *config_orthoskim.txt* files (with all required files and formats), ORTHOSKIM is called step by step within the conda environment with a `-m mode`, `-c config_file.txt` and specific `-t targets`.
 
 We provide detail instructions through the description of arguments and the tutorials below.
 
@@ -433,7 +436,7 @@ THREADS=15                                                                      
 VERBOSE=0                                                                            ## [5] set verbose to TRUE (1) or FALSE (0)
 PLANT_MODEL=yes                                                                      ## [6] plant model analyzed (yes/no)
 GENETIC_CODE=1                                                                       ## [7] NCBI genetic code number used for DNA translation (eg. 1: standard genetic code, 2: Vertebrate Mitochondrial Code...). Codes are available at https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi
-SAMPLES=~/ORTHOSKIM-master/ressources/listSamples.tab                                ## [8] samples table. Specific format required:  (1) sample name with Genus_species_(subsp)_taxid_attributes; (2) path to forward reads; (3) path to reverse reads; (4) [additional for phyloskims users] chloroplast annotations
+SAMPLES=~/ORTHOSKIM-master/resources/listSamples.tab                                ## [8] samples table. Specific format required:  (1) sample name with Genus_species_(subsp)_taxid_attributes; (2) path to forward reads; (3) path to reverse reads; (4) [additional for phyloskims users] chloroplast annotations
 ```
 
 > **NOTE**: The NCBI genetic code number, which is used during the capture to find ORF, has to be set according to study model and the target sequence. By default the standard genetic code is used (here GENETIC_CODE=1). But for vertebrates, if mitochondrial sequences are targeted please set GENETIC_CODE=2. All code numbers are available [here](https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi).
@@ -472,14 +475,14 @@ SEEDS_THRESHOLD=0.8                                                             
 ```
 + respective output files
 ```
-MITO_REF_CDS=~/ORTHOSKIM-master/data/mit_CDS_unaligned.fa                            ## [41] mtDNA CDS reference sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
-MITO_REF_rRNA=~/ORTHOSKIM-master/data/mit_rRNA_unaligned.fa                          ## [42] mtDNA rRNA reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+MITO_REF_CDS=~/ORTHOSKIM-master/data/mit_CDS_unaligned.fa                            ## [42] mtDNA CDS reference sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
+MITO_REF_rRNA=~/ORTHOSKIM-master/data/mit_rRNA_unaligned.fa                          ## [43] mtDNA rRNA reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
 ...
-CHLORO_REF_CDS=~/ORTHOSKIM-master/data/chloro_CDS_unaligned.fa                       ## [48] cpDNA CDS reference sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
-CHLORO_REF_rRNA=~/ORTHOSKIM-master/data/chloro_rRNA_unaligned.fa                     ## [49] cpDNA rRNA gene reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
-CHLORO_REF_tRNA=~/ORTHOSKIM-master/data/chloro_tRNA_unaligned.fa                     ## [50] cpDNA tRNA gene reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+CHLORO_REF_CDS=~/ORTHOSKIM-master/data/chloro_CDS_unaligned.fa                       ## [49] cpDNA CDS reference sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
+CHLORO_REF_rRNA=~/ORTHOSKIM-master/data/chloro_rRNA_unaligned.fa                     ## [50] cpDNA rRNA gene reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+CHLORO_REF_tRNA=~/ORTHOSKIM-master/data/chloro_tRNA_unaligned.fa                     ## [51] cpDNA tRNA gene reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
 ...
-NRDNA_REF=~/ORTHOSKIM-master/data/nucrdna_rRNA_unaligned.fa                          ## [54] rDNA rRNA reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+NRDNA_REF=~/ORTHOSKIM-master/data/nucrdna_rRNA_unaligned.fa                          ## [55] rDNA rRNA reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
 ```
 
 `>` **output files**
@@ -490,8 +493,8 @@ Database mode generates references files for cpDNA, mtDNA and rDNA sequences sep
 
 
 **NOTE:** We also supplied with ORTHOSKIM two python functions *SortDB_family.py* and *SortDB_lineages.py*
-+ ***SortDB_family.py*** allows to select a subset of lineages by family in sequence or annotations databases. This allows to reduce the computational time of capture steps by reducing the number of sequences by families and keeping a taxonomic diversity within the database.
-+ ***SortDB_lineages.py*** allows to extract within the reference sequences databases all sequences corresponding to the queried phylum. These function can be run directly on outputs as indicated:
++ ***SortDB_family.py*** allows selecting a subset of lineages by family in sequence or annotations databases. This allows to reduce the computational time of capture steps by reducing the number of sequences by families and keeping a taxonomic diversity within the database.
++ ***SortDB_lineages.py*** allows extracting within the reference sequences databases all sequences corresponding to the queried phylum. These function can be run directly on outputs as indicated:
 ```
 SortDB_family.py -i chloroplast_CDS.fa -f fasta -l 3 -o selected_chloroplast_CDS.fa -m gene
 SortDB_family.py -i chloroplast_ncbi.gb -f genbank -l 5 -o selected_chloroplast_CDS.embl -m genome
@@ -505,9 +508,9 @@ with -i input genes/genomes file; -l number of queried lineages by family; -f in
 
 ### 3.2. Global assemblies and cleaning
 
-#### 3.2.1. genomic/transcriptomic assembly
+#### 3.2.1. Genomic/transcriptomic assembly
 
-Global assemblies are performed for each library given in the sample file (l.7) by using [SPAdes](http://cab.spbu.ru/software/spades/). The user has to use the `-m assembly -t spades` or `-m assembly -t rnaspades` commands to run the assemblies according to the type of library (green arrows in Fig. 1). After [SPAdes](http://cab.spbu.ru/software/spades/) runs, ORTHOSKIM has to preprocess scaffolding contigs by formating the output files according to the library names provided in sample file. For such purpose, the user has to run the `-m format` mode with `-t spades` or `-t rnaspades` targets according to the type of library that were processed.
+Global assemblies are performed for each library given in the sample file (l.7) by using [SPAdes](http://cab.spbu.ru/software/spades/). The user has to use the `-m assembly -t spades` or `-m assembly -t rnaspades` commands to run the assemblies according to the type of library (green arrows in Fig. 1). After [SPAdes](http://cab.spbu.ru/software/spades/) runs, ORTHOSKIM has to preprocess scaffolding contigs by formatting the output files according to the library names provided in sample file. For such purpose, the user has to run the `-m format` mode with `-t spades` or `-t rnaspades` targets according to the type of library that were processed.
 
 
 `>` **list of commands**
@@ -539,12 +542,12 @@ KMER=55                                                                         
 `>` **output files**
 
 ORTHOSKIM creates an `/Working_directory/Assembly/` directory including two subdirectories:
-+ `/Working_directory/Assembly/SPADES/` or `/Working_directory/Assembly/RNASPADES/` directory with all assemblies produced by SPAdes ordered by libraries (with the given samplenames)
++ `/Working_directory/Assembly/SPADES/` or `/Working_directory/Assembly/RNASPADES/` directory with all assemblies produced by SPAdes ordered by libraries (with the given sample names)
 + `/Working_directory/Assembly/Samples/` directory with formatted unfiltered assemblies
 
 
 
-#### 3.2.2. assemblies cleaning
+#### 3.2.2. Assemblies cleaning
 
 Before the capture of target sequences, all assemblies are cleaned using the `-m cleaning` mode. This step identifies and removes  potential contaminant contigs in the final assemblies by mapping the assemblies on different databases including RNA, cpDNA, mtDNA and rDNA sequences for a wide range of taxa.  
 
@@ -566,9 +569,9 @@ user$: (orthoskim-env) ./orthoskim -m cleaning -c config_orthoskim.txt
 ```
 SIMILARITY_CONTA_THSLD=65                                                            ## [11] similarity threshold (%) used to check contaminants. We recommend to keep a low threshold as sequence are filtered according to their taxId (e.g. 65, meaning that only hits with a least 65% of similarity are used).
 MAPPING_CONTA_LENGTH=50                                                              ## [12] minimal mapping length. As for the threshold, we recommend to keep a low value here (e.g. 50).
-TAXONOMIC_PHYLUM_EXPECTED=Embryophyta                                                ## [13] taxonomic phylum expected for contigs (e.g. "Embryophyta","Viridiplantae" for plants, otherwise "Eumetazoa","Arthropoda","Annelida","Mollusca" etc); Note: "Animalia" is not allowed. Please check the taxonomy provided in the ~/ORTHOSKIM-master/ressources/rRNA_database_taxonomy.txt file.
+TAXONOMIC_PHYLUM_EXPECTED=Embryophyta                                                ## [13] taxonomic phylum expected for contigs (e.g. "Embryophyta","Viridiplantae" for plants, otherwise "Eumetazoa","Arthropoda","Annelida","Mollusca" etc); Note: "Animalia" is not allowed. Please check the taxonomy provided in the ~/ORTHOSKIM-master/resources/rRNA_database_taxonomy.txt file.
 ```
-> **NOTE:** Please check the taxonomy provided in the ~/ORTHOSKIM-master/ressources/rRNA_database_taxonomy.txt file to set a correct phylum (*e.g.* "Embryophyta", "Eumetazoa","Arthropoda","Annelida" etc).
+> **NOTE:** Please check the taxonomy provided in the ~/ORTHOSKIM-master/resources/rRNA_database_taxonomy.txt file to set a correct phylum (*e.g.* "Embryophyta", "Eumetazoa","Arthropoda","Annelida" etc).
 
 `>` **output files**
 
@@ -588,7 +591,7 @@ The capture of targeted sequence is achieved with the `-m capture` mode by follo
 
 `>` **list of commands**
 
-The capture mode is running with specific targets according to the querried targeted sequences:
+The capture mode is running with specific targets according to the queried targeted sequences:
 
 ```
 user$: (orthoskim-env) ./orthoskim -m capture -t chloroplast_CDS -c config_orthoskim.txt
@@ -622,9 +625,12 @@ CHLORO_SIZE_MIN=140000                                                          
 CHLORO_SIZE_MAX=200000                                                               ## [25] maximal size of cpDNA genomes required for the pre-selection of contigs
 SEEDS_THRESHOLD=0.8                                                                  ## [26] minimal percent of seed coverage to keep genes in references. For example, if rrn28S in seeds is 3375bp longer, only rrn28S genes with length >= 0.8*3375bp will be considered in the final references list.
 ```
-
++ for the pre-selection of nuclear contigs (nucleus and busco targets)
+```
+MAX_SEQS=2                                                                           ## [34] maximal number of contigs per reference used in BLAST for the pre-selection of contigs in the nucleus and busco modes. To speed up the capture in these modes, only one or two contig(s) can be preselected for each reference.
+```
+>**Note:** This parameter can be set to 1 or 2 to keep only 1 or 2 contig(s) for each reference, which can greatly reduce the capture time.
 + global parameters
-
 ```
 GENETIC_CODE=1                                                                       ## [7] NCBI genetic code number used for DNA translation (eg. 1: standard genetic code, 2: Vertebrate Mitochondrial Code...). Codes are available at https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi
 MINLENGTH=90                                                                         ## [27] minimal length of captured sequence
@@ -636,47 +642,47 @@ COVCUTOFF=on                                                                    
 ORFCOV=0.8                                                                           ## [33] minimal fraction of captured sequences covered by the longest open reading frame (ORF). For example, 0.8 means that 80% of the captured sequence has to be covered by an ORF.
 ```
 >**Note:** For vertebrates, if mitochondrial sequences are targeted please set GENETIC_CODE=2. All code numbers are available [here](https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi).
-
+>**Note:** Filtering on ORF size can be set to 0.0 when the filtering option for paralogs is chosen during the alignment mode.
 
 + references used, and specific regions of the target sequences to capture (TYPE=exon/intron/both)
   + busco
   ```
-  BUSCO_REF=~/ORTHOSKIM-master/data/BUSCO_viridiplantae.fa                             ## [34] BUSCO reference sequences FASTA file.
-  BUSCO_TYPE=exon                                                                      ## [35] region of reference captured: [exon,intron,all]
+  BUSCO_REF=~/ORTHOSKIM-master/data/BUSCO_viridiplantae.fa                             ## [35] BUSCO reference sequences FASTA file.
+  BUSCO_TYPE=exon                                                                      ## [36] region of reference captured: [exon,intron,all]
   ```
   + nucleus targets
   ```
-  NUC_NT_REF=~/ORTHOSKIM-master/data/nucleusNT_unaligned.fa                            ## [36] nuclear reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
-  NUC_AA_REF=~/ORTHOSKIM-master/data/nucleusAA_unaligned.fa                            ## [37] nuclear reference sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
-  NUC_TYPE=exon                                                                        ## [38] region of reference captured: [exon,intron,all]
+  NUC_NT_REF=~/ORTHOSKIM-master/data/nucleusNT_unaligned.fa                            ## [37] nuclear reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+  NUC_AA_REF=~/ORTHOSKIM-master/data/nucleusAA_unaligned.fa                            ## [38] nuclear reference sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
+  NUC_TYPE=exon                                                                        ## [39] region of reference captured: [exon,intron,all]
   ```
   + mtDNA targets
   ```
-  SEEDS_MITO_CDS=~/ORTHOSKIM-master/ressources/mitoCDS.seeds                           ## [39] mtDNA CDS seeds sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
-  SEEDS_MITO_rRNA=~/ORTHOSKIM-master/ressources/mitorRNA.seeds                         ## [40] mtDNA rRNA seeds sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
-  MITO_REF_CDS=~/ORTHOSKIM-master/data/mit_CDS_unaligned.fa                            ## [41] mtDNA CDS reference sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
-  MITO_REF_rRNA=~/ORTHOSKIM-master/data/mit_rRNA_unaligned.fa                          ## [42] mtDNA rRNA reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
-  MITO_REF_NT=~/ORTHOSKIM-master/data/mit_nt_custom.fa                                 ## [43] mtDNA custom reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
-  MITO_TYPE=exon                                                                       ## [44] region of reference captured: [exon,intron,all]
+  SEEDS_MITO_CDS=~/ORTHOSKIM-master/resources/mitoCDS.seeds                           ## [40] mtDNA CDS seeds sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
+  SEEDS_MITO_rRNA=~/ORTHOSKIM-master/resources/mitorRNA.seeds                         ## [41] mtDNA rRNA seeds sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+  MITO_REF_CDS=~/ORTHOSKIM-master/data/mit_CDS_unaligned.fa                            ## [42] mtDNA CDS reference sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
+  MITO_REF_rRNA=~/ORTHOSKIM-master/data/mit_rRNA_unaligned.fa                          ## [43] mtDNA rRNA reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+  MITO_REF_NT=~/ORTHOSKIM-master/data/mit_nt_custom.fa                                 ## [44] mtDNA custom reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+  MITO_TYPE=exon                                                                       ## [45] region of reference captured: [exon,intron,all]
   ```
   >**Note:** for plant models, cpDNA seeds needs also to be supplied
   + cpDNA targets
   ```
-  SEEDS_CHLORO_CDS=~/ORTHOSKIM-master/ressources/chloroCDS.seeds                       ## [45] cpDNA CDS seeds sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
-  SEEDS_CHLORO_rRNA=~/ORTHOSKIM-master/ressources/chlororRNA.seeds                     ## [46] cpDNA rRNA seeds sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
-  SEEDS_CHLORO_tRNA=~/ORTHOSKIM-master/ressources/chlorotRNA.seeds                     ## [47] cpDNA tRNA seeds sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names, with the anticodon in the name (e.g. trnL-UAA_taxid_genus_species)
-  CHLORO_REF_CDS=~/ORTHOSKIM-master/data/chloro_CDS_unaligned.fa                       ## [48] cpDNA CDS reference sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
-  CHLORO_REF_rRNA=~/ORTHOSKIM-master/data/chloro_rRNA_unaligned.fa                     ## [49] cpDNA rRNA gene reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
-  CHLORO_REF_tRNA=~/ORTHOSKIM-master/data/chloro_tRNA_unaligned.fa                     ## [50] cpDNA tRNA gene reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
-  CHLORO_REF_NT=~/ORTHOSKIM-master/data/chloro_nt_custom.fa                            ## [51] cpDNA custom reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
-  CHLORO_TYPE=exon                                                                     ## [52] region of reference captured: [exon,intron,all]
+  SEEDS_CHLORO_CDS=~/ORTHOSKIM-master/resources/chloroCDS.seeds                       ## [46] cpDNA CDS seeds sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
+  SEEDS_CHLORO_rRNA=~/ORTHOSKIM-master/resources/chlororRNA.seeds                     ## [47] cpDNA rRNA seeds sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+  SEEDS_CHLORO_tRNA=~/ORTHOSKIM-master/resources/chlorotRNA.seeds                     ## [48] cpDNA tRNA seeds sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names, with the anticodon in the name (e.g. trnL-UAA_taxid_genus_species)
+  CHLORO_REF_CDS=~/ORTHOSKIM-master/data/chloro_CDS_unaligned.fa                       ## [49] cpDNA CDS reference sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
+  CHLORO_REF_rRNA=~/ORTHOSKIM-master/data/chloro_rRNA_unaligned.fa                     ## [50] cpDNA rRNA gene reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+  CHLORO_REF_tRNA=~/ORTHOSKIM-master/data/chloro_tRNA_unaligned.fa                     ## [51] cpDNA tRNA gene reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+  CHLORO_REF_NT=~/ORTHOSKIM-master/data/chloro_nt_custom.fa                            ## [52] cpDNA custom reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+  CHLORO_TYPE=exon                                                                     ## [53] region of reference captured: [exon,intron,all]
   ```
   >**Note:** mtDNA seeds needs also to be supplied
   + rDNA targets
   ```
-  SEEDS_NRDNA=~/ORTHOSKIM-master/ressources/nucrdna.seeds                              ## [53] rDNA rRNA seeds sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
-  NRDNA_REF=~/ORTHOSKIM-master/data/nucrdna_rRNA_unaligned.fa                          ## [54] rDNA rRNA reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
-  NRDNA_TYPE=exon                                                                      ## [55] region of reference captured: [exon,intron,all]
+  SEEDS_NRDNA=~/ORTHOSKIM-master/resources/nucrdna.seeds                              ## [54] rDNA rRNA seeds sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+  NRDNA_REF=~/ORTHOSKIM-master/data/nucrdna_rRNA_unaligned.fa                          ## [55] rDNA rRNA reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+  NRDNA_TYPE=exon                                                                      ## [56] region of reference captured: [exon,intron,all]
   ```
 
 
@@ -718,8 +724,9 @@ ORTHOSKIM generates also a `/Working_directory/Mapping/` subdirectory, including
 
 ### 3.4. Alignment of taxa
 
-ORTHOSKIM provides a mode to align each captured sequences across the libraries by using the `-m alignment` mode and by choosing which sequences to align. Alignments can be filtered using [TRIMAL](http://TRIMAL.cgenomics.org/) if the option is chosen by users (*on/off* at line 58 of the config file). In addition, users can choose which libraries will be aligned according to the selection option (*on/off* at line 56 of the config file). In such case, a corresponding library list has to be given (list stated in l. 57 of the config file).
+ORTHOSKIM provides a mode to align each captured sequences across the libraries by using the `-m alignment` mode and by choosing which sequences and taxa to align. Alignments can be filtered using [TRIMAL](http://TRIMAL.cgenomics.org/) if the option is chosen by users (*on/off* at line 58 of the config file). In addition, users has to choose which libraries will be aligned (list of libraries stated in l. 58 of the config file).
 
+We also developed an optional mode to identify and remove putative paralogous sequences using a sliding window approach (*on/off* at line 61 of the config file). To do this, for each gene, a simple consensus sequence is first created according to the specified taxonomic level (*e.g.* at the genus or family, args l. 62). Each sequence from the same taxonomic rank is next compared to this consensus within the sliding window and removed if the amount of polymorphic sites exceeds the given level. The sliding window length and the maximum number of variable sites within this window can be modified (l.63-64 of the config file).
 
 
 `>` **list of commands**
@@ -732,17 +739,20 @@ user$: (orthoskim-env) ./orthoskim -m alignment -t chloroplast_CDS -t chloroplas
 `>` **parameters used**
 
 ```
-SELECTION=on                                                                         ## [56] selection of taxa for the alignment: [on/off]
-TAXA_ALN=~/ORTHOSKIM-master/ressources/selTaxa_Primulaceae.tab                       ## [57] file with selected taxa (file with with each line corresponding to one taxon)
-TRIMMING=on                                                                          ## [58] alignment trimming option using trimAl: [on/off]
-TRIMMODE=automated1                                                                  ## [59] trimming mode of trimAl: [automated1,gappyout,strictplus]. See trimAl documentation.
-MISSING_RATIO=1.0                                                                    ## [60] maximal threshold of missing data allowed in the final matrix (e.g. 0.5 means that final sequence has fewer than 50% of missing data). Taxa that not passed this threshold are removed.
-GENES_TO_CONCAT=~/ORTHOSKIM-master/ressources/listGenes_To_Concat.tab                ## [61] file with selected genes for the alignment (each line corresponds to one gene)
+TAXA_ALN=~/ORTHOSKIM-master/resources/selTaxa_Primulaceae.tab                        ## [58] file with selected taxa (file with each line corresponding to one taxon)
+TRIMMING=on                                                                          ## [59] alignment trimming option using trimAl: [on/off]
+TRIMMODE=automated1                                                                  ## [60] trimming mode of trimAl: [automated1,gappyout,strictplus]. See trimAl documentation.
+PARALOG_FILT=on                                                                      ## [61] filtering paralogs mode: [on,off]
+CONSENSUS_LEVEL=family                                                               ## [62] Taxonomic level of the consensus for paralog identification: [order, family, genus]
+WINDOW_SIZE=20                                                                       ## [63] sliding window size (e.g. 20 nt)
+WINDOW_PSITE=5                                                                       ## [64] maximal number of polymorphic sites within the sliding window allowed. All sequences with more than <WINDOW_PSITE> will be removed.
+MISSING_RATIO=1.0                                                                    ## [65] maximal threshold of missing data allowed in the final matrix (e.g. 0.5 means that final sequence has fewer than 50% of missing data). Taxa that not passed this threshold are removed.
+GENES_TO_CONCAT=~/ORTHOSKIM-master/resources/listGenes_To_Concat.tab                 ## [66] file with selected genes for the alignment (each line corresponds to one gene)
 ```
 
 `>` **output files**
 
-ORTHOSKIM produces a concatenated alignment of sequences along with a partition file under a RAxML-style format suitable for phylogenetic inferences within the `/Working_directory/Assembly/` or `/Working_directory/Selection/` subdirectory (if a selection of taxa is made). For such needs, users have to choose which sequences will be concatenated from a given list (list stated in l. 57 of the config file). A file with informations about gappy or missing data is also produced by library.
+ORTHOSKIM produces a concatenated alignment of sequences along with a partition file under a RAxML-style format suitable for phylogenetic inferences within the `/Working_directory/Alignment/` subdirectory. For such needs, users have to choose which sequences will be concatenated from a given list (list stated in l. 66 of the config file). A file with information about gappy or missing data is also produced by library.
 
 ```
 user$: (orthoskim-env) ls -l /Working_directory/Alignment/
@@ -774,14 +784,12 @@ Carex_elongata_240685_PHA001842_BGN_MAS	0.0096
 Dipsacus_fullonum_183561_TROM_V_159792_CDM_BFO	0.1808
 ```
 
->**NOTE**: At the moment, ORTHOSKIM is not designed to deal with paralogous sequences, but our pipeline allows us to strongly reduce this potential bias when the reference database is appropriately designed. We use a sequence similarity threshold to define homology and assign contigs to different target sequences by selecting the ones with greatest similarity. We thus suggest users to check alignements manually or using softwares to pinpoint paralogous sequences in the final alignments as an additional check step, such as [PREQUAL](https://github.com/simonwhelan/prequal) or [SPRUCEUP](https://github.com/marekborowiec/spruceup).
-
 
 ### 3.5. Additional modes
 
 #### 3.5.1. get summary statistics over assemblies
 
-ORTHOSKIM allows to output summary statistic over assemblies by using the `-m statistic_assembly` mode once contigs were cleaned.
+ORTHOSKIM allows outputting summary statistic over assemblies by using the `-m statistic_assembly` mode once contigs were cleaned.
 
 `>` **list of commands**
 
@@ -822,7 +830,7 @@ Anagallis_arvensis_4337_PHA000447_BGN_NS	DBFAM_mitochondrion	227	root,eukaryota,
 
 #### 3.5.2. get summary statistics over capture
 
-ORTHOSKIM allows to get statistic from the sequence captured by using the `-m statistic_capture` mode for the different targets.
+ORTHOSKIM allows getting statistic from the sequence captured by using the `-m statistic_capture` mode for the different targets.
 
 
 `>` **list of commands**
@@ -834,7 +842,7 @@ user$: (orthoskim-env) ./orthoskim -m statistic_capture -t chloroplast_CDS -c co
 
 `>` **output files**
 
-The pipeline generates table (*report.tab*) within the `/Working_directory/Statistics/` folder, containing:
+The pipeline generates a table (*report.tab*) within the `/Working_directory/Statistics/` folder, containing:
 + the targeted sequence name (gene_name)
 + the number of library having the targeted sequence (taxa)
 + the mean length of the sequence (mean)
@@ -869,7 +877,7 @@ with -p: path where genes are extracted and -t: list of taxa to compute statisti
 <br>
 
 
-Moreover, when analyzing genome skimming libraries (*i.e.* by targeting chloroplast, mitochondrion or ribosomal sequences in the genomic libraries), we also strongly recommend to investigate the summary statistics of the contigs for which sequences were captured once the capture is done, by using the function *StatContigs.py* as indicated:
+Moreover, when analyzing genome skimming libraries (*i.e.* by targeting chloroplast, mitochondrion or ribosomal sequences in the genomic libraries), we also strongly recommend investigating the summary statistics of the contigs for which sequences were captured once the capture is done, by using the function *StatContigs.py* as indicated:
 
 ```
 user$: (orthoskim-env) ~/ORTHOSKIM-master/src/StatContigs.py --path /Working_directory/Mapping/ --taxa taxalist --mode [all,chloroplast,mitochondrion,nucrdna] > statistics_captured_contigs.log
@@ -890,19 +898,12 @@ Primula_magellanica_175079_CLA010550_GWM_1236	5	126155	172.52
 Primula_marginata_175080_PHA007227_BGN_ID	5	124986	192.91
 ```
 
-This can provide an indication about contaminant that can not be identified during the assembly cleaning (*e.g.* plant-plant contaminants, host-parasite DNA contaminant, chimeric contigs). For a 150kb chloroplast genome, we except to have a reconstructed size over 125Kb (*i.e.* with only one inverted repeat). In the above example, `Primula_acaulis_175104_PHA007169_RSZ_RSZAXPI000864-106` is doubtful as it shows an higher reconstructed size and number of chloroplast contigs thant expected. In such case, user can check all genes captured for this sample before to include it on the alignment procedure if chloroplast sequences from an other organism were captured, or if it can correspond to a chimeric contig. In such a case, users can choose the *COVCUTOFF* option during the capture.
+This can provide an indication about contaminant that can not be identified during the assembly cleaning (*e.g.* plant-plant contaminants, host-parasite DNA contaminant, chimeric contigs). For a 150kb chloroplast genome, we expect to have a reconstructed size over 125Kb (*i.e.* with only one inverted repeat). In the above example, `Primula_acaulis_175104_PHA007169_RSZ_RSZAXPI000864-106` is doubtful as it shows a higher reconstructed size and number of chloroplast contigs thant expected. In such case, user can check all genes captured for this sample before to include it on the alignment procedure if chloroplast sequences from another organism were captured, or if it can correspond to a chimeric contig. Users can choose the *COVCUTOFF* option during the capture.
 
 
-#### 3.5.3. check captured sequences
+#### 3.5.3. checking of captured sequences
 
 Once sequence were captured, users can use the `-m checking` mode on some sequences to check the family rank found for each library. A BLAST is processed on NCBI database, and a taxonomic comparison is made according to the given taxID of the library.
-
-For such purpose, users have to download and unzip the corresponding file with the matches between the accesions and taxids numbers as following:
-```
-wget ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/accession2taxid//nucl_gb.accession2taxid.gz
-```
-> **Note:** a new version of this mode, without this requirement, will be available soon.
-
 
 `>` **list of commands**
 
@@ -912,14 +913,14 @@ user$: (orthoskim-env) ./orthoskim -m checking -c config_orthoskim.txt
 
 `>` **parameters used**
 ```
-BARCODES=( matK rbcL )                                                               ## [62] list of sequences used for the taxonomic checking. Users have to respect spaces between sequence names. If only one gene, set BARCODES=( matK ). We recommend to use only genes that are widely represented in the NCBI database (e.g. traditional barcodes).
-BARCODES_TYPE=chloroplast_CDS                                                        ## [63] ORTHOSKIM targets including these genes [chloroplast_CDS, chloroplast_rRNA, chloroplast_tRNA, chloroplast_nt, mitochondrion_CDS, mitochondrion_rRNA, mitochondrion_nt,nuleus_aa, nucleus_nt, busco, nucrdna]
-DB_LOCAL=off                                                                         ## [64] option to run BLAST locally by using the NCBI nt database, which has previously to be downloaded: [on/off]. Otherwise, NCBI server will be used.
-BLAST_NT_DB=~/path_to_ntdb/nt                                                        ## [65] local NCBI nt database files if DB_LOCAL=on
-BLAST_NT_ACCESSION_TAXID=/bettik/pouchon/blastDB/nucl_gb.accession2taxid             ## [66] file with the matches between the NCBI accessions and taxids. Such file needs to be downloaded on the NCBI.
-TAXA_CHECK=~/ORTHOSKIM-master/ressources/selTaxa_Primulaceae.tab                     ## [67] file with selected taxa for the taxonomic checking (each line corresponding to one taxon)
-FAMILIES_LOCAL=off                                                                   ## [68] option to use a local list of taxonomic families, when query taxIDs are not yet included in the NBCI taxonomy: [on/off]. If this option is used, the CORRESPONDING_FAMILIES file needs to be given.
-CORRESPONDING_FAMILIES=ecofind_out.tab                                               ## [69] table with query taxID and corresponding family (with space separator)
+# [checking] mode -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+BARCODES=( matK rbcL )                                                               ## [67] list of sequences used for the taxonomic checking. Users have to respect spaces between sequence names. If only one gene, set BARCODES=( matK ). We recommend to use only genes that are widely represented in the NCBI database (e.g. traditional barcodes).
+BARCODES_TYPE=chloroplast_CDS                                                        ## [68] ORTHOSKIM targets including these genes [chloroplast_CDS, chloroplast_rRNA, chloroplast_tRNA, chloroplast_nt, mitochondrion_CDS, mitochondrion_rRNA, mitochondrion_nt,nuleus_aa, nucleus_nt, busco, nucrdna]
+DB_LOCAL=off                                                                         ## [65] option to run BLAST locally by using the NCBI nt database, which has previously to be downloaded: [on/off]. Otherwise, NCBI server will be used.
+BLAST_NT_DB=~/path_to_ntdb/nt                                                        ## [66] local NCBI nt database files if DB_LOCAL=on
+TAXA_CHECK=~/ORTHOSKIM-master/resources/selTaxa_Primulaceae.tab                      ## [68] file with selected taxa for the taxonomic checking (each line corresponding to one taxon)
+FAMILIES_LOCAL=off                                                                   ## [69] option to use a local list of taxonomic families, when query taxIDs are not yet included in the NBCI taxonomy: [on/off]. If this option is used, the CORRESPONDING_FAMILIES file needs to be given.
+CORRESPONDING_FAMILIES=ecofind_out.tab                                               ## [70] table with query taxID and corresponding family (with space separator)
 ```
 
 `>` **output files**
@@ -932,7 +933,7 @@ Abies_sibirica_97169_TROM_V_97238_CDM_AVE	TRUE	TRUE
 ```
 > If users want to combine chloroplast_tRNA (*e.g.* trnL-UAA) and CDS genes (*e.g.* matK and rbcL), a new directory must be created in the `/Working_directory/Extraction/` folder including all the queried sequences for the checking step; users have next to set the name of this directory in the config file.
 
-We also recommend to investigate the reconstructed size and the number of contigs for which targeted sequences were captured to identify spurious taxa (see following section 3.5.2.).
+We also recommend investigating the reconstructed size and the number of contigs for which targeted sequences were captured to identify spurious taxa (see following section 3.5.2.).
 
 
 
@@ -992,7 +993,7 @@ Filtering annotations on taxonomy
  	 parsing annotations [............................................................] 100 %
 4869 / 5201 annotations selected on taxonomy
 ```
->**NOTE:** the output (given with **-o**) has to be the same which is set in the config file (line 15: <font size="2">**CHLORO_ANNOTATIONS**</font>). Morevover, multiple taxonomic levels can be given in -l with a coma separator (*e.g.* -l asteraceae,helianthae).
+>**NOTE:** the output (given with **-o**) has to be the same which is set in the config file (line 16: <font size="2">**CHLORO_ANNOTATIONS**</font>). Morevover, multiple taxonomic levels can be given in -l with a coma separator (*e.g.* -l asteraceae,helianthae).
 
 
 ## 5. How to collect seed sequences for annotations
@@ -1009,12 +1010,25 @@ user$: (orthoskim-env) ~/ORTHOSKIM-master/src/AnoRef_nucrdna.py --single -in you
 4. In the output directory set on the functions, a single FASTA file is generated per taxon of the annotations and per type of sequences (CDS in amino-acid sequences, rRNA or tRNA in nucleotide). The user can choose each file to use as seed sequences. Please to rename these files.
 
 
-## 6. Tutorial
-
-In this section, we provide a short tutorial to run ORTHOSKIM on the four RNAseq libraries used in the original paper to capture chloroplast, mitochondrial and ribosomal genes. This tutorial assumes that user have created the sample file, edited the config and the tools files and collect annotations files for the targeted compartments. By default, subsets of genomic annotations are given for Viridiplantae with ORTHOSKIM to quickly run the software. Here we use these annotations and keep the standard genetic code (GENETIC_CODE=1) in the config file, as this tutorial is focussed on plant model.
 
 
-### 6.1 Load environment, download sequences
+## 6. Recommendations for hybrid enrichment libraries
+
+When lots of nuclear genes are targeted, as expected on hybrid enrichment libraries, we recommend users to reduce the maximal number of contigs allowed by reference during the preselection step, which can greatly speed up the *in silico* capture (l. 34 of the config file).
+
+```
+MAX_SEQS=2                                                                           ## [34] maximal number of contigs per reference used in BLAST for the pre-selection of contigs in the nucleus and busco modes. To speed up the capture in these modes, only one or two contig(s) can be preselected for each reference.
+```
+
+For the references, we supplied by default in ORTHOSKIM the last set of Angiosperms353 enriched with 560 new taxa (McLay et al. 2021).
+
+
+## 7. Tutorial
+
+In this section, we provide a short tutorial to run ORTHOSKIM on the four RNAseq libraries used in the original paper to capture chloroplast, mitochondrial and ribosomal genes. This tutorial assumes that users have created the sample file, edited the config and the tools files and collect annotations files for the targeted compartments. By default, subsets of genomic annotations are given for Viridiplantae with ORTHOSKIM to quickly run the software. Here we use these annotations and keep the standard genetic code (GENETIC_CODE=1) in the config file, as this tutorial is focussed on plant model.
+
+
+### 7.1 Load environment, download sequences
 
 We set the ORTHOSKIM environment
 
@@ -1039,7 +1053,7 @@ Pyrola_americana_93820_SRR11994223      /path/to/download/SRA_reads/SRR11994223_
 Vaccinium_corymbosum_69266_SRR6472974_cv-Arlen_leaf     /path/to/download/SRA_reads/SRR6472974_1.fastq.gz /path/to/download/SRA_reads/SRR6472974_2.fastq.gz
 ```
 
-### 6.2 Database creation from annotations
+### 7.2 Database creation from annotations
 
 Once all reads have been downloaded and all config, tools files completed, we compute the database from the annotations and seed files giving in ORTHOSKIM. Reference sequences for CDS, rRNA and tRNA will be output according to the given path-files of the config file.
 
@@ -1049,7 +1063,7 @@ Once all reads have been downloaded and all config, tools files completed, we co
 (orthoskim-env) ./orthoskim -m database -t nucrdna -c config_orthoskim.txt
 ```
 
-### 6.3 contig assembly and cleaning
+### 7.3 contig assembly and cleaning
 
 We next perform global assemblies of our samples and formate the outputs. After that, assemblies were cleaned by removing all potential contaminants.
 
@@ -1067,7 +1081,7 @@ If you want to get summary statistics of assemblies, users can run the following
 (orthoskim-env) ./orthoskim -m statistic_assembly -c config_orthoskim.txt
 ```
 
-### 6.1 Load environment, download sequences
+### 7.4 sequences capture
 
 The next step consists on capture all targeted sequences into these assemblies. To do this, we run the `capture` mode with our different targets.
 
@@ -1098,11 +1112,11 @@ Finally, we compute a supermatrix by aligning captured sequences (here chloropla
 
 
 
-## 7. Additional modes for PhyloDB users
+## 8. Additional modes for PhyloDB users
 
 Additional modes were implemented for PhyloDB users (*i.e.* for PHA, PHN, PHC member project) to use ORTHOSKIM along with annotations performed under these projects with [Org.Asm](https://git.metabarcoding.org/org-asm/org-asm) assembler. Users can easily use all modes supplied in ORTHOSKIM in complement.
 
-### 7.1. get a sample file
+### 8.1. get a sample file
 
 Sample file can be created directly from libraries available on the [GriCAD](https://gricad-doc.univ-grenoble-alpes.fr/hpc/description/) infrastructures on the */bettik/LECA/phyloskims/release/* folder. This sample file is produced by the `-m phyloskim_indexing` mode, by screening each library available in the given `-p path/to/seek/files/` path. Unwanted libraries can be removed from the generated list before processing other modes.
 
@@ -1110,21 +1124,21 @@ Sample file can be created directly from libraries available on the [GriCAD](htt
 user$: (orthoskim-env) ./orthoskim -m indexing -c config_orthoskim.txt -p /bettik/LECA/phyloskims/release/
 ```
 
-### 7.2. List of genes files
+### 8.2. List of genes files
 
 The extraction of orthologous regions and the creation of databases from annotations are based on a given list of genes. The lists are supplied in the *config* file:
 
 ```
-CHLORO_GENES=~/ORTHOSKIM-master/ressources/listGenes.chloro                          ## [70] list of cpDNA genes. Table format: $1=type (CDS,rRNA,tRNA), $2=genename. This file can be modified by adding/removing specific lines.
-MITO_GENES=~/ORTHOSKIM-master/ressources/listGenes.mito                              ## [71] list of mtDNA genes. Table format: $1=type (CDS,rRNA,tRNA), $2=genename. This file can be modified by adding/removing specific lines.
-NRDNA_GENES=~/ORTHOSKIM-master/ressources/listGenes.rdna                             ## [72] list of rDNA genes. Table format: $1=type (rRNA,misc_RNA), $2=genename. This file can be modified by adding/removing specific lines.
+CHLORO_GENES=~/ORTHOSKIM-master/resources/listGenes.chloro                          ## [70] list of cpDNA genes. Table format: $1=type (CDS,rRNA,tRNA), $2=genename. This file can be modified by adding/removing specific lines.
+MITO_GENES=~/ORTHOSKIM-master/resources/listGenes.mito                              ## [71] list of mtDNA genes. Table format: $1=type (CDS,rRNA,tRNA), $2=genename. This file can be modified by adding/removing specific lines.
+NRDNA_GENES=~/ORTHOSKIM-master/resources/listGenes.rdna                             ## [72] list of rDNA genes. Table format: $1=type (rRNA,misc_RNA), $2=genename. This file can be modified by adding/removing specific lines.
 ```
 and must contain:
 + the type of gene (*e.g.* CDS,rRNA,tRNA,misc_RNA)
 + the gene name
 
 ```
-head ~/OrthoSkim/ressources/listGenes.chloro
+head ~/OrthoSkim/resources/listGenes.chloro
 tRNA    trnV
 tRNA    trnA
 tRNA    trnN
@@ -1140,7 +1154,7 @@ CDS     matK
 By default, ORTHOSKIM provides a list for tRNA, rRNA and CDS genes in chloroplast. For the ribosomal complex, the gene type correspond to rRNA (*i.e.* for rrn18S, 5.8S rRNA, rrn28S) and the internal transcribed spacers (*i.e.* ITS1 and ITS2) to misc_RNA; as annotated in Org.Asm assembler.
 
 
-### 7.3. phyloDB database of references
+### 8.3. phyloDB database of references
 
 ORTHOSKIM provides a mode to create a database from the all annotations performed within the project by using the `-m phyloskim_database` mode. For such purpose, all genes found in these annotations files are extracted following the ORTHOSKIM nomenclature. Output files are created according to the path-files set in the **config** file:
 ```
@@ -1153,15 +1167,15 @@ NRDNA_REF=~/ORTHOSKIM-master/data/nucrdna_rRNA_unaligned.fa                     
 
 >**Note:** For chloroplast annotations, only genes found in single and circular contig will be extracted to avoid the capture of mitochondrial contigs that can be annotated as chloroplast one.   
 
-### 7.4. phyloDB extraction from annotations
+### 8.4. phyloDB extraction from annotations
 
 For each library of the sample file, ORTHOSKIM will perform genes extraction directly from annotation with `-m phyloskim_extraction_targeted` mode, according to a list of genes for `-t [chloroplast, nucrdna]` targets.
 
 Muli-FASTA files are generated per gene in the `/Working_directory/Extraction/` directory for each compartment and gene type.
 
-## 8. Funding
+## 9. Funding
 
 The PhyloAlps data collection was largely funded from the European Research Council under the European Community’s Seventh Framework Programme FP7/2007-2013 grant agreement 281422 (TEEMBIO), the Sixth European Framework Programme (GOCE-CT-2007-036866), the Swiss SNF (Grant 31003A_149508/1), the ANR DIVERSITALP Project (ANR-07-BDIV-014), ANR project Origin-Alps (ANR-16-CE93-0004), France Génomique (ANR-10-INBS-09-08) and the NextBarcode project (Institut Français de Bioinformatique).
 
-## 9. Support
+## 10. Support
 For questions and comments, please contact: [contact@orthoskim.org](mailto:contact@orthoskim.org?subject=[GitHub]%20Support)

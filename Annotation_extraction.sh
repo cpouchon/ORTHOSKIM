@@ -48,8 +48,8 @@ if [ $mode == 'chloroplast' ]; then
   mkdir -p ${RES}/tmp/unclean
   start=$(date +%s)
   echo '*** extraction of all genes from annotations ***'
-  echo "CMD: `dirname $0`/src/Ano_extraction.py --single -in ${CHLORO_ANNOTATIONS} -o ${RES}/tmp/unclean -m chloroplast -fmt ${CHLORO_DB_FMT} --codon `dirname $0`/ressources/tRNA_codons.tab"
-  `dirname $0`/src/Ano_extraction.py --single -in ${CHLORO_ANNOTATIONS} -o ${RES}/tmp/unclean -m chloroplast -fmt ${CHLORO_DB_FMT} --codon `dirname $0`/ressources/tRNA_codons.tab
+  echo "CMD: `dirname $0`/src/Ano_extraction.py --single -in ${CHLORO_ANNOTATIONS} -o ${RES}/tmp/unclean -m chloroplast -fmt ${CHLORO_DB_FMT} --codon `dirname $0`/resources/tRNA_codons.tab"
+  `dirname $0`/src/Ano_extraction.py --single -in ${CHLORO_ANNOTATIONS} -o ${RES}/tmp/unclean -m chloroplast -fmt ${CHLORO_DB_FMT} --codon `dirname $0`/resources/tRNA_codons.tab
 
   echo '*** alignment of CDS into seeds and extraction of final sequences ***'
   for file in `find ${RES}/tmp/unclean/chloroplast_CDS/ -type f -name \*.fa`;
@@ -96,8 +96,8 @@ elif [ $mode == 'mitochondrion' ]; then
   mkdir -p ${RES}/tmp/unclean
   start=$(date +%s)
   echo '*** extraction of all genes from annotations ***'
-  echo "CMD: `dirname $0`/src/Ano_extraction.py --single -in ${MITO_ANNOTATIONS} -o ${RES}/tmp/unclean -m mitochondrion -fmt ${MITO_DB_FMT} --codon `dirname $0`/ressources/tRNA_codons.tab"
-  `dirname $0`/src/Ano_extraction.py --single -in ${MITO_ANNOTATIONS} -o ${RES}/tmp/unclean -m mitochondrion -fmt ${MITO_DB_FMT} --codon `dirname $0`/ressources/tRNA_codons.tab
+  echo "CMD: `dirname $0`/src/Ano_extraction.py --single -in ${MITO_ANNOTATIONS} -o ${RES}/tmp/unclean -m mitochondrion -fmt ${MITO_DB_FMT} --codon `dirname $0`/resources/tRNA_codons.tab"
+  `dirname $0`/src/Ano_extraction.py --single -in ${MITO_ANNOTATIONS} -o ${RES}/tmp/unclean -m mitochondrion -fmt ${MITO_DB_FMT} --codon `dirname $0`/resources/tRNA_codons.tab
 
   echo '*** alignment of CDS into seeds and extraction of final sequences ***'
   for file in `find ${RES}/tmp/unclean/mitochondrion_CDS/ -type f -name \*.fa`;

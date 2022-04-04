@@ -50,6 +50,7 @@ with open(giventaxa) as f:
 for b in list_barcodes:
     bestscore={}
     besthits={}
+    besttaxids={}
     with open(str(outpath+"/"+"blast_"+b+".out")) as out:
         for l in out:
             sub_error=0
@@ -57,7 +58,8 @@ for b in list_barcodes:
             query_name=tab[0].replace(";","")
             sub_name=tab[1]
             score=tab[2]
-
+            taxid=tab[5]
+            besttaxids[query_name]=[taxid]
             if query_name in taxa_dict.keys():
                 if query_name in besthits.keys():
                     if int(score) > bestscore[query_name]:
@@ -79,6 +81,7 @@ for b in list_barcodes:
     for taxa in besthits:
         query_name=taxa
         sub_name=besthits[taxa][0]
+        taxid=besttaxids[taxa][0]
         with open(str(outpath+"/"+b+"_besthits"+".out"),"a+") as file:
-            file.write(query_name+'\t'+sub_name+'\n')
+            file.write(query_name+'\t'+sub_name+'\t'+taxid+'\n')
             file.close()

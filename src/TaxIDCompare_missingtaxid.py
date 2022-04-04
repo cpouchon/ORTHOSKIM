@@ -17,14 +17,12 @@ import os, errno
 
 
 parser = argparse.ArgumentParser(description='Check errors according to taxonomic assignment of best hits and query taxid. Script was writen by C. Pouchon (2020).')
-parser.add_argument("--accession", help="accessions to taxid list",
-                    type=str)
-parser.add_argument("-o","--outdir", help="out directory path",
-                    type=str)
 parser.add_argument('-b', '--barcodes', help='list of barcodes', type=str)
+parser.add_argument('--families', help='list of families for new taxid', type=str)
 parser.add_argument("--local", help="use local corresponding for query taxid and families",
                     action="store_true")
-parser.add_argument('--families', help='list of families for new taxid', type=str)
+parser.add_argument("-o","--outdir", help="out directory path",
+                    type=str)
 parser.add_argument("-t","--taxa", help="list of taxa to include in the final concatenated file",
                     type=str)
 
@@ -35,27 +33,23 @@ if len(sys.argv)==1:
 args = parser.parse_args()
 
 
-list_accessions = args.accession
+#list_accessions = args.accession
 outpath=args.outdir
 giventaxa = args.taxa
 list_newtaxid=args.families
-# list_accessions = ""
-# list_barcodes=['matK']
-# outpath="./"
-# giventaxa = "testdata_taxa"
 
 ncbi = NCBITaxa()
 
-access_dict={}
-with open(list_accessions) as f:
-    for l in f:
-        tab=l.rstrip().split('\t')
-        if 'accession' in tab:
-            pass
-        else:
-            code=tab[0]
-            code_txid=tab[2]
-            access_dict[code]=int(code_txid)
+# access_dict={}
+# with open(list_accessions) as f:
+#     for l in f:
+#         tab=l.rstrip().split('\t')
+#         if 'accession' in tab:
+#             pass
+#         else:
+#             code=tab[0]
+#             code_txid=tab[1]
+#             access_dict[code]=int(code_txid)
 
 if args.local:
     list_newtaxid=args.families
@@ -74,7 +68,6 @@ with open(giventaxa) as f:
         for b in list_barcodes:
             taxa_dict[l.rstrip()][b]="NA"
 
-
 for b in list_barcodes:
     with open(str(outpath+"/"+b+"_besthits"+".out")) as out:
         for l in out:
@@ -82,11 +75,11 @@ for b in list_barcodes:
             tab=l.rstrip().split('\t')
             query_name=tab[0].replace(";","")
             sub_name=tab[1]
-
-            if len(ncbi.get_taxid_translator([access_dict[sub_name]]))==0:
+            taxid=int(tab[2].split(";")[0])
+            if len(ncbi.get_taxid_translator([taxid]))==0:
                 sub_error=sub_error+1
             else:
-                sub_lineages=ncbi.get_lineage(access_dict[sub_name])
+                sub_lineages=ncbi.get_lineage(taxid)
                 sub_names=ncbi.get_taxid_translator(sub_lineages)
                 sub_ranks=ncbi.get_rank(sub_names.keys())
                 list_fam=[key  for (key, value) in sub_ranks.items() if value == u'family']

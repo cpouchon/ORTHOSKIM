@@ -124,6 +124,7 @@ def GeneExtraction(genenumber):
                     out.write(header+'\n')
                     out.write(str(dna)+'\n')
         else:
+            seqid = besthits_filtered[geneid][0][1]
             taxa="_".join(seqid.split("_")[1:len(seqid.split("_"))])
             print("ERROR: multiple gene sequences mapping onto the %s seed for %s" % (geneid,taxa))
     else:

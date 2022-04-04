@@ -76,6 +76,13 @@ def mad(a, axis=None):
     return mad
 
 
+def pad_seq(sequence):
+    """ Pad sequence to multiple of 3 with N """
+
+    remainder = len(sequence) % 3
+
+    return sequence if remainder == 0 else sequence + Seq('N' * (3 - remainder))
+
 def weighted_std(values, weights):
     """
     Return the weighted average and standard deviation.
@@ -318,9 +325,11 @@ def GeneExtraction(genenumber):
     cond_orf=0
 
     if typeseq=="exon" and (model=="chloroplast_CDS" or model=="mitochondrion_CDS" or model=="busco" or model=="nucleus_aa"):
-        tseq=Seq(newseq).translate(table=genet_code)
+        #tseq=Seq(newseq).translate(table=genet_code)
+        tseq=pad_seq(Seq(newseq)).translate(table=genet_code)
         if "*" in tseq:
-            seqframes=[Seq(newseq).translate(table=genet_code),Seq(newseq[1:len(newseq)]).translate(table=genet_code),Seq(newseq[2:len(newseq)]).translate(table=genet_code)]
+            newseq_rev=str(Seq(newseq).reverse_complement())
+            seqframes=[pad_seq(Seq(newseq)).translate(table=genet_code),pad_seq(Seq(newseq[1:len(newseq)])).translate(table=genet_code),pad_seq(Seq(newseq[2:len(newseq)])).translate(table=genet_code),pad_seq(Seq(newseq_rev)).translate(table=genet_code),pad_seq(Seq(newseq_rev[1:len(newseq_rev)])).translate(table=genet_code),pad_seq(Seq(newseq_rev[2:len(newseq_rev)])).translate(table=genet_code)]
             frame_select=0
             len_orf=0
             orf_select=""
@@ -354,6 +363,12 @@ def GeneExtraction(genenumber):
                         frame_seq=newseq[1:len(newseq)]
                     elif frame_select==2:
                         frame_seq=newseq[2:len(newseq)]
+                    elif frame_select==3:
+                        frame_seq=newseq_rev
+                    elif frame_select==4:
+                        frame_seq=newseq_rev[1:len(newseq_rev)]
+                    elif frame_select==5:
+                        frame_seq=newseq_rev[2:len(newseq_rev)]
                     newseq2=frame_seq[((s+1)*3)-3:(e)*3]
                     cond_orf=cond_orf+1
                 else:
@@ -365,9 +380,10 @@ def GeneExtraction(genenumber):
         else:
             newseq2=newseq
     elif typeseq=="exon" and model=="nucleus_nt":
-        tseq=Seq(newseq).translate(table=genet_code)
+        tseq=pad_seq(Seq(newseq)).translate(table=genet_code)
         if "*" in tseq:
-            seqframes=[Seq(newseq).translate(table=genet_code),Seq(newseq[1:len(newseq)]).translate(table=genet_code),Seq(newseq[2:len(newseq)]).translate(table=genet_code)]
+            newseq_rev=str(Seq(newseq).reverse_complement())
+            seqframes=[pad_seq(Seq(newseq)).translate(table=genet_code),pad_seq(Seq(newseq[1:len(newseq)])).translate(table=genet_code),pad_seq(Seq(newseq[2:len(newseq)])).translate(table=genet_code),pad_seq(Seq(newseq_rev)).translate(table=genet_code),pad_seq(Seq(newseq_rev[1:len(newseq_rev)])).translate(table=genet_code),pad_seq(Seq(newseq_rev[2:len(newseq_rev)])).translate(table=genet_code)]
             frame_select=0
             len_orf=0
             orf_select=""
@@ -401,6 +417,12 @@ def GeneExtraction(genenumber):
                         frame_seq=newseq[1:len(newseq)]
                     elif frame_select==2:
                         frame_seq=newseq[2:len(newseq)]
+                    elif frame_select==3:
+                        frame_seq=newseq_rev
+                    elif frame_select==4:
+                        frame_seq=newseq_rev[1:len(newseq_rev)]
+                    elif frame_select==5:
+                        frame_seq=newseq_rev[2:len(newseq_rev)]
                     newseq2=frame_seq[((s+1)*3)-3:(e)*3]
                     cond_orf=cond_orf+1
                 else:
@@ -512,9 +534,11 @@ def GeneExtraction(genenumber):
                                     extract=str(Seq(dna[posmin-1:posmax]))
                                 exon_concat.append(extract)
                 exon_seq="".join(exon_concat)
-                tseq=Seq(exon_seq).translate(table=genet_code)
+                newseq_rev=str(Seq(newseq).reverse_complement())
+                tseq=pad_seq(Seq(exon_seq)).translate(table=genet_code)
                 if "*" in tseq:
-                    seqframes=[Seq(exon_seq).translate(table=genet_code),Seq(exon_seq[1:len(exon_seq)]).translate(table=genet_code),Seq(exon_seq[2:len(exon_seq)]).translate(table=genet_code)]
+                    exon_seq_rev=str(Seq(exon_seq).reverse_complement())
+                    seqframes=[pad_seq(Seq(exon_seq)).translate(table=genet_code),pad_seq(Seq(exon_seq[1:len(exon_seq)])).translate(table=genet_code),pad_seq(Seq(exon_seq[2:len(exon_seq)])).translate(table=genet_code),pad_seq(Seq(exon_seq_rev)).translate(table=genet_code),pad_seq(Seq(exon_seq_rev[1:len(exon_seq_rev)])).translate(table=genet_code),pad_seq(Seq(exon_seq_rev[2:len(exon_seq_rev)])).translate(table=genet_code)]
                     frame_select=0
                     len_orf=0
                     orf_select=""
@@ -548,6 +572,12 @@ def GeneExtraction(genenumber):
                                 frame_seq=newseq[1:len(newseq)]
                             elif frame_select==2:
                                 frame_seq=newseq[2:len(newseq)]
+                            elif frame_select==3:
+                                frame_seq=newseq_rev
+                            elif frame_select==4:
+                                frame_seq=newseq_rev[1:len(newseq_rev)]
+                            elif frame_select==5:
+                                frame_seq=newseq_rev[2:len(newseq_rev)]
                             newseq2=newseq
                         else:
                             cond_toprint_var=cond_toprint_var+1
@@ -558,9 +588,10 @@ def GeneExtraction(genenumber):
                 else:
                     newseq2=newseq
             else:
-                tseq=Seq(newseq).translate(table=genet_code)
+                tseq=pad_seq(Seq(newseq)).translate(table=genet_code)
+                newseq_rev=str(Seq(newseq).reverse_complement())
                 if "*" in tseq:
-                    seqframes=[Seq(newseq).translate(table=genet_code),Seq(newseq[1:len(newseq)]).translate(table=genet_code),Seq(newseq[2:len(newseq)]).translate(table=genet_code)]
+                    seqframes=[pad_seq(Seq(newseq)).translate(table=genet_code),pad_seq(Seq(newseq[1:len(newseq)])).translate(table=genet_code),pad_seq(Seq(newseq[2:len(newseq)])).translate(table=genet_code),pad_seq(Seq(newseq_rev)).translate(table=genet_code),pad_seq(Seq(newseq_rev[1:len(newseq_rev)])).translate(table=genet_code),pad_seq(Seq(newseq_rev[2:len(newseq_rev)])).translate(table=genet_code)]
                     frame_select=0
                     len_orf=0
                     orf_select=""
@@ -594,6 +625,12 @@ def GeneExtraction(genenumber):
                                 frame_seq=newseq[1:len(newseq)]
                             elif frame_select==2:
                                 frame_seq=newseq[2:len(newseq)]
+                            elif frame_select==3:
+                                frame_seq=newseq_rev
+                            elif frame_select==4:
+                                frame_seq=newseq_rev[1:len(newseq_rev)]
+                            elif frame_select==5:
+                                frame_seq=newseq_rev[2:len(newseq_rev)]
                             newseq2=frame_seq[((s+1)*3)-3:(e)*3]
                             cond_orf=cond_orf+1
                         else:
@@ -706,9 +743,11 @@ def GeneExtraction(genenumber):
                                     extract=str(Seq(dna[posmin-1:posmax]))
                                 exon_concat.append(extract)
                 exon_seq="".join(exon_concat)
-                tseq=Seq(exon_seq).translate(table=genet_code)
+                newseq_rev=str(Seq(newseq).reverse_complement())
+                tseq=pad_seq(Seq(exon_seq)).translate(table=genet_code)
                 if "*" in tseq:
-                    seqframes=[Seq(exon_seq).translate(table=genet_code),Seq(exon_seq[1:len(exon_seq)]).translate(table=genet_code),Seq(exon_seq[2:len(exon_seq)]).translate(table=genet_code)]
+                    exon_seq_rev=str(Seq(exon_seq).reverse_complement())
+                    seqframes=[pad_seq(Seq(exon_seq)).translate(table=genet_code),pad_seq(Seq(exon_seq[1:len(exon_seq)])).translate(table=genet_code),pad_seq(Seq(exon_seq[2:len(exon_seq)])).translate(table=genet_code),pad_seq(Seq(exon_seq_rev)).translate(table=genet_code),pad_seq(Seq(exon_seq_rev[1:len(exon_seq_rev)])).translate(table=genet_code),pad_seq(Seq(exon_seq_rev[2:len(exon_seq_rev)])).translate(table=genet_code)]
                     frame_select=0
                     len_orf=0
                     orf_select=""
@@ -742,6 +781,12 @@ def GeneExtraction(genenumber):
                                 frame_seq=newseq[1:len(newseq)]
                             elif frame_select==2:
                                 frame_seq=newseq[2:len(newseq)]
+                            elif frame_select==3:
+                                frame_seq=newseq_rev
+                            elif frame_select==4:
+                                frame_seq=newseq_rev[1:len(newseq_rev)]
+                            elif frame_select==5:
+                                frame_seq=newseq_rev[2:len(newseq_rev)]
                             newseq2=newseq
                         else:
                             cond_toprint_var=cond_toprint_var+1
@@ -752,9 +797,10 @@ def GeneExtraction(genenumber):
                 else:
                     newseq2=newseq
             else:
-                tseq=Seq(newseq).translate(table=genet_code)
+                tseq=pad_seq(Seq(newseq)).translate(table=genet_code)
+                newseq_rev=str(Seq(newseq).reverse_complement())
                 if "*" in tseq:
-                    seqframes=[Seq(newseq).translate(table=genet_code),Seq(newseq[1:len(newseq)]).translate(table=genet_code),Seq(newseq[2:len(newseq)]).translate(table=genet_code)]
+                    seqframes=[pad_seq(Seq(newseq)).translate(table=genet_code),pad_seq(Seq(newseq[1:len(newseq)])).translate(table=genet_code),pad_seq(Seq(newseq[2:len(newseq)])).translate(table=genet_code),pad_seq(Seq(newseq_rev)).translate(table=genet_code),pad_seq(Seq(newseq_rev[1:len(newseq_rev)])).translate(table=genet_code),pad_seq(Seq(newseq_rev[2:len(newseq_rev)])).translate(table=genet_code)]
                     frame_select=0
                     len_orf=0
                     orf_select=""
@@ -781,13 +827,19 @@ def GeneExtraction(genenumber):
                     if len(orf_select)>0:
                         s=int(orf_select.split("-")[0])
                         e=int(orf_select.split("-")[1])
-                        if float(len(seqframes[frame_select][s:e]))/float(reflength[geneid]/3)>=refcond:
+                        if float(len(seqframes[frame_select][s:e]))/float(reflength[geneid])>=refcond:
                             if frame_select==0:
                                 frame_seq=newseq
                             elif frame_select==1:
                                 frame_seq=newseq[1:len(newseq)]
                             elif frame_select==2:
                                 frame_seq=newseq[2:len(newseq)]
+                            elif frame_select==3:
+                                frame_seq=newseq_rev
+                            elif frame_select==4:
+                                frame_seq=newseq_rev[1:len(newseq_rev)]
+                            elif frame_select==5:
+                                frame_seq=newseq_rev[2:len(newseq_rev)]
                             newseq2=frame_seq[((s+1)*3)-3:(e)*3]
                             cond_orf=cond_orf+1
                         else:
