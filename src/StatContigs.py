@@ -11,7 +11,7 @@ parser.add_argument("-p","--path", help="searching path of sequences files",
 parser.add_argument("-t","--taxa", help="taxa list",
                     type=str)
 parser.add_argument("-m","--mode", help="taxa list",
-                    type=str,choices=["all","chloroplast","mitochondrion","nucrdna"])
+                    type=str,choices=["all","chloroplast","mitochondrion","nucrdna","nucleus"])
 if len(sys.argv)==1:
     parser.print_help(sys.stderr)
     sys.exit(1)
@@ -149,5 +149,25 @@ elif model=="nucrdna":
             rdna_count=0
             rdna_cov=0.0
         print ("%s\t%s\t%s\t%s" % (str(taxa),int(rdna_count),int(rdna_size),float(rdna_cov)))
+elif model=="nucleus":
+    for taxa in taxa_dict.keys():
+        try:
+            with open(os.path.join(str(path+"nucleus"), str(taxa+".cont_nucleus.log")), 'r') as out:
+                ndna=out.read().splitlines()
+            ndna_size=0
+            ndna_count=len(ndna)
+            cov=0
+            for cont in ndna:
+                if cont=="None":
+                    continue
+                else:
+                    ndna_size=ndna_size+int(cont.split("length_")[1].split("_")[0])
+                    cov=cov+float(cont.split("cov_")[1])*int(cont.split("length_")[1].split("_")[0])
+            ndna_cov=round(cov/ndna_size,2)
+        except:
+            ndna_size=0
+            ndna_count=0
+            ndna_cov=0.0
+        print ("%s\t%s\t%s\t%s" % (str(taxa),int(ndna_count),int(ndna_size),float(ndna_cov)))
 else:
     pass

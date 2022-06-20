@@ -141,7 +141,7 @@ print("parsing of input files")
 Bar = ProgressBar(len(in_files), 60, '\t ')
 barp=0
 for file in in_files:
-    barp=barp+1
+    #barp=barp+1
     geneID=os.path.basename(file).replace(".fasta","").replace(str("."+"fa"),"").replace(".trim","")
     seqs=to_dict_remove_dups(SeqIO.parse(file, "fasta"))
     if geneID in list(stored.keys()):
@@ -149,9 +149,9 @@ for file in in_files:
     else:
         stored[geneID]=dict()
         alignments[geneID]=dict()
-        stored[geneID]["other"]=dict()
+        stored[geneID]["other"]=list()
         #alignments[geneID]["other"]=MultipleSeqAlignment([], Gapped(IUPAC.unambiguous_dna, "-"))
-        alignments[geneID]["other"]=MultipleSeqAlignment([])
+        #alignments[geneID]["other"]=MultipleSeqAlignment([])
     for s in seqs:
         genus=s.split("_")[0]
         if len(ncbi.get_name_translator([genus]))>0:
@@ -161,23 +161,22 @@ for file in in_files:
             sub_ranks=ncbi.get_rank(sub_names.keys())
             list_fam=[key  for (key, value) in sub_ranks.items() if value == query_level.lower()]
             if len(list_fam)==0:
-                stored[geneID]["other"][s]=seqs[s]
-                alignments[geneID]["other"].add_sequence(s, str(seqs[s].seq))
+                stored[geneID]["other"].append(seqs[s])
+                #alignments[geneID]["other"].add_sequence(s, str(seqs[s].seq))
             else:
                 fam=ncbi.get_taxid_translator(list_fam)[list_fam[0]]
                 fam_taxid=int(list_fam[0])
                 if fam in list(stored[geneID].keys()):
-                    if s in list(stored[geneID][fam].keys()):
-                        pass
-                    else:
-                        stored[geneID][fam][s]=seqs[s]
-                        alignments[geneID][fam].add_sequence(s, str(seqs[s].seq))
+                    stored[geneID][fam].append(seqs[s])
+                    #alignments[geneID][fam].add_sequence(s, str(seqs[s].seq))
                 else:
-                    stored[geneID][fam]=dict()
-                    stored[geneID][fam][s]=seqs[s]
+                    stored[geneID][fam]=list()
+                    stored[geneID][fam].append(seqs[s])
                     #alignments[geneID][fam] = MultipleSeqAlignment([], Gapped(IUPAC.unambiguous_dna, "-"))
-                    alignments[geneID][fam] = MultipleSeqAlignment([])
-                    alignments[geneID][fam].add_sequence(s, str(seqs[s].seq))
+                    #alignments[geneID][fam] = MultipleSeqAlignment([])
+                    #alignments[geneID][fam].add_sequence(s, str(seqs[s].seq))
+    for f in list(stored[geneID].keys()):
+        alignments[geneID][f]=MultipleSeqAlignment(stored[geneID][f])
     Bar.update(barp)
 print("")
 print("done")
