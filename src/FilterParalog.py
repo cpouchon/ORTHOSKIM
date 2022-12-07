@@ -9,6 +9,7 @@ from ete3 import NCBITaxa
 from Bio import AlignIO
 from Bio.Align import AlignInfo
 from Bio.Align import MultipleSeqAlignment
+from collections import Counter
 #from Bio.Alphabet import IUPAC, Gapped
 
 #import numpy as np
@@ -18,14 +19,13 @@ import sys
 import os, errno
 import time
 import glob
+import random
 
 start_time = time.time()
 
 parser = argparse.ArgumentParser(description='Filtering of paralogs from alignments. Script was writen by C. Pouchon (2020).')
 parser.add_argument("-i","--inpath", help="in path of alignments fasta files",
                     type=str)
-parser.add_argument("-c","--consensus", help="consensus rule (eg. 0.5 for majority rule consensus)",
-                    type=float)
 parser.add_argument("-e","--extension", help="file extension (eg. trim/fa/fasta/fna/etc)",
                     type=str)
 parser.add_argument("-q","--query", help="queried taxonomic level for consensus",
@@ -111,17 +111,39 @@ def to_dict_remove_dups(sequences):
     return {record.id: record for record in sequences}
 
 
+try:
+    # Python 2
+    xrange
+except NameError:
+    # Python 3, xrange is now named range
+    xrange = range
 
+def get_maj_sites(string):
+    from collections import Counter
+    counts=Counter(string)
+    keys=[]
+    #tot=sum(counts.values())
+    for key, value in counts.items():
+        if value == max(counts.values()):
+            keys.append(key)
+    return keys
+
+def majority_rule_consense(msa_summary):
+    import random
+    consensus = ''
+    for i in xrange(msa_summary.alignment.get_alignment_length()):
+        possibles = get_maj_sites(msa_summary.get_column(i))
+        if len(possibles) == 1:
+            consensus += possibles[0]
+        else:
+            consensus += random.choice(possibles)
+    return consensus
 
 # load all fasta
 inpath=args.inpath
-#inpath="Alignment/mitochondrion_CDS/trim/"
-
-rule_cons=args.consensus
 w_size=args.window
 w_site=args.psites
 outpath=args.outpath
-#outpath="/Users/pouchonc/Lecythidaceae/alignment/filter_paralogs"
 query_level=args.query
 
 
@@ -134,14 +156,14 @@ for r, d, f in path_to_seek:
 
 stored=dict()
 alignments=dict()
-
+stored_for_cons=dict()
 
 # store all sequences
 print("parsing of input files")
 Bar = ProgressBar(len(in_files), 60, '\t ')
 barp=0
 for file in in_files:
-    #barp=barp+1
+    barp=barp+1
     geneID=os.path.basename(file).replace(".fasta","").replace(str("."+"fa"),"").replace(".trim","")
     seqs=to_dict_remove_dups(SeqIO.parse(file, "fasta"))
     if geneID in list(stored.keys()):
@@ -149,7 +171,9 @@ for file in in_files:
     else:
         stored[geneID]=dict()
         alignments[geneID]=dict()
-        stored[geneID]["other"]=list()
+        stored_for_cons[geneID]=dict()
+        stored[geneID]["other"]=dict()
+        stored_for_cons[geneID]["other"]=list()
         #alignments[geneID]["other"]=MultipleSeqAlignment([], Gapped(IUPAC.unambiguous_dna, "-"))
         #alignments[geneID]["other"]=MultipleSeqAlignment([])
     for s in seqs:
@@ -161,22 +185,29 @@ for file in in_files:
             sub_ranks=ncbi.get_rank(sub_names.keys())
             list_fam=[key  for (key, value) in sub_ranks.items() if value == query_level.lower()]
             if len(list_fam)==0:
-                stored[geneID]["other"].append(seqs[s])
+                stored[geneID]["other"][s]=seqs[s]
+                stored_for_cons[geneID]["other"].append(seqs[s])
                 #alignments[geneID]["other"].add_sequence(s, str(seqs[s].seq))
             else:
                 fam=ncbi.get_taxid_translator(list_fam)[list_fam[0]]
                 fam_taxid=int(list_fam[0])
                 if fam in list(stored[geneID].keys()):
-                    stored[geneID][fam].append(seqs[s])
-                    #alignments[geneID][fam].add_sequence(s, str(seqs[s].seq))
+                    if s in list(stored[geneID][fam].keys()):
+                        pass
+                    else:
+                        stored[geneID][fam][s]=seqs[s]
+                        stored_for_cons[geneID][fam].append(seqs[s])
+                        #alignments[geneID][fam].add_sequence(s, str(seqs[s].seq))
                 else:
-                    stored[geneID][fam]=list()
-                    stored[geneID][fam].append(seqs[s])
+                    stored[geneID][fam]=dict()
+                    stored[geneID][fam][s]=seqs[s]
+                    stored_for_cons[geneID][fam]=list()
+                    stored_for_cons[geneID][fam].append(seqs[s])
                     #alignments[geneID][fam] = MultipleSeqAlignment([], Gapped(IUPAC.unambiguous_dna, "-"))
                     #alignments[geneID][fam] = MultipleSeqAlignment([])
                     #alignments[geneID][fam].add_sequence(s, str(seqs[s].seq))
-    for f in list(stored[geneID].keys()):
-        alignments[geneID][f]=MultipleSeqAlignment(stored[geneID][f])
+    for fam in list(stored[geneID].keys()):
+        alignments[geneID][fam]=MultipleSeqAlignment(stored_for_cons[geneID][fam])
     Bar.update(barp)
 print("")
 print("done")
@@ -194,7 +225,8 @@ for g in stored:
         if len(stored[g][f])>0:
             align = alignments[g][f]
             summary_align = AlignInfo.SummaryInfo(align)
-            cons=str(summary_align.dumb_consensus(rule_cons))
+            #cons=str(summary_align.dumb_consensus(rule_cons))
+            cons=majority_rule_consense(summary_align)
             consense[g][f]=cons
         else:
             continue

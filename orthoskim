@@ -3272,10 +3272,10 @@ o       O o       O o       O
       do
         if [ ${TRIMMING} == 'on' ]; then
           f_path=${RES}/Alignment/alignments/${element}/trim
-          `dirname $0`/src/FilterParalog.py -i ${inpath} -c 0.5 -e trim -q ${CONSENSUS_LEVEL} -o ${RES}/Alignment/alignments/${element}/clean -w ${WINDOW_SIZE} -p ${WINDOW_PSITE}
+          `dirname $0`/src/FilterParalog.py -i ${f_path} -e trim -q ${CONSENSUS_LEVEL} -o ${RES}/Alignment/alignments/${element}/clean -w ${WINDOW_SIZE} -p ${WINDOW_PSITE}
         else
           f_path=${RES}/Alignment/alignments/${element}/files
-          `dirname $0`/src/FilterParalog.py -i ${inpath} -c 0.5 -e fa -q ${CONSENSUS_LEVEL} -o ${RES}/Alignment/alignments/${element}/clean -w ${WINDOW_SIZE} -p ${WINDOW_PSITE}
+          `dirname $0`/src/FilterParalog.py -i ${f_path} -e fa -q ${CONSENSUS_LEVEL} -o ${RES}/Alignment/alignments/${element}/clean -w ${WINDOW_SIZE} -p ${WINDOW_PSITE}
         fi
       done
     else

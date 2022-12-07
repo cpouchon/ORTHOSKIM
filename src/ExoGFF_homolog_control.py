@@ -1707,14 +1707,16 @@ for g in list(besthits_filtered2.keys()):
                         rc=set(range(cmin,cmax))
                         intersection=rhit.intersection(rc)
                         cg=c["gene"]
+                        cgsize=int(cmax-cmin+1)
                         if len(intersection)/size>0.2:
                             if g == cg:
                                 pass
                             else:
-                                if bscore>=int(c["score"]):
+                                if bscore>int(c["score"]):
                                     pass
                                 else:
-                                    control_pass=control_pass+1
+                                    if len(intersection)/cgsize>0.2:
+                                        control_pass=control_pass+1
                         else:
                             pass
         else:

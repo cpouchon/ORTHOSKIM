@@ -123,9 +123,9 @@ partnumber=0
 for file in in_files:
     seqs={}
     if args.trim:
-        genename=os.path.basename(file).replace(str("."+"trim"),"")
+        genename=os.path.basename(file).replace(str("."+"trim"),"").rstrip()
     else:
-        genename=os.path.basename(file).replace(str("."+"fa"),"")
+        genename=os.path.basename(file).replace(str("."+"fa"),"").rstrip()
 
     if genename in gene_list:
         cur_genome = SeqIO.parse(file, "fasta")
@@ -188,9 +188,9 @@ for taxa in taxa_dict:
     concatenate_seq=""
     for file in in_files:
         if args.trim:
-            genename=os.path.basename(file).replace(str("."+"trim"),"")
+            genename=os.path.basename(file).replace(str("."+"trim"),"").rstrip()
         else:
-            genename=os.path.basename(file).replace(str("."+"fa"),"")
+            genename=os.path.basename(file).replace(str("."+"fa"),"").rstrip()
         if genename in gene_list:
             concatenate_seq=concatenate_seq+str(taxa_dict[taxa][genename])
     Ncount=int(concatenate_seq.count("N"))
