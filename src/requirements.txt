@@ -1,4 +1,4 @@
 ete3==3.0.0b35
-joblib==0.16.0
+joblib==1.2.0
 numpy==1.19.1
 Bio==0.3.0
