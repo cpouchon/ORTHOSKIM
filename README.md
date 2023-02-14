@@ -160,25 +160,29 @@ TAXA_ALN=~/ORTHOSKIM-master/resources/selTaxa_Primulaceae.tab                   
 TRIMMING=on                                                                          ## [59] alignment trimming option using trimAl: [on/off]
 TRIMMODE=automated1                                                                  ## [60] trimming mode of trimAl: [automated1,gappyout,strictplus]. See trimAl documentation.
 PARALOG_FILT=on                                                                      ## [61] filtering paralogs mode: [on,off]
-CONSENSUS_LEVEL=family                                                               ## [62] Taxonomic level of the consensus for paralog identification: [order, family, genus]
-WINDOW_SIZE=20                                                                       ## [63] sliding window size (e.g. 20 nt)
-WINDOW_PSITE=5                                                                       ## [64] maximal number of polymorphic sites within the sliding window allowed. All sequences with more than <WINDOW_PSITE> will be removed.
-MISSING_RATIO=1.0                                                                    ## [65] maximal threshold of missing data allowed in the final matrix (e.g. 0.5 means that final sequence has fewer than 50% of missing data). Taxa that not passed this threshold are removed.
-GENES_TO_CONCAT=~/ORTHOSKIM-master/resources/listGenes_To_Concat.tab                 ## [66] file with selected genes for the alignment (each line corresponds to one gene)
+GENUS_WINDOW_SIZE=100                                                                ## [62] Genus level - sliding window size (e.g. 20 nt)
+GENUS_WINDOW_PSITE=20                                                                ## [63] Genus level - maximal number of polymorphic sites within the sliding window allowed. All sequences with more than <GENUS_WINDOW_PSITE> will be removed.
+FAMILY_WINDOW_SIZE=150                                                               ## [64] Family level - sliding window size (e.g. 20 nt)
+FAMILY_WINDOW_PSITE=30                                                               ## [65] Family level - maximal number of polymorphic sites within the sliding window allowed. All sequences with more than <FAMILY_WINDOW_PSITE> will be removed.
+GENUS_TAXA=3                                                                         ## [66] Genus level - minimal number of taxa required for the consensus
+FAMILY_TAXA=5                                                                        ## [67] Family level - minimal number of taxa required for the consensus
+EXPORT=on                                                                            ## [68] option to export the consensus sequences used at both genus and family levels
+MISSING_RATIO=1.0                                                                    ## [69] maximal threshold of missing data allowed in the final matrix (e.g. 0.5 means that final sequence has fewer than 50% of missing data). Taxa that not passed this threshold are removed.
+GENES_TO_CONCAT=~/ORTHOSKIM-master/resources/listGenes_To_Concat.tab                 ## [70] file with selected genes for the alignment (each line corresponds to one gene)
 
 # [checking] mode -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-BARCODES=( matK rbcL )                                                               ## [67] list of sequences used for the taxonomic checking. Users have to respect spaces between sequence names. If only one gene, set BARCODES=( matK ). We recommend to use only genes that are widely represented in the NCBI database (e.g. traditional barcodes).
-BARCODES_TYPE=chloroplast_CDS                                                        ## [68] ORTHOSKIM targets including these genes [chloroplast_CDS, chloroplast_rRNA, chloroplast_tRNA, chloroplast_nt, mitochondrion_CDS, mitochondrion_rRNA, mitochondrion_nt,nuleus_aa, nucleus_nt, busco, nucrdna]
-DB_LOCAL=off                                                                         ## [65] option to run BLAST locally by using the NCBI nt database, which has previously to be downloaded: [on/off]. Otherwise, NCBI server will be used.
-BLAST_NT_DB=~/path_to_ntdb/nt                                                        ## [66] local NCBI nt database files if DB_LOCAL=on
-TAXA_CHECK=~/ORTHOSKIM-master/resources/selTaxa_Primulaceae.tab                      ## [68] file with selected taxa for the taxonomic checking (each line corresponding to one taxon)
-FAMILIES_LOCAL=off                                                                   ## [69] option to use a local list of taxonomic families, when query taxIDs are not yet included in the NBCI taxonomy: [on/off]. If this option is used, the CORRESPONDING_FAMILIES file needs to be given.
-CORRESPONDING_FAMILIES=ecofind_out.tab                                               ## [70] table with query taxID and corresponding family (with space separator)
+BARCODES=( matK rbcL )                                                               ## [71] list of sequences used for the taxonomic checking. Users have to respect spaces between sequence names. If only one gene, set BARCODES=( matK ). We recommend to use only genes that are widely represented in the NCBI database (e.g. traditional barcodes).
+BARCODES_TYPE=chloroplast_CDS                                                        ## [72] ORTHOSKIM targets including these genes [chloroplast_CDS, chloroplast_rRNA, chloroplast_tRNA, chloroplast_nt, mitochondrion_CDS, mitochondrion_rRNA, mitochondrion_nt,nuleus_aa, nucleus_nt, busco, nucrdna]
+DB_LOCAL=off                                                                         ## [73] option to run BLAST locally by using the NCBI nt database, which has previously to be downloaded: [on/off]. Otherwise, NCBI server will be used.
+BLAST_NT_DB=~/path_to_ntdb/nt                                                        ## [74] local NCBI nt database files if DB_LOCAL=on
+TAXA_CHECK=~/ORTHOSKIM-master/resources/selTaxa_Primulaceae.tab                      ## [75] file with selected taxa for the taxonomic checking (each line corresponding to one taxon)
+FAMILIES_LOCAL=off                                                                   ## [76] option to use a local list of taxonomic families, when query taxIDs are not yet included in the NBCI taxonomy: [on/off]. If this option is used, the CORRESPONDING_FAMILIES file needs to be given.
+CORRESPONDING_FAMILIES=ecofind_out.tab                                               ## [77] table with query taxID and corresponding family (with space separator)
 
 # only for phyloskims users --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-CHLORO_GENES=~/ORTHOSKIM-master/resources/listGenes.chloro                           ## [71] list of cpDNA genes. Table format: $1=type (CDS,rRNA,tRNA), $2=genename. This file can be modified by adding/removing specific lines.
-MITO_GENES=~/ORTHOSKIM-master/resources/listGenes.mito                               ## [72] list of mtDNA genes. Table format: $1=type (CDS,rRNA,tRNA), $2=genename. This file can be modified by adding/removing specific lines.
-NRDNA_GENES=~/ORTHOSKIM-master/resources/listGenes.rdna                              ## [73] list of rDNA genes. Table format: $1=type (rRNA,misc_RNA), $2=genename. This file can be modified by adding/removing specific lines.
+CHLORO_GENES=~/ORTHOSKIM-master/resources/listGenes.chloro                           ## [78] list of cpDNA genes. Table format: $1=type (CDS,rRNA,tRNA), $2=genename. This file can be modified by adding/removing specific lines.
+MITO_GENES=~/ORTHOSKIM-master/resources/listGenes.mito                               ## [79] list of mtDNA genes. Table format: $1=type (CDS,rRNA,tRNA), $2=genename. This file can be modified by adding/removing specific lines.
+NRDNA_GENES=~/ORTHOSKIM-master/resources/listGenes.rdna                              ## [80] list of rDNA genes. Table format: $1=type (rRNA,misc_RNA), $2=genename. This file can be modified by adding/removing specific lines.
 
 ```
 
@@ -726,8 +730,9 @@ ORTHOSKIM generates also a `/Working_directory/Mapping/` subdirectory, including
 
 ORTHOSKIM provides a mode to align each captured sequences across the libraries by using the `-m alignment` mode and by choosing which sequences and taxa to align. Alignments can be filtered using [TRIMAL](http://TRIMAL.cgenomics.org/) if the option is chosen by users (*on/off* at line 58 of the config file). In addition, users has to choose which libraries will be aligned (list of libraries stated in l. 58 of the config file).
 
-We also developed an optional mode to identify and remove putative paralogous sequences using a sliding window approach (*on/off* at line 61 of the config file). To do this, for each gene, a simple consensus sequence is first created according to the specified taxonomic level (*e.g.* at the genus or family, args l. 62). Each sequence from the same taxonomic rank is next compared to this consensus within the sliding window and removed if the amount of polymorphic sites exceeds the given level. The sliding window length and the maximum number of variable sites within this window can be modified (l.63-64 of the config file).
+We also developed an optional mode to identify and remove putative paralogous sequences using a sliding window approach (*on/off* at line 61 of the config file). To do this, for each gene, a simple consensus sequence is first created at the genus and the family level. Each sequence is next compared to the genus-level consensus within the sliding window and removed if the amount of polymorphic sites exceeds the given level. A minimal number of taxa is also required to generate the consensus sequences. If there is not enough sequences to get a genus-level consensus, each sequence is compared to the family-level consensus. The sliding window length and the maximum number of variable sites within this window can be modified at both genus and family levels.
 
+An option can be used to export the produced consensus sequences at this step (*on/off* l.68). These sequences may thus be used in reads mapping pipelines.
 
 `>` **list of commands**
 
@@ -743,11 +748,15 @@ TAXA_ALN=~/ORTHOSKIM-master/resources/selTaxa_Primulaceae.tab                   
 TRIMMING=on                                                                          ## [59] alignment trimming option using trimAl: [on/off]
 TRIMMODE=automated1                                                                  ## [60] trimming mode of trimAl: [automated1,gappyout,strictplus]. See trimAl documentation.
 PARALOG_FILT=on                                                                      ## [61] filtering paralogs mode: [on,off]
-CONSENSUS_LEVEL=family                                                               ## [62] Taxonomic level of the consensus for paralog identification: [order, family, genus]
-WINDOW_SIZE=20                                                                       ## [63] sliding window size (e.g. 20 nt)
-WINDOW_PSITE=5                                                                       ## [64] maximal number of polymorphic sites within the sliding window allowed. All sequences with more than <WINDOW_PSITE> will be removed.
-MISSING_RATIO=1.0                                                                    ## [65] maximal threshold of missing data allowed in the final matrix (e.g. 0.5 means that final sequence has fewer than 50% of missing data). Taxa that not passed this threshold are removed.
-GENES_TO_CONCAT=~/ORTHOSKIM-master/resources/listGenes_To_Concat.tab                 ## [66] file with selected genes for the alignment (each line corresponds to one gene)
+GENUS_WINDOW_SIZE=100                                                                ## [62] Genus level - sliding window size (e.g. 20 nt)
+GENUS_WINDOW_PSITE=20                                                                ## [63] Genus level - maximal number of polymorphic sites within the sliding window allowed. All sequences with more than <GENUS_WINDOW_PSITE> will be removed.
+FAMILY_WINDOW_SIZE=150                                                               ## [64] Family level - sliding window size (e.g. 20 nt)
+FAMILY_WINDOW_PSITE=30                                                               ## [65] Family level - maximal number of polymorphic sites within the sliding window allowed. All sequences with more than <FAMILY_WINDOW_PSITE> will be removed.
+GENUS_TAXA=3                                                                         ## [66] Genus level - minimal number of taxa required for the consensus
+FAMILY_TAXA=5                                                                        ## [67] Family level - minimal number of taxa required for the consensus
+EXPORT=on                                                                            ## [68] option to export the consensus sequences used at both genus and family levels
+MISSING_RATIO=1.0                                                                    ## [69] maximal threshold of missing data allowed in the final matrix (e.g. 0.5 means that final sequence has fewer than 50% of missing data). Taxa that not passed this threshold are removed.
+GENES_TO_CONCAT=~/ORTHOSKIM-master/resources/listGenes_To_Concat.tab                 ## [70] file with selected genes for the alignment (each line corresponds to one gene)
 ```
 
 `>` **output files**
@@ -912,15 +921,15 @@ user$: (orthoskim-env) ./orthoskim -m checking -c config_orthoskim.txt
 ```
 
 `>` **parameters used**
+
 ```
-# [checking] mode -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-BARCODES=( matK rbcL )                                                               ## [67] list of sequences used for the taxonomic checking. Users have to respect spaces between sequence names. If only one gene, set BARCODES=( matK ). We recommend to use only genes that are widely represented in the NCBI database (e.g. traditional barcodes).
-BARCODES_TYPE=chloroplast_CDS                                                        ## [68] ORTHOSKIM targets including these genes [chloroplast_CDS, chloroplast_rRNA, chloroplast_tRNA, chloroplast_nt, mitochondrion_CDS, mitochondrion_rRNA, mitochondrion_nt,nuleus_aa, nucleus_nt, busco, nucrdna]
-DB_LOCAL=off                                                                         ## [65] option to run BLAST locally by using the NCBI nt database, which has previously to be downloaded: [on/off]. Otherwise, NCBI server will be used.
-BLAST_NT_DB=~/path_to_ntdb/nt                                                        ## [66] local NCBI nt database files if DB_LOCAL=on
-TAXA_CHECK=~/ORTHOSKIM-master/resources/selTaxa_Primulaceae.tab                      ## [68] file with selected taxa for the taxonomic checking (each line corresponding to one taxon)
-FAMILIES_LOCAL=off                                                                   ## [69] option to use a local list of taxonomic families, when query taxIDs are not yet included in the NBCI taxonomy: [on/off]. If this option is used, the CORRESPONDING_FAMILIES file needs to be given.
-CORRESPONDING_FAMILIES=ecofind_out.tab                                               ## [70] table with query taxID and corresponding family (with space separator)
+BARCODES=( matK rbcL )                                                               ## [71] list of sequences used for the taxonomic checking. Users have to respect spaces between sequence names. If only one gene, set BARCODES=( matK ). We recommend to use only genes that are widely represented in the NCBI database (e.g. traditional barcodes).
+BARCODES_TYPE=chloroplast_CDS                                                        ## [72] ORTHOSKIM targets including these genes [chloroplast_CDS, chloroplast_rRNA, chloroplast_tRNA, chloroplast_nt, mitochondrion_CDS, mitochondrion_rRNA, mitochondrion_nt,nuleus_aa, nucleus_nt, busco, nucrdna]
+DB_LOCAL=off                                                                         ## [73] option to run BLAST locally by using the NCBI nt database, which has previously to be downloaded: [on/off]. Otherwise, NCBI server will be used.
+BLAST_NT_DB=~/path_to_ntdb/nt                                                        ## [74] local NCBI nt database files if DB_LOCAL=on
+TAXA_CHECK=~/ORTHOSKIM-master/resources/selTaxa_Primulaceae.tab                      ## [75] file with selected taxa for the taxonomic checking (each line corresponding to one taxon)
+FAMILIES_LOCAL=off                                                                   ## [76] option to use a local list of taxonomic families, when query taxIDs are not yet included in the NBCI taxonomy: [on/off]. If this option is used, the CORRESPONDING_FAMILIES file needs to be given.
+CORRESPONDING_FAMILIES=ecofind_out.tab                                               ## [77] table with query taxID and corresponding family (with space separator)
 ```
 
 `>` **output files**
@@ -1129,9 +1138,9 @@ user$: (orthoskim-env) ./orthoskim -m indexing -c config_orthoskim.txt -p /betti
 The extraction of orthologous regions and the creation of databases from annotations are based on a given list of genes. The lists are supplied in the *config* file:
 
 ```
-CHLORO_GENES=~/ORTHOSKIM-master/resources/listGenes.chloro                          ## [70] list of cpDNA genes. Table format: $1=type (CDS,rRNA,tRNA), $2=genename. This file can be modified by adding/removing specific lines.
-MITO_GENES=~/ORTHOSKIM-master/resources/listGenes.mito                              ## [71] list of mtDNA genes. Table format: $1=type (CDS,rRNA,tRNA), $2=genename. This file can be modified by adding/removing specific lines.
-NRDNA_GENES=~/ORTHOSKIM-master/resources/listGenes.rdna                             ## [72] list of rDNA genes. Table format: $1=type (rRNA,misc_RNA), $2=genename. This file can be modified by adding/removing specific lines.
+CHLORO_GENES=~/ORTHOSKIM-master/resources/listGenes.chloro                           ## [78] list of cpDNA genes. Table format: $1=type (CDS,rRNA,tRNA), $2=genename. This file can be modified by adding/removing specific lines.
+MITO_GENES=~/ORTHOSKIM-master/resources/listGenes.mito                               ## [79] list of mtDNA genes. Table format: $1=type (CDS,rRNA,tRNA), $2=genename. This file can be modified by adding/removing specific lines.
+NRDNA_GENES=~/ORTHOSKIM-master/resources/listGenes.rdna                              ## [80] list of rDNA genes. Table format: $1=type (rRNA,misc_RNA), $2=genename. This file can be modified by adding/removing specific lines.
 ```
 and must contain:
 + the type of gene (*e.g.* CDS,rRNA,tRNA,misc_RNA)

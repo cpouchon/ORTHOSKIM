@@ -343,7 +343,7 @@ def GeneExtraction(genenumber):
                         end=i
                         orf_parts.append(str(start)+"-"+str(end))
                         start=i+1
-                orf_parts.append(str(start)+"-"+str(end))
+                orf_parts.append(str(start)+"-"+str(end+1))
                 for i in range(len(orf_parts)):
                     part=orf_parts[i]
                     s=int(part.split("-")[0])
@@ -354,26 +354,8 @@ def GeneExtraction(genenumber):
                         frame_select=p
             #check that orf cov refpct
             if len(orf_select)>0:
-                s=int(orf_select.split("-")[0])
-                e=int(orf_select.split("-")[1])
-                if float(len(seqframes[frame_select][s:e]))/float(reflength[geneid])>=refcond:
-                    if frame_select==0:
-                        frame_seq=newseq
-                    elif frame_select==1:
-                        frame_seq=newseq[1:len(newseq)]
-                    elif frame_select==2:
-                        frame_seq=newseq[2:len(newseq)]
-                    elif frame_select==3:
-                        frame_seq=newseq_rev
-                    elif frame_select==4:
-                        frame_seq=newseq_rev[1:len(newseq_rev)]
-                    elif frame_select==5:
-                        frame_seq=newseq_rev[2:len(newseq_rev)]
-                    newseq2=frame_seq[((s+1)*3)-3:(e)*3]
-                    cond_orf=cond_orf+1
-                else:
-                    cond_toprint_var=cond_toprint_var+1
-                    newseq2=newseq
+                newseq2=newseq
+                cond_orf=cond_orf+1
             else:
                 cond_toprint_var=cond_toprint_var+1
                 newseq2=newseq
@@ -397,7 +379,7 @@ def GeneExtraction(genenumber):
                         end=i
                         orf_parts.append(str(start)+"-"+str(end))
                         start=i+1
-                orf_parts.append(str(start)+"-"+str(end))
+                orf_parts.append(str(start)+"-"+str(end+1))
                 for i in range(len(orf_parts)):
                     part=orf_parts[i]
                     s=int(part.split("-")[0])
@@ -408,26 +390,8 @@ def GeneExtraction(genenumber):
                         frame_select=p
             #check that orf cov refpct
             if len(orf_select)>0:
-                s=int(orf_select.split("-")[0])
-                e=int(orf_select.split("-")[1])
-                if float(len(seqframes[frame_select][s:e]))/float(reflength[geneid]/3)>=refcond:
-                    if frame_select==0:
-                        frame_seq=newseq
-                    elif frame_select==1:
-                        frame_seq=newseq[1:len(newseq)]
-                    elif frame_select==2:
-                        frame_seq=newseq[2:len(newseq)]
-                    elif frame_select==3:
-                        frame_seq=newseq_rev
-                    elif frame_select==4:
-                        frame_seq=newseq_rev[1:len(newseq_rev)]
-                    elif frame_select==5:
-                        frame_seq=newseq_rev[2:len(newseq_rev)]
-                    newseq2=frame_seq[((s+1)*3)-3:(e)*3]
-                    cond_orf=cond_orf+1
-                else:
-                    cond_toprint_var=cond_toprint_var+1
-                    newseq2=newseq
+                newseq2=newseq
+                cond_orf=cond_orf+1
             else:
                 cond_toprint_var=cond_toprint_var+1
                 newseq2=newseq
@@ -552,7 +516,7 @@ def GeneExtraction(genenumber):
                                 end=i
                                 orf_parts.append(str(start)+"-"+str(end))
                                 start=i+1
-                        orf_parts.append(str(start)+"-"+str(end))
+                        orf_parts.append(str(start)+"-"+str(end+1))
                         for i in range(len(orf_parts)):
                             part=orf_parts[i]
                             s=int(part.split("-")[0])
@@ -563,25 +527,8 @@ def GeneExtraction(genenumber):
                                 frame_select=p
                     #check that orf cov refpct
                     if len(orf_select)>0:
-                        s=int(orf_select.split("-")[0])
-                        e=int(orf_select.split("-")[1])
-                        if float(len(seqframes[frame_select][s:e]))/float(reflength[geneid])>=refcond:
-                            if frame_select==0:
-                                frame_seq=newseq
-                            elif frame_select==1:
-                                frame_seq=newseq[1:len(newseq)]
-                            elif frame_select==2:
-                                frame_seq=newseq[2:len(newseq)]
-                            elif frame_select==3:
-                                frame_seq=newseq_rev
-                            elif frame_select==4:
-                                frame_seq=newseq_rev[1:len(newseq_rev)]
-                            elif frame_select==5:
-                                frame_seq=newseq_rev[2:len(newseq_rev)]
-                            newseq2=newseq
-                        else:
-                            cond_toprint_var=cond_toprint_var+1
-                            newseq2=newseq
+                        newseq2=newseq
+                        cond_orf=cond_orf+1
                     else:
                         cond_toprint_var=cond_toprint_var+1
                         newseq2=newseq
@@ -605,7 +552,7 @@ def GeneExtraction(genenumber):
                                 end=i
                                 orf_parts.append(str(start)+"-"+str(end))
                                 start=i+1
-                        orf_parts.append(str(start)+"-"+str(end))
+                        orf_parts.append(str(start)+"-"+str(end+1))
                         for i in range(len(orf_parts)):
                             part=orf_parts[i]
                             s=int(part.split("-")[0])
@@ -616,26 +563,8 @@ def GeneExtraction(genenumber):
                                 frame_select=p
                     #check that orf cov refpct
                     if len(orf_select)>0:
-                        s=int(orf_select.split("-")[0])
-                        e=int(orf_select.split("-")[1])
-                        if float(len(seqframes[frame_select][s:e]))/float(reflength[geneid])>=refcond:
-                            if frame_select==0:
-                                frame_seq=newseq
-                            elif frame_select==1:
-                                frame_seq=newseq[1:len(newseq)]
-                            elif frame_select==2:
-                                frame_seq=newseq[2:len(newseq)]
-                            elif frame_select==3:
-                                frame_seq=newseq_rev
-                            elif frame_select==4:
-                                frame_seq=newseq_rev[1:len(newseq_rev)]
-                            elif frame_select==5:
-                                frame_seq=newseq_rev[2:len(newseq_rev)]
-                            newseq2=frame_seq[((s+1)*3)-3:(e)*3]
-                            cond_orf=cond_orf+1
-                        else:
-                            cond_toprint_var=cond_toprint_var+1
-                            newseq2=newseq
+                        newseq2=newseq
+                        cond_orf=cond_orf+1
                     else:
                         cond_toprint_var=cond_toprint_var+1
                         newseq2=newseq
@@ -761,7 +690,7 @@ def GeneExtraction(genenumber):
                                 end=i
                                 orf_parts.append(str(start)+"-"+str(end))
                                 start=i+1
-                        orf_parts.append(str(start)+"-"+str(end))
+                        orf_parts.append(str(start)+"-"+str(end+1))
                         for i in range(len(orf_parts)):
                             part=orf_parts[i]
                             s=int(part.split("-")[0])
@@ -772,25 +701,8 @@ def GeneExtraction(genenumber):
                                 frame_select=p
                     #check that orf cov refpct
                     if len(orf_select)>0:
-                        s=int(orf_select.split("-")[0])
-                        e=int(orf_select.split("-")[1])
-                        if float(len(seqframes[frame_select][s:e]))/float(reflength[geneid]/3)>=refcond:
-                            if frame_select==0:
-                                frame_seq=newseq
-                            elif frame_select==1:
-                                frame_seq=newseq[1:len(newseq)]
-                            elif frame_select==2:
-                                frame_seq=newseq[2:len(newseq)]
-                            elif frame_select==3:
-                                frame_seq=newseq_rev
-                            elif frame_select==4:
-                                frame_seq=newseq_rev[1:len(newseq_rev)]
-                            elif frame_select==5:
-                                frame_seq=newseq_rev[2:len(newseq_rev)]
-                            newseq2=newseq
-                        else:
-                            cond_toprint_var=cond_toprint_var+1
-                            newseq2=newseq
+                        newseq2=newseq
+                        cond_orf=cond_orf+1
                     else:
                         cond_toprint_var=cond_toprint_var+1
                         newseq2=newseq
@@ -814,7 +726,7 @@ def GeneExtraction(genenumber):
                                 end=i
                                 orf_parts.append(str(start)+"-"+str(end))
                                 start=i+1
-                        orf_parts.append(str(start)+"-"+str(end))
+                        orf_parts.append(str(start)+"-"+str(end+1))
                         for i in range(len(orf_parts)):
                             part=orf_parts[i]
                             s=int(part.split("-")[0])
@@ -825,26 +737,8 @@ def GeneExtraction(genenumber):
                                 frame_select=p
                     #check that orf cov refpct
                     if len(orf_select)>0:
-                        s=int(orf_select.split("-")[0])
-                        e=int(orf_select.split("-")[1])
-                        if float(len(seqframes[frame_select][s:e]))/float(reflength[geneid])>=refcond:
-                            if frame_select==0:
-                                frame_seq=newseq
-                            elif frame_select==1:
-                                frame_seq=newseq[1:len(newseq)]
-                            elif frame_select==2:
-                                frame_seq=newseq[2:len(newseq)]
-                            elif frame_select==3:
-                                frame_seq=newseq_rev
-                            elif frame_select==4:
-                                frame_seq=newseq_rev[1:len(newseq_rev)]
-                            elif frame_select==5:
-                                frame_seq=newseq_rev[2:len(newseq_rev)]
-                            newseq2=frame_seq[((s+1)*3)-3:(e)*3]
-                            cond_orf=cond_orf+1
-                        else:
-                            cond_toprint_var=cond_toprint_var+1
-                            newseq2=newseq
+                        newseq2=newseq
+                        cond_orf=cond_orf+1
                     else:
                         cond_toprint_var=cond_toprint_var+1
                         newseq2=newseq

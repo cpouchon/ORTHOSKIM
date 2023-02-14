@@ -3267,15 +3267,22 @@ o       O o       O o       O
       done
     done
     if [ ${PARALOG_FILT} == 'on' ]; then
-      echo "INFO: identification and filtering of paralogous sequences"
+      echo "INFO: identification and filtering of errors and paralogous sequences"
       for element in "${target[@]}";
       do
         if [ ${TRIMMING} == 'on' ]; then
           f_path=${RES}/Alignment/alignments/${element}/trim
-          `dirname $0`/src/FilterParalog.py -i ${f_path} -e trim -q ${CONSENSUS_LEVEL} -o ${RES}/Alignment/alignments/${element}/clean -w ${WINDOW_SIZE} -p ${WINDOW_PSITE}
+          if [ ${EXPORT} == 'on' ]; then
+            `dirname $0`/src/ErrorFilter.py -i ${f_path} -e trim -o ${RES}/Alignment/alignments/${element}/clean -gw ${GENUS_WINDOW_SIZE} -gp ${GENUS_WINDOW_PSITE} -fw ${FAMILY_WINDOW_SIZE} -fp ${FAMILY_WINDOW_PSITE} -gt ${GENUS_TAXA} -ft ${FAMILY_TAXA} -t ${TAXONOMIC_PHYLUM_EXPECTED} --export -co ${RES}/Alignment/alignments/${element}/consensus/
+          else
+            `dirname $0`/src/ErrorFilter.py -i ${f_path} -e trim -o ${RES}/Alignment/alignments/${element}/clean -gw ${GENUS_WINDOW_SIZE} -gp ${GENUS_WINDOW_PSITE} -fw ${FAMILY_WINDOW_SIZE} -fp ${FAMILY_WINDOW_PSITE} -gt ${GENUS_TAXA} -ft ${FAMILY_TAXA} -t ${TAXONOMIC_PHYLUM_EXPECTED}
+          fi
         else
           f_path=${RES}/Alignment/alignments/${element}/files
-          `dirname $0`/src/FilterParalog.py -i ${f_path} -e fa -q ${CONSENSUS_LEVEL} -o ${RES}/Alignment/alignments/${element}/clean -w ${WINDOW_SIZE} -p ${WINDOW_PSITE}
+          if [ ${EXPORT} == 'on' ]; then
+            `dirname $0`/src/ErrorFilter.py -i ${f_path} -e fa -o ${RES}/Alignment/alignments/${element}/clean -gw ${GENUS_WINDOW_SIZE} -gp ${GENUS_WINDOW_PSITE} -fw ${FAMILY_WINDOW_SIZE} -fp ${FAMILY_WINDOW_PSITE} -gt ${GENUS_TAXA} -ft ${FAMILY_TAXA} -t ${TAXONOMIC_PHYLUM_EXPECTED} --export -co ${RES}/Alignment/alignments/${element}/consensus/
+          else
+            `dirname $0`/src/ErrorFilter.py -i ${f_path} -e fa -o ${RES}/Alignment/alignments/${element}/clean -gw ${GENUS_WINDOW_SIZE} -gp ${GENUS_WINDOW_PSITE} -fw ${FAMILY_WINDOW_SIZE} -fp ${FAMILY_WINDOW_PSITE} -gt ${GENUS_TAXA} -ft ${FAMILY_TAXA} -t ${TAXONOMIC_PHYLUM_EXPECTED}
         fi
       done
     else
