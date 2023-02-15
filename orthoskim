@@ -3283,6 +3283,7 @@ o       O o       O o       O
             `dirname $0`/src/ErrorFilter.py -i ${f_path} -e fa -o ${RES}/Alignment/alignments/${element}/clean -gw ${GENUS_WINDOW_SIZE} -gp ${GENUS_WINDOW_PSITE} -fw ${FAMILY_WINDOW_SIZE} -fp ${FAMILY_WINDOW_PSITE} -gt ${GENUS_TAXA} -ft ${FAMILY_TAXA} -t ${TAXONOMIC_PHYLUM_EXPECTED} --export -co ${RES}/Alignment/alignments/${element}/consensus/
           else
             `dirname $0`/src/ErrorFilter.py -i ${f_path} -e fa -o ${RES}/Alignment/alignments/${element}/clean -gw ${GENUS_WINDOW_SIZE} -gp ${GENUS_WINDOW_PSITE} -fw ${FAMILY_WINDOW_SIZE} -fp ${FAMILY_WINDOW_PSITE} -gt ${GENUS_TAXA} -ft ${FAMILY_TAXA} -t ${TAXONOMIC_PHYLUM_EXPECTED}
+          fi
         fi
       done
     else
