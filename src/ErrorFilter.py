@@ -200,7 +200,7 @@ for file in in_files:
         stored_for_cons[geneID]["other"]=list()
         stored_for_cons_fam[geneID]["other"]=list()
     for s in seqs:
-        genus=s.split("_")[0]
+        genus=s.replace("_R_","").split("_")[0]
         taxids=[]
         for i in s.split("_"):
             if i.isdigit():
