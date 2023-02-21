@@ -401,7 +401,7 @@ for g in stored:
                                 fratio=float(fw_site)/float(fw_size)
                                 for i in range(lenseq+1):
                                     bmin=i
-                                    bmax=lenseq+1
+                                    bmax=lenseq
                                     poly_dict=dict.fromkeys(list(stored[g][f].keys()), 0)
                                     for j in range(bmin,bmax):
                                         for s in stored[g][f]:
@@ -460,7 +460,7 @@ for g in stored:
                         gratio=float(gw_site)/float(gw_size)
                         for i in range(lenseq+1):
                             bmin=i
-                            bmax=lenseq+1
+                            bmax=lenseq
                             poly_dict=dict.fromkeys(list(stored[g][f].keys()), 0)
                             for j in range(bmin,bmax):
                                 for s in stored[g][f]:
