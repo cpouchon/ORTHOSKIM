@@ -48,14 +48,23 @@ user$: unzip master.zip
 
 ORTHOSKIM is packaged with all required dependencies in a [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) environment, which has to be installed (see https://conda.io/projects/conda/en/latest/user-guide/install/index.html).
 
-ORTHOSKIM package is create with the *orthoskim-env.yml* file provided:
+ORTHOSKIM package is create within the following conda environment:
 
 ```
-user$: cd ./ORTHOSKIM-master/
-user$: conda env create --prefix /your_path_to_install/orthoskim-env --file orthoskim-env.yml
+user$: conda config --add channels defaults
+user$: conda config --add channels bioconda
+user$: conda config --add channels conda-forge
+```
+```
+user$: conda create --name /your_path_to_install/orthoskim-env
+user$: conda activate /your_path_to_install/orthoskim-env
+user$: conda install -c conda-forge python biopython -y
+user$: conda install -c bioconda spades exonerate diamond blast mafft trimal numpy joblib scipy -y
+user$: conda install -c etetoolkit ete3 -y
+user$: conda deactivate
 ```
 
-Such package has then to be activated/deactivated when running ORTHOSKIM:
+This environment has then to be activated/deactivated when running ORTHOSKIM:
 
 ```
 user$: conda activate /your_path_to_install/orthoskim-env
