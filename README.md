@@ -58,9 +58,8 @@ user$: conda config --add channels conda-forge
 ```
 user$: conda create --prefix /your_path_to_install/orthoskim-env
 user$: conda activate /your_path_to_install/orthoskim-env
-user$: conda install -c conda-forge python biopython -y
+user$: conda install -c conda-forge python ete3 biopython -y
 user$: conda install -c bioconda spades exonerate diamond blast mafft trimal numpy joblib scipy -y
-user$: conda install -c etetoolkit ete3 -y
 user$: conda deactivate
 ```
 
@@ -203,7 +202,7 @@ To retrieve dependencies, once the orthoskim-env is activated, please use:
 
 ```
 user$: conda activate orthoskim-env
-user$: (orthoskim-env) which diamond spades.py exonerate makeblastdb blastn mafft trimal tblastn
+user$: (orthoskim-env) which spades.py exonerate makeblastdb blastn mafft trimal tblastn
 /home/charles/.conda/envs/orthoskim-env/bin/spades.py
 /home/charles/.conda/envs/orthoskim-env/bin/exonerate
 /home/charles/.conda/envs/orthoskim-env/bin/makeblastdb
