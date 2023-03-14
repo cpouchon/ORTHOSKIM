@@ -56,7 +56,7 @@ user$: conda config --add channels bioconda
 user$: conda config --add channels conda-forge
 ```
 ```
-user$: conda create --name /your_path_to_install/orthoskim-env
+user$: conda create --prefix /your_path_to_install/orthoskim-env
 user$: conda activate /your_path_to_install/orthoskim-env
 user$: conda install -c conda-forge python biopython -y
 user$: conda install -c bioconda spades exonerate diamond blast mafft trimal numpy joblib scipy -y
