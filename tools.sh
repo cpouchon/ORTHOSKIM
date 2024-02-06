@@ -1,9 +1,11 @@
 #!/bin/bash
 
-SPADES=/Users/pouchonc/PhyloAlps/OrthoSkim/TOOLS/SPAdes-3.13.0-Darwin/bin/spades.py
-EXONERATE=/usr/local/bin/exonerate
-BLASTDB=/Users/pouchonc/miniconda2/bin/makeblastdb
-BLASTN=/Users/pouchonc/miniconda2/bin/blastn
-MAFFT=/path/to/mafft
-TBLASTN=/Users/pouchonc/miniconda2/bin/tblastn
-TRIMAL=/path/to/trimal
+ENV_DIR=<FIXME>                         ### <FIXME>: The conda path environment
+SPADES=${ENV_DIR}/bin/spades.py
+EXONERATE=${ENV_DIR}/bin/exonerate
+BLASTDB=${ENV_DIR}/bin/makeblastdb
+BLASTN=${ENV_DIR}/bin/blastn
+MAFFT=${ENV_DIR}/bin/mafft
+TBLASTN=${ENV_DIR}/bin/tblastn
+TRIMAL=${ENV_DIR}/bin/trimal
+
