@@ -5,5 +5,5 @@ EXONERATE=/usr/local/bin/exonerate
 BLASTDB=/Users/pouchonc/miniconda2/bin/makeblastdb
 BLASTN=/Users/pouchonc/miniconda2/bin/blastn
 MAFFT=/path/to/mafft
-TBLASTN=/Users/pouchonc/miniconda2/bin/tblastn
 TRIMAL=/path/to/trimal
+TBLASTN=/Users/pouchonc/miniconda2/bin/tblastn
