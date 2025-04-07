@@ -1,47 +1,47 @@
 # ORTHOSKIM (v.1.6) config file
 # Global parameters ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-TOOLS=~/ORTHOSKIM-v.1.6/tools.sh                                                    ## [1] file with dependencies aliases
+TOOLS=~/ORTHOSKIM-v.1.6/tools.sh                                                    ## [1] file containing dependency aliases
 RES=~/run_orthoskim                                                                  ## [2] working directory for all ORTHOSKIM outputs
-EVALUE=0.00001                                                                       ## [3] evalue threshold for mapping steps
-THREADS=15                                                                           ## [4] number of threads to use for multithreading steps
-VERBOSE=0                                                                            ## [5] set verbose to TRUE (1) or FALSE (0)
-PLANT_MODEL=yes                                                                      ## [6] plant model analyzed (yes/no)
+EVALUE=0.00001                                                                       ## [3] e-value threshold for mapping steps
+THREADS=15                                                                           ## [4] number of threads to use for multithreaded steps
+VERBOSE=0                                                                            ## [5] set verbose mode to TRUE (1) or FALSE (0)
+PLANT_MODEL=yes                                                                      ## [6] plant model being analyzed (yes/no)
 GENETIC_CODE=1                                                                       ## [7] NCBI genetic code number used for DNA translation (e.g. 1: standard genetic code, 2: Vertebrate Mitochondrial Code...). Codes are available at https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi
-SAMPLES=~/ORTHOSKIM-v.1.6/resources/listSamples.tab                                 ## [8] samples file. Specific format required:  (1) sample name with Genus_species_(subsp)_taxid_attributes; (2) path to forward reads; (3) path to reverse reads; (4) [additional for phyloskims users] chloroplast annotations
+SAMPLES=~/ORTHOSKIM-v.1.6/resources/listSamples.tab                                 ## [8] samples file. Specific format required: (1) sample name with Genus_species_(subsp)_taxid_attributes; (2) path to forward reads; (3) path to reverse reads; (4) [additional for phyloskims users] chloroplast annotations
 
 # [assembly] mode ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-MEMORY=30                                                                            ## [9] max memory used in assembly
-KMER=55                                                                              ## [10] K-mer size used in assembly with single (here 55) or range values (as 21,33,55). Note: less than 128
+MEMORY=30                                                                            ## [9] maximum memory used in assembly
+KMER=55                                                                              ## [10] K-mer size used in assembly with single (here 55) or range values (e.g. 21,33,55). Note: less than 128
 
 # [filtering] mode: Filtering for contaminants in assemblies
-SIMILARITY_CONTA_THSLD=65                                                            ## [11] similarity threshold (%) used to check contaminants. We recommend keeping a low threshold as sequence are filtered according to their taxId (e.g. 65, meaning that only hits with a least 65% of similarity are used).
-MAPPING_CONTA_LENGTH=50                                                              ## [12] minimal mapping length. As for the threshold, we recommend to keep a low value here (e.g. 50).
-TAXONOMIC_PHYLUM_EXPECTED=Embryophyta                                                ## [13] taxonomic phylum expected for contigs (e.g. "Embryophyta","Viridiplantae" for plants, otherwise "Eumetazoa","Arthropoda","Annelida","Mollusca" etc); Note: "Animalia" is not allowed. Please check the taxonomy provided in the ~/ORTHOSKIM-v.1.6/resources/rRNA_database_taxonomy.txt file.
+SIMILARITY_CONTA_THSLD=65                                                            ## [11] similarity threshold (%) for contaminant checking. It is recommended to keep a low threshold, as sequences are filtered based on their taxId (e.g. 65 means only hits with at least 65% similarity are used).
+MAPPING_CONTA_LENGTH=50                                                              ## [12] minimal mapping length. It is recommended to keep a low value (e.g. 50).
+TAXONOMIC_PHYLUM_EXPECTED=Embryophyta                                                ## [13] expected taxonomic phylum for contigs (e.g. "Embryophyta", "Viridiplantae" for plants, otherwise "Eumetazoa", "Arthropoda", "Annelida", "Mollusca", etc); Note: "Animalia" is not allowed. Please check the taxonomy in ~/ORTHOSKIM-v.1.6/resources/rRNA_database_taxonomy.txt.
 
 # [database] mode: sequences of reference -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-MITO_ANNOTATIONS=~/ORTHOSKIM-v.1.6/data/mitochondrion_viridiplantae.gb              ## [14] input mtDNA Annotations file (in .gb or .embl)
+MITO_ANNOTATIONS=~/ORTHOSKIM-v.1.6/data/mitochondrion_viridiplantae.gb              ## [14] input mtDNA annotations file (in .gb or .embl)
 NRDNA_ANNOTATIONS=~/ORTHOSKIM-v.1.6/data/nucrdna_viridiplantae.gb                   ## [15] input rDNA annotations file (in .gb or .embl)
 CHLORO_ANNOTATIONS=~/ORTHOSKIM-v.1.6/data/chloroplast_viridiplantae.gb              ## [16] input cpDNA annotations file (in .gb or .embl)
 MITO_DB_FMT=genbank                                                                  ## [17] database format: [genbank,embl]
 NRDNA_DB_FMT=genbank                                                                 ## [18] database format: [genbank,embl]
 CHLORO_DB_FMT=genbank                                                                ## [19] database format: [genbank,embl]
-MITO_SIZE_MIN=200000                                                                 ## [20] minimal size of mtDNA genomes required for the pre-selection of contigs
-MITO_SIZE_MAX=1000000                                                                ## [21] maximal size of mtDNA genomes required for the pre-selection of contigs
-NRDNA_SIZE_MIN=2000                                                                  ## [22] minimal size of rDNA complex required for the pre-selection of contigs
-NRDNA_SIZE_MAX=9000                                                                  ## [23] maximal size of rDNA complex required for the pre-selection of contigs
-CHLORO_SIZE_MIN=140000                                                               ## [24] minimal size of cpDNA genomes required for the pre-selection of contigs
-CHLORO_SIZE_MAX=200000                                                               ## [25] maximal size of cpDNA genomes required for the pre-selection of contigs
-SEEDS_THRESHOLD=0.8                                                                  ## [26] minimal percent of seed coverage to keep genes in references. For example, if rrn28S in seeds is 3375bp longer, only rrn28S genes with length >= 0.8*3375bp will be considered in the final references list.
+MITO_SIZE_MIN=200000                                                                 ## [20] minimum size of mtDNA genomes required for pre-selection of contigs
+MITO_SIZE_MAX=1000000                                                                ## [21] maximum size of mtDNA genomes required for pre-selection of contigs
+NRDNA_SIZE_MIN=2000                                                                  ## [22] minimum size of rDNA complex required for pre-selection of contigs
+NRDNA_SIZE_MAX=9000                                                                  ## [23] maximum size of rDNA complex required for pre-selection of contigs
+CHLORO_SIZE_MIN=140000                                                               ## [24] minimum size of cpDNA genomes required for pre-selection of contigs
+CHLORO_SIZE_MAX=200000                                                               ## [25] maximum size of cpDNA genomes required for pre-selection of contigs
+SEEDS_THRESHOLD=0.8                                                                  ## [26] minimum percent seed coverage to keep genes in references. For example, if rrn28S in seeds is 3375bp longer, only rrn28S genes with length >= 0.8*3375bp will be considered in the final references list.
 
 # [capture] mode: extraction steps from mapping assemblies into a reference ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 MINLENGTH=90                                                                         ## [27] minimal length of captured sequence
-REFPCT=0.4                                                                           ## [28] minimal coverage fraction of the reference exon(s) (e.g. 0.4 means that at least 40% of reference exon(s) has to be captured).
+REFPCT=0.4                                                                           ## [28] minimum coverage fraction of the reference exon(s) (e.g. 0.4 means at least 40% of reference exon(s) must be captured).
 COVERAGE=3                                                                           ## [29] minimal contig coverage (in k-mer coverage) allowed for the capture
-MINCONTLENGTH=500                                                                    ## [30] minimal contig length allowed for the capture
-EXO_SCORE=50                                                                         ## [31] minimal mapping score. We recommend to not set too high values (if the targeted sequence length is short) as a selection is done for the best alignments.
-COVCUTOFF=on                                                                         ## [32] coverage cut-off option for organelles (cpDNA, mtDNA): [on/off] - cut-off done according to a standard deviations approach from the mean contig coverage weighted by the reconstructed size of the organelles.
-ORFCOV=0.8                                                                           ## [33] minimal fraction of captured sequences covered by the longest open reading frame (ORF). For example, 0.8 means that 80% of the captured sequence has to be covered by an ORF.
-MAX_SEQS=2                                                                           ## [34] maximal number of contigs per reference used in BLAST for the pre-selection of contigs in the nucleus and busco modes. To speed up the capture in these modes, only one or two contig(s) can be preselected for each reference.
+MINCONTLENGTH=500                                                                    ## [30] minimum contig length allowed for the capture
+EXO_SCORE=50                                                                         ## [31] minimal mapping score. It is recommended not to set too high values (if the targeted sequence length is short), as selection is based on the best alignments.
+COVCUTOFF=on                                                                         ## [32] coverage cut-off option for organelles (cpDNA, mtDNA): [on/off] - cut-off is done based on standard deviations approach from the mean contig coverage weighted by the reconstructed size of the organelles.
+ORFCOV=0.8                                                                           ## [33] minimum fraction of captured sequences covered by the longest open reading frame (ORF). For example, 0.8 means that 80% of the captured sequence must be covered by an ORF.
+MAX_SEQS=2                                                                           ## [34] maximum number of contigs per reference used in BLAST for pre-selection of contigs in the nucleus and busco modes. To speed up capture in these modes, only one or two contig(s) can be preselected for each reference.
 
 #---------  [busco] target --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 BUSCO_REF=~/ORTHOSKIM-v.1.6/data/BUSCO_viridiplantae.fa                             ## [35] BUSCO reference sequences FASTA file.
@@ -65,8 +65,8 @@ SEEDS_CHLORO_CDS=~/ORTHOSKIM-v.1.6/resources/chloroCDS.seeds                    
 SEEDS_CHLORO_rRNA=~/ORTHOSKIM-v.1.6/resources/chlororRNA.seeds                      ## [47] cpDNA rRNA seeds sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
 SEEDS_CHLORO_tRNA=~/ORTHOSKIM-v.1.6/resources/chlorotRNA.seeds                      ## [48] cpDNA tRNA seeds sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names, with the anticodon in the name (e.g. trnL-UAA_taxid_genus_species)
 CHLORO_REF_CDS=~/ORTHOSKIM-v.1.6/data/chloro_CDS_unaligned.fa                       ## [49] cpDNA CDS reference sequences FASTA file (amino-acid sequences required). Please check restrictions for the sequence names.
-CHLORO_REF_rRNA=~/ORTHOSKIM-v.1.6/data/chloro_rRNA_unaligned.fa                     ## [50] cpDNA rRNA gene reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
-CHLORO_REF_tRNA=~/ORTHOSKIM-v.1.6/data/chloro_tRNA_unaligned.fa                     ## [51] cpDNA tRNA gene reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+CHLORO_REF_rRNA=~/ORTHOSKIM-v.1.6/data/chloro_rRNA_unaligned.fa                     ## [50] cpDNA rRNA reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
+CHLORO_REF_tRNA=~/ORTHOSKIM-v.1.6/data/chloro_tRNA_unaligned.fa                     ## [51] cpDNA tRNA reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
 CHLORO_REF_NT=~/ORTHOSKIM-v.1.6/data/chloro_nt_custom.fa                            ## [52] cpDNA custom reference sequences FASTA file (nucleotide sequences required). Please check restrictions for the sequence names.
 CHLORO_TYPE=exon                                                                     ## [53] region of reference captured: [exon,intron,all]
 
@@ -76,30 +76,30 @@ NRDNA_REF=~/ORTHOSKIM-v.1.6/data/nucrdna_rRNA_unaligned.fa                      
 NRDNA_TYPE=exon                                                                      ## [56] region of reference captured: [exon,intron,all]
 
 # [alignment] mode -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-TAXA_ALN=~/ORTHOSKIM-v.1.6/resources/selTaxa_Primulaceae.tab                        ## [58] file with selected taxa (file with each line corresponding to one taxon)
+TAXA_ALN=~/ORTHOSKIM-v.1.6/resources/selTaxa_Primulaceae.tab                        ## [58] file with selected taxa (each line corresponds to one taxon)
 TRIMMING=on                                                                          ## [59] alignment trimming option using trimAl: [on/off]
 TRIMMODE=automated1                                                                  ## [60] trimming mode of trimAl: [automated1,gappyout,strictplus]. See trimAl documentation.
-PARALOG_FILT=on                                                                      ## [61] filtering paralogs mode: [on,off]
+PARALOG_FILT=on                                                                      ## [61] paralog filtering mode: [on,off]
 GENUS_WINDOW_SIZE=100                                                                ## [62] Genus level - sliding window size (e.g. 20 nt)
-GENUS_WINDOW_PSITE=20                                                                ## [63] Genus level - maximal number of polymorphic sites within the sliding window allowed. All sequences with more than <GENUS_WINDOW_PSITE> will be removed.
+GENUS_WINDOW_PSITE=20                                                                ## [63] Genus level - maximum number of polymorphic sites within the sliding window allowed. All sequences with more than <GENUS_WINDOW_PSITE> will be removed.
 FAMILY_WINDOW_SIZE=150                                                               ## [64] Family level - sliding window size (e.g. 20 nt)
-FAMILY_WINDOW_PSITE=30                                                               ## [65] Family level - maximal number of polymorphic sites within the sliding window allowed. All sequences with more than <FAMILY_WINDOW_PSITE> will be removed.
-GENUS_TAXA=3                                                                         ## [66] Genus level - minimal number of taxa required for the consensus
-FAMILY_TAXA=5                                                                        ## [67] Family level - minimal number of taxa required for the consensus
+FAMILY_WINDOW_PSITE=30                                                               ## [65] Family level - maximum number of polymorphic sites within the sliding window allowed. All sequences with more than <FAMILY_WINDOW_PSITE> will be removed.
+GENUS_TAXA=3                                                                         ## [66] Genus level - minimum number of taxa required for the consensus
+FAMILY_TAXA=5                                                                        ## [67] Family level - minimum number of taxa required for the consensus
 EXPORT=on                                                                            ## [68] option to export the consensus sequences used at both genus and family levels
-MISSING_RATIO=1.0                                                                    ## [69] maximal threshold of missing data allowed in the final matrix (e.g. 0.5 means that final sequence has fewer than 50% of missing data). Taxa that not passed this threshold are removed.
-GENES_TO_CONCAT=~/ORTHOSKIM-v.1.6/resources/listGenes_To_Concat.tab                 ## [70] file with selected genes for the alignment (each line corresponds to one gene)
+MISSING_RATIO=1.0                                                                    ## [69] maximum threshold of missing data allowed in the final matrix (e.g. 0.5 means that final sequence has fewer than 50% missing data). Taxa not passing this threshold are removed.
+GENES_TO_CONCAT=~/ORTHOSKIM-v.1.6/resources/listGenes_To_Concat.tab                 ## [70] file with selected genes for alignment (each line corresponds to one gene)
 
 # [checking] mode -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-BARCODES=( matK rbcL )                                                               ## [71] list of sequences used for the taxonomic checking. Users have to respect spaces between sequence names. If only one gene, set BARCODES=( matK ). We recommend to use only genes that are widely represented in the NCBI database (e.g. traditional barcodes).
-BARCODES_TYPE=chloroplast_CDS                                                        ## [72] ORTHOSKIM targets including these genes [chloroplast_CDS, chloroplast_rRNA, chloroplast_tRNA, chloroplast_nt, mitochondrion_CDS, mitochondrion_rRNA, mitochondrion_nt,nuleus_aa, nucleus_nt, busco, nucrdna]
-DB_LOCAL=off                                                                         ## [73] option to run BLAST locally by using the NCBI nt database, which has previously to be downloaded: [on/off]. Otherwise, NCBI server will be used.
+BARCODES=( matK rbcL )                                                               ## [71] list of sequences used for taxonomic checking. Users must respect the spaces between sequence names. If only one gene is used, set BARCODES=( matK ). It is recommended to use only genes that are widely represented in the NCBI database (e.g. traditional barcodes).
+BARCODES_TYPE=chloroplast_CDS                                                        ## [72] ORTHOSKIM targets including these genes [chloroplast_CDS, chloroplast_rRNA, chloroplast_tRNA, chloroplast_nt, mitochondrion_CDS, mitochondrion_rRNA, mitochondrion_nt, nucleus_aa, nucleus_nt, busco, nucrdna]
+DB_LOCAL=off                                                                         ## [73] option to run BLAST locally using the NCBI nt database, which must be downloaded beforehand: [on/off]. Otherwise, the NCBI server will be used.
 BLAST_NT_DB=~/path_to_ntdb/nt                                                        ## [74] local NCBI nt database files if DB_LOCAL=on
-TAXA_CHECK=~/ORTHOSKIM-v.1.6/resources/selTaxa_Primulaceae.tab                      ## [75] file with selected taxa for the taxonomic checking (each line corresponding to one taxon)
-FAMILIES_LOCAL=off                                                                   ## [76] option to use a local list of taxonomic families, when query taxIDs are not yet included in the NBCI taxonomy: [on/off]. If this option is used, the CORRESPONDING_FAMILIES file needs to be given.
+TAXA_CHECK=~/ORTHOSKIM-v.1.6/resources/selTaxa_Primulaceae.tab                      ## [75] file with selected taxa for taxonomic checking (each line corresponds to one taxon)
+FAMILIES_LOCAL=off                                                                   ## [76] option to use a local list of taxonomic families when query taxIDs are not yet included in the NCBI taxonomy: [on/off]. If this option is used, the CORRESPONDING_FAMILIES file needs to be provided.
 CORRESPONDING_FAMILIES=ecofind_out.tab                                               ## [77] table with query taxID and corresponding family (with space separator)
 
 # only for phyloskims users --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-CHLORO_GENES=~/ORTHOSKIM-v.1.6/resources/listGenes.chloro                           ## [78] list of cpDNA genes. Table format: $1=type (CDS,rRNA,tRNA), $2=genename. This file can be modified by adding/removing specific lines.
-MITO_GENES=~/ORTHOSKIM-v.1.6/resources/listGenes.mito                               ## [79] list of mtDNA genes. Table format: $1=type (CDS,rRNA,tRNA), $2=genename. This file can be modified by adding/removing specific lines.
-NRDNA_GENES=~/ORTHOSKIM-v.1.6/resources/listGenes.rdna                              ## [80] list of rDNA genes. Table format: $1=type (rRNA,misc_RNA), $2=genename. This file can be modified by adding/removing specific lines.
+CHLORO_GENES=~/ORTHOSKIM-v.1.6/resources/listGenes.chloro                           ## [78] list of cpDNA genes. Table format: $1=type (CDS,rRNA,tRNA), $2=gene name. This file can be modified by adding/removing specific lines.
+MITO_GENES=~/ORTHOSKIM-v.1.6/resources/listGenes.mito                               ## [79] list of mtDNA genes. Table format: $1=type (CDS,rRNA,tRNA), $2=gene name. This file can be modified by adding/removing specific lines.
+NRDNA_GENES=~/ORTHOSKIM-v.1.6/resources/listGenes.rdna                              ## [80] list of rDNA genes. Table format: $1=type (rRNA,misc_RNA), $2=gene name. This file can be modified by adding/removing specific lines.
